@@ -10,3 +10,9 @@ bin
 # Ignore java generated files
 .classpath
 .project
+
+# Ignore vscode generated files
+.vscode
+
+# Ignore wpilib files
+.wpilib
