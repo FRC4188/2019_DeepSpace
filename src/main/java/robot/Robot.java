@@ -1,6 +1,5 @@
 package robot; 
 
-import robot.RobotMap;
 import robot.OI;
 import robot.subsystems.*;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -11,7 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
     
-    public static Drivetrain m_drivetrain;  
+    public static Drivetrain m_drivetrain = new Drivetrain();  
     public static OI m_oi;
 
     Command m_autonomousCommand;
@@ -19,7 +18,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        RobotMap.init();
         m_oi = new OI();
     }
 
@@ -64,4 +62,5 @@ public class Robot extends TimedRobot {
     @Override
     public void testPeriodic() {
     }
+
 }

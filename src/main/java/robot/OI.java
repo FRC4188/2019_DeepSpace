@@ -45,6 +45,17 @@ public class OI {
         pilotStart = new JoystickButton(pilot, Mappings.START);
         pilotLs = new JoystickButton(pilot, Mappings.LS);
         pilotRs = new JoystickButton(pilot, Mappings.RS);
+        
+        coPilotA = new JoystickButton(pilot, Mappings.A);
+        coPilotB = new JoystickButton(pilot, Mappings.B);
+        coPilotX = new JoystickButton(pilot, Mappings.X);
+        coPilotY = new JoystickButton(pilot, Mappings.Y);
+        coPilotLb = new JoystickButton(pilot, Mappings.LB);
+        coPilotRb = new JoystickButton(pilot, Mappings.RB);
+        coPilotBack = new JoystickButton(pilot, Mappings.BACK);
+        coPilotStart = new JoystickButton(pilot, Mappings.START);
+        coPilotLs = new JoystickButton(pilot, Mappings.LS);
+        coPilotRs = new JoystickButton(pilot, Mappings.RS);
 
         // Command mappings
         // on the way
