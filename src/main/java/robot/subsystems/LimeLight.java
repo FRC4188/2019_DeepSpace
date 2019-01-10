@@ -67,8 +67,7 @@ public class LimeLight extends Subsystem {
   }
 
   /**
-   * Constructor for Limelight
-   * @author Matthew
+   * Constructor for Limelight.
    */
   public LimeLight(){
 
@@ -76,7 +75,6 @@ public class LimeLight extends Subsystem {
 
   /**
    * Sets the LED mode of the camera.
-   * @author Matthew
    * @param mode the LED mode to set the camera to
    */
   public void setLightMode(ledMode mode){
@@ -85,7 +83,6 @@ public class LimeLight extends Subsystem {
 
   /**
    * Sets the camera mode of the camera.
-   * @author Matthew
    * @param mode the camera mode to set the camera to
    */
   public void setCameraMode(cameraMode mode){
@@ -93,8 +90,7 @@ public class LimeLight extends Subsystem {
   }
 
   /**
-   * Sets the pipeline for the camera to use
-   * @author Matthew
+   * Sets the pipeline for the camera to use.
    * @param pl the pipeline for the camera to use
    */
   public void setPipeline(pipeline pl){
@@ -102,8 +98,7 @@ public class LimeLight extends Subsystem {
   }
 
   /**
-   * Returns if the camera sees a target
-   * @author Matthew
+   * Returns if the camera sees a target.
    * @return the camera sees a target
    */
   public boolean hasTarget(){
@@ -111,8 +106,7 @@ public class LimeLight extends Subsystem {
   }
 
   /**
-   * Returns the horizontal angle from the center of the camera to the target
-   * @author Matthew
+   * Returns the horizontal angle from the center of the camera to the target.
    * @return the horizontal angle to the target
    */
   public double getHorizontalAngle(){
@@ -120,8 +114,7 @@ public class LimeLight extends Subsystem {
   }
 
   /**
-   * Returns the vertical angle from the center of the camera to the target
-   * @author Matthew
+   * Returns the vertical angle from the center of the camera to the target.
    * @return the vertical angle to the target
    */
   public double getVerticalAngle(){
@@ -129,27 +122,27 @@ public class LimeLight extends Subsystem {
   }
 
   /**
-   * Return the distance from the camera to the target
-   * Uses the equation: tan(a + ty) = (ht - hc) / d
-   * a: the angle of the camera from the ground
-   * ty: the measured angle of the target from the camera
-   * ht: the height of the target
-   * hc: the height of the camera
-   * d: the distance
-   * @author Matthew
+   * Return the distance from the camera to the target.
    * @return the distance from the camera to the target
    */
   public double getDistance(){
+    /*
+    *Uses the equation: tan(a + ty) = (ht - hc) / d
+    * a: the angle of the camera from the ground
+    * ty: the measured angle of the target from the camera
+    * ht: the height of the target
+    * hc: the height of the camera
+    * d: the distance
+    */
     double a = 0.0;
     double ty = getVerticalAngle();
     double ht = 0.0;
     double hc = 0.0;
-    return (ht - hc)/Math.tan(Math.toRadians(a + ty));
+    return (ht - hc)/Math.tan(Math.toRadians(a + ty)) - targetDistance;
   }
 
   /**
    * Start tracking the ship bays
-   * @author Matthew
    */
   public void trackShipBay(){
     setLightMode(ledMode.ON);
@@ -160,7 +153,6 @@ public class LimeLight extends Subsystem {
 
   /**
    * Start tracking the rocket bays (slightly higher up)
-   * @author Matthew
    */
   public void trackRocketBay(){
     setLightMode(ledMode.ON);
@@ -171,7 +163,6 @@ public class LimeLight extends Subsystem {
 
   /**
    * Start tracking the cargo
-   * @author Matthew
    */
   public void trackCargo(){
     setLightMode(ledMode.ON);
@@ -182,7 +173,6 @@ public class LimeLight extends Subsystem {
 
   /**
    * Start tracking the hatches
-   * @author Matthew
    */
   public void trackHatch(){
     setLightMode(ledMode.ON);
@@ -193,7 +183,6 @@ public class LimeLight extends Subsystem {
 
   /**
    * Use LimeLight as camera
-   * @author Matthew
    */
   public void useAsCamera(){
     setLightMode(ledMode.OFF);
