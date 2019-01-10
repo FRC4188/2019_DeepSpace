@@ -17,7 +17,7 @@ Limelight vision camera. Used to detect reflective tape.
 public class LimeLight extends Subsystem {
 
   // limelight network table
-  NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+  NetworkTable limelightTable = null;
 
   // distance for target
   private double targetDistance = 0.0;
@@ -70,7 +70,7 @@ public class LimeLight extends Subsystem {
    * Constructor for Limelight.
    */
   public LimeLight(){
-
+    limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
   }
 
   /**
