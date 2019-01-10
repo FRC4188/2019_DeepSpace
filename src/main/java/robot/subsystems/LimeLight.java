@@ -48,7 +48,7 @@ public class LimeLight extends Subsystem {
     }
   }
 
-  // pipeline enum TODO: add pipelines as needed
+  // pipeline enum 
   public enum pipeline{
     BAY(0), CARGO(1), HATCH(2);
 
@@ -189,5 +189,16 @@ public class LimeLight extends Subsystem {
     setCameraMode(cameraMode.VISION);
     setPipeline(pipeline.HATCH);
     targetDistance = 0.5;
+  }
+
+  /**
+   * Use LimeLight as camera
+   * @author Matthew
+   */
+  public void useAsCamera(){
+    setLightMode(ledMode.OFF);
+    setCameraMode(cameraMode.CAMERA);
+    setPipeline(pipeline.BAY);
+    targetDistance = 0.0;
   }
 }
