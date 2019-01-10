@@ -1,4 +1,4 @@
-package robot; 
+package robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
 

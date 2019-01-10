@@ -1,4 +1,4 @@
-package robot; 
+package robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
@@ -19,8 +19,8 @@ public class OI {
     }
 
     // Controller declarations
-    public static XboxController pilot;
-    public static XboxController coPilot;
+    public XboxController pilot;
+    public XboxController coPilot;
 
     // Button declarations
     public JoystickButton pilotA, pilotB, pilotX, pilotY, pilotLb, pilotRb,
@@ -45,7 +45,7 @@ public class OI {
         pilotStart = new JoystickButton(pilot, Mappings.START);
         pilotLs = new JoystickButton(pilot, Mappings.LS);
         pilotRs = new JoystickButton(pilot, Mappings.RS);
-        
+
         coPilotA = new JoystickButton(pilot, Mappings.A);
         coPilotB = new JoystickButton(pilot, Mappings.B);
         coPilotX = new JoystickButton(pilot, Mappings.X);
@@ -59,7 +59,7 @@ public class OI {
 
         // Command mappings
         // on the way
-        
+
     }
 
 }
