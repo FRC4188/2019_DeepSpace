@@ -1,4 +1,4 @@
-package robot.commands; 
+package robot.commands.drive;
 
 import robot.Robot;
 import edu.wpi.first.wpilibj.XboxController;

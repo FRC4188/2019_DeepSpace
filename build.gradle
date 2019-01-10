@@ -3,7 +3,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2019.1.1"
 }
 
-def ROBOT_MAIN_CLASS = "Main"
+def ROBOT_MAIN_CLASS = "robot.Main"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project EmbeddedTools.
@@ -41,7 +41,7 @@ dependencies {
     compile wpi.deps.vendor.java()
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
-    testCompile 'junit:junit:4.12'
+    // testCompile 'junit:junit:4.12'
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
