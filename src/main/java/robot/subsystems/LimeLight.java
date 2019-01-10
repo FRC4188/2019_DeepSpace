@@ -9,6 +9,7 @@ package robot.subsystems;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import robot.commands.vision.LimeLightUseAsCamera;
 import edu.wpi.first.networktables.NetworkTable;
 
 /**
@@ -63,7 +64,7 @@ public class LimeLight extends Subsystem {
 
   @Override
   public void initDefaultCommand() {
-    
+    setDefaultCommand(new LimeLightUseAsCamera());
   }
 
   /**

@@ -9,7 +9,6 @@ package robot.commands.vision;
 
 import edu.wpi.first.wpilibj.command.Command;
 import robot.Robot;
-import robot.subsystems.LimeLight;
 
 public class LimeLightUseAsCamera extends Command {
   public LimeLightUseAsCamera() {
