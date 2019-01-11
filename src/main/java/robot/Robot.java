@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
-    
-    public static Drivetrain m_drivetrain;  
+
+    public static Drivetrain m_drivetrain;
     public static LimeLight m_limelight;
     public static OI m_oi;
 
@@ -62,10 +62,6 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
-        SmartDashboard.putNumber("Left position", m_drivetrain.getLeftPosition());
-        SmartDashboard.putNumber("Right position", m_drivetrain.getRightPosition());
-        SmartDashboard.putNumber("Raw left", m_drivetrain.getRawRightPosition());
-        SmartDashboard.putNumber("Raw right", m_drivetrain.getRawLeftPosition());
     }
 
     @Override
