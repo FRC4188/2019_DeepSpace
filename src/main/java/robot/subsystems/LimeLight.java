@@ -22,6 +22,7 @@ public class LimeLight extends Subsystem {
 
   // distance for target
   private double targetDistance = 0.0;
+  private double targetHeight = 0.0;
 
   // LED mode enum
   public enum ledMode{
@@ -135,11 +136,43 @@ public class LimeLight extends Subsystem {
     * hc: the height of the camera
     * d: the distance
     */
-    double a = 0.0;
+    double a = 0.0; 
     double ty = getVerticalAngle();
-    double ht = 0.0;
-    double hc = 0.0;
+    double ht = targetHeight;
+    double hc = 0.0; // TODO modify for actual camera height
     return (ht - hc)/Math.tan(Math.toRadians(a + ty)) - targetDistance;
+  }
+
+  /**
+   * Return the aspect ratio of the bounding box.
+   * @return the width/height of the bounding box
+   */
+  public double getAspectRatio(){
+    return (double)limelightTable.getEntry("thoriz").getNumber(0.0) / (double)limelightTable.getEntry("tvert").getNumber(1.0);
+  }
+
+  /**
+   * Return the angle of the robot from the wall. 0 degrees means facing the wall.
+   * @return the angle of the robot
+   */
+  public double getRobotAngle(){
+    double trueAR = 2.51078701462;
+    return Math.toDegrees(Math.acos(Math.toRadians(getAspectRatio() / trueAR)));
+  }
+
+  /**
+   * Return the angle to turn to be 15 inches in front of the target.
+   * @return the angle to turn
+   */
+  public double getTurnAngle(){
+    // math time bois
+    double distance = getDistance();
+    double angle = getHorizontalAngle();
+    double robotAngle = getRobotAngle();
+    double horzDiff = distance * Math.sin(robotAngle + angle);
+    double vertDiff = distance * Math.cos(robotAngle + angle) - 15.0 / 12;
+    if(vertDiff == 0) return 0;
+    return robotAngle - Math.atan(horzDiff / vertDiff);
   }
 
   /**
@@ -150,6 +183,7 @@ public class LimeLight extends Subsystem {
     setCameraMode(cameraMode.VISION);
     setPipeline(pipeline.BAY);
     targetDistance = 1.0;
+    targetHeight = 19.0 / 12; // 1ft 7 inches from carpet
   }
 
   /**
@@ -159,7 +193,8 @@ public class LimeLight extends Subsystem {
     setLightMode(ledMode.ON);
     setCameraMode(cameraMode.VISION);
     setPipeline(pipeline.BAY);
-    targetDistance = 1.5;
+    targetDistance = 1.0;
+    targetHeight = 27.5 / 12; // 2ft and 3.5 inches from carpet
   }
 
   /**
@@ -170,6 +205,7 @@ public class LimeLight extends Subsystem {
     setCameraMode(cameraMode.VISION);
     setPipeline(pipeline.CARGO);
     targetDistance = 0.5;
+    targetHeight = 6.5 / 12; // 13 inch diameter, so look for center
   }
 
   /**
@@ -180,6 +216,7 @@ public class LimeLight extends Subsystem {
     setCameraMode(cameraMode.VISION);
     setPipeline(pipeline.HATCH);
     targetDistance = 0.5;
+    targetHeight = 0.0; // only track hatches when they are laying on the ground
   }
 
   /**
@@ -190,5 +227,6 @@ public class LimeLight extends Subsystem {
     setCameraMode(cameraMode.CAMERA);
     setPipeline(pipeline.BAY);
     targetDistance = 0.0;
+    targetHeight = 0.0;
   }
 }
