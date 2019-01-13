@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import robot.commands.drive.FollowLine;
 
 public class OI {
 
@@ -69,7 +70,7 @@ public class OI {
 
     /** Constructs new OI object and assigns commands. */
     public OI() {
-        // on the way
+        pilotA.whenPressed(new FollowLine());
     }
 
     /** Returns y axis of Joystick on pilot controller. */

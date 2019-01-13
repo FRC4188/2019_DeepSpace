@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
@@ -16,13 +17,16 @@ import jaci.pathfinder.modifiers.TankModifier;
 public class Drivetrain extends Subsystem {
 
     // Device initialization
-    private TalonSRX left = new TalonSRX(0);
-    private TalonSRX leftSlave1 = new TalonSRX(0);
+    private TalonSRX left = new TalonSRX(6);
+    private TalonSRX leftSlave1 = new TalonSRX(5);
     private TalonSRX leftSlave2 = new TalonSRX(0);
-    private TalonSRX right = new TalonSRX(0);
-    private TalonSRX rightSlave1 = new TalonSRX(0);
+    private TalonSRX right = new TalonSRX(7);
+    private TalonSRX rightSlave1 = new TalonSRX(8);
     private TalonSRX rightSlave2 = new TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+    private DigitalInput lineSensorLeft = new DigitalInput(1);
+    private DigitalInput lineSensorMid = new DigitalInput(2);
+    private DigitalInput lineSensorRight = new DigitalInput(3);
 
     // Drive constants
     private final double MAX_VELOCITY = 0; // ft/s
@@ -43,6 +47,7 @@ public class Drivetrain extends Subsystem {
     // State fields
     private double lastDriveError, lastTurnError, driveIntegral, turnIntegral = 0;
     private boolean isDriveFinished, isTurnFinished, isPathFinished = true;
+    private boolean isFollowingLine = false;
 
     /** Constructs new Drivetrain object and configures devices */
     public Drivetrain() {
@@ -116,7 +121,6 @@ public class Drivetrain extends Subsystem {
         rightSlave1.setNeutralMode(NeutralMode.Coast);
         rightSlave2.setNeutralMode(NeutralMode.Coast);
     }
-
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
     public void resetEncoders() {
@@ -243,11 +247,11 @@ public class Drivetrain extends Subsystem {
         turnIntegral += error * DELTA_T;
         double turnDerivative = (error - lastTurnError) / DELTA_T;
         double output = kP * error + kI * turnIntegral * kD * turnDerivative;
+        lastTurnError = error;
         tank(output, -output, 1.0);
         if(error < tolerance) {
             isTurnFinished = true;
         }
-        gyro.getRate();
     }
 
     /** Returns true when error on currently running turnToAngle is less than tolerance. */
@@ -260,6 +264,60 @@ public class Drivetrain extends Subsystem {
     public void resetTurnToAngle() {
         lastTurnError = 0;
         turnIntegral = 0;
+    }
+
+    /** Uses photosensors to detect reflective tape on ground and drive along line. */
+    public void followLine() {
+
+        // line following constants
+        final double SPEED = 0.2;
+        final double TURN_MINOR = 0.1;
+        final double TURN_MAJOR = 0.3;
+
+        // get data from photo sensors, true = reflecting
+        boolean leftSense = lineSensorLeft.get();
+        boolean midSense = lineSensorMid.get();
+        boolean rightSense = lineSensorRight.get();
+        
+        // drive forward until line is detected, then begin control loop
+        if(!isFollowingLine) {
+            System.out.println("Not tracking line, continuing straight.");
+            arcade(SPEED, 0, 1.0);
+            if(leftSense || rightSense || midSense) isFollowingLine = true;
+        } else {
+            if(leftSense && !midSense && !rightSense) {         // left only
+                System.out.println("Only left sensing, major turn right.");
+                arcade(SPEED, -TURN_MAJOR, 1.0);
+            } else if(leftSense && midSense && !rightSense) {   // left and mid
+                System.out.println("Left and mid sensing, minor turn right.");
+                arcade(SPEED, -TURN_MINOR, 1.0);
+            } else if(!leftSense && midSense && !rightSense) {  // mid only
+                System.out.println("Only mid sensing, continuing straight.");
+                arcade(SPEED, 0, 1.0);
+            } else if(!leftSense && midSense && rightSense) {   // right and mid
+                System.out.println("Right and mid sensing, minor turn left.");
+                arcade(SPEED, TURN_MINOR, 1.0);
+            } else if(!leftSense && !midSense && rightSense) {  // right only
+                System.out.println("Only right sensing, major turn left.");
+                arcade(SPEED, TURN_MAJOR, 1.0);
+            } else if(leftSense && !midSense && rightSense) {   // left and right
+                System.out.println("Left and right sensing, continuing straight.");
+                arcade(SPEED, 0, 1.0);
+            } else if(leftSense && midSense && rightSense) {    // all three
+                System.out.println("All three sensing, continuing straight.");
+                arcade(SPEED, 0, 1.0);
+            } else {
+                System.out.println("Lost track of line, driving backwards.");
+                arcade(-SPEED, 0, 1.0);
+            }
+        }
+        
+    }
+
+    /** Resets state fields associated with followLine. Should call before 
+     *  and/or after running followLine(). */
+    public void resetFollowLine() {
+        isFollowingLine = false;
     }
 
     /** Generates path from waypoints and returns array of EncoderFollowers
