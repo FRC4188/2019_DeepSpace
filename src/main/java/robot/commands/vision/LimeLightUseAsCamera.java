@@ -6,12 +6,12 @@ import robot.Robot;
 public class LimeLightUseAsCamera extends Command {
 
     public LimeLightUseAsCamera() {
-        requires(Robot.m_limelight);
+        requires(Robot.limelight);
     }
 
     @Override
     protected void initialize() {
-        Robot.m_limelight.useAsCamera();
+        Robot.limelight.useAsCamera();
     }
 
     @Override

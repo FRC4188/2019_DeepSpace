@@ -14,29 +14,29 @@ public class FollowPath extends Command {
     EncoderFollower[] followers;
 
     public FollowPath(Waypoint[] points, boolean isReversed) {
-        requires(Robot.m_drivetrain);
+        requires(Robot.drivetrain);
         this.points = points;
         this.isReversed = isReversed;
     }
 
     @Override
     protected void initialize() {
-        followers = Robot.m_drivetrain.getEncoderFollowers(points);
+        followers = Robot.drivetrain.getEncoderFollowers(points);
     }
 
     @Override
     protected void execute() {
-        Robot.m_drivetrain.followPath(followers, isReversed);
+        Robot.drivetrain.followPath(followers, isReversed);
     }
 
     @Override
     protected boolean isFinished() {
-        return Robot.m_drivetrain.isPathFinished();
+        return Robot.drivetrain.isPathFinished();
     }
 
     @Override
     protected void end() {
-        Robot.m_drivetrain.tank(0, 0, 0);
+        Robot.drivetrain.tank(0, 0, 0);
     }
 
     @Override

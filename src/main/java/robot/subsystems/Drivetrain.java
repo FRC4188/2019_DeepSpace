@@ -165,8 +165,40 @@ public class Drivetrain extends Subsystem {
     /** Controls drivetrain with arcade model, with positive xSpeed going forward
      *  and positive zTurn turning right. Output multiplied by throttle. */
     public void arcade(double xSpeed, double zTurn, double throttle) {
-        left.set(ControlMode.PercentOutput, (xSpeed + zTurn) * throttle);
-        right.set(ControlMode.PercentOutput, (xSpeed - zTurn) * throttle);
+
+        double MAX_INPUT = 1.0;
+        double turnRatio;
+        double leftInput = xSpeed - zTurn;
+        double rightInput = xSpeed + zTurn;
+
+        // ensure that input does not exceed 1.0
+        // if it does, reduce greatest input to 1.0 and reduce other proportionately
+        if(leftInput > MAX_INPUT || rightInput > MAX_INPUT) {
+            if(rightInput > leftInput) {
+                turnRatio = leftInput / rightInput;
+                rightInput = MAX_INPUT;
+                leftInput = MAX_INPUT * turnRatio;
+            } else if (leftInput > rightInput) {
+                turnRatio = rightInput / leftInput;
+                leftInput = MAX_INPUT;
+                rightInput = MAX_INPUT * turnRatio;
+            }
+        } else if(leftInput < -MAX_INPUT || rightInput < -MAX_INPUT) {
+            if(rightInput < leftInput) {
+                turnRatio = leftInput / rightInput;
+                rightInput = -MAX_INPUT;
+                leftInput = -MAX_INPUT * turnRatio;
+            } else if (leftInput < rightInput) {
+                turnRatio = rightInput / leftInput;
+                leftInput = -MAX_INPUT;
+                rightInput = -MAX_INPUT * turnRatio;
+            }
+        }
+
+        // command motor output
+        left.set(ControlMode.PercentOutput, leftInput * throttle);
+        right.set(ControlMode.PercentOutput, rightInput * throttle);
+            
     }
 
     /** Controls drivetrain with tank model, individually moving left and
