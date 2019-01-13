@@ -17,11 +17,11 @@ import jaci.pathfinder.modifiers.TankModifier;
 public class Drivetrain extends Subsystem {
 
     // Device initialization
-    private TalonSRX left = new TalonSRX(6);
-    private TalonSRX leftSlave1 = new TalonSRX(5);
+    private TalonSRX left = new TalonSRX(0);
+    private TalonSRX leftSlave1 = new TalonSRX(0);
     private TalonSRX leftSlave2 = new TalonSRX(0);
-    private TalonSRX right = new TalonSRX(7);
-    private TalonSRX rightSlave1 = new TalonSRX(8);
+    private TalonSRX right = new TalonSRX(0);
+    private TalonSRX rightSlave1 = new TalonSRX(0);
     private TalonSRX rightSlave2 = new TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(1);

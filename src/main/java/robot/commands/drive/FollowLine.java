@@ -6,7 +6,7 @@ import robot.Robot;
 public class FollowLine extends Command {
 
     public FollowLine() {
-        requires(Robot.m_drivetrain);
+        requires(Robot.drivetrain);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class FollowLine extends Command {
 
     @Override
     protected void execute() {
-        Robot.m_drivetrain.followLine();
+        Robot.drivetrain.followLine();
     }
 
     @Override
@@ -25,7 +25,7 @@ public class FollowLine extends Command {
 
     @Override
     protected void end() {
-        Robot.m_drivetrain.resetFollowLine();
+        Robot.drivetrain.resetFollowLine();
     }
 
     @Override
