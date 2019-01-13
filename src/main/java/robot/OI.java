@@ -2,6 +2,7 @@ package robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import robot.commands.drive.FollowLine;
 
 public class OI {
 
@@ -58,7 +59,7 @@ public class OI {
         coPilotRs = new JoystickButton(pilot, Mappings.RS);
 
         // Command mappings
-        // on the way
+        pilotA.whenPressed(new FollowLine());
 
     }
 
