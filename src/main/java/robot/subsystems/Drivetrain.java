@@ -17,11 +17,11 @@ import jaci.pathfinder.modifiers.TankModifier;
 public class Drivetrain extends Subsystem {
 
     // Device initialization
-    private TalonSRX left = new TalonSRX(0);
-    private TalonSRX leftSlave1 = new TalonSRX(0);
+    private TalonSRX left = new TalonSRX(6);
+    private TalonSRX leftSlave1 = new TalonSRX(5);
     private TalonSRX leftSlave2 = new TalonSRX(0);
-    private TalonSRX right = new TalonSRX(0);
-    private TalonSRX rightSlave1 = new TalonSRX(0);
+    private TalonSRX right = new TalonSRX(7);
+    private TalonSRX rightSlave1 = new TalonSRX(8);
     private TalonSRX rightSlave2 = new TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(1);
@@ -45,7 +45,7 @@ public class Drivetrain extends Subsystem {
     private final double kA = 0;
 
     // State fields
-    private double lastDriveError, lastTurnError, driveIntegral, turnIntegral = 0;
+    private double lastDriveError, lastTurnError, driveIntegral, turnIntegral, lastLineTurn = 0;
     private boolean isDriveFinished, isTurnFinished, isPathFinished = true;
     private boolean isFollowingLine = false;
 
@@ -54,9 +54,9 @@ public class Drivetrain extends Subsystem {
 
         // Slave control
         leftSlave1.follow(left);
-        leftSlave2.follow(left);
+        //leftSlave2.follow(left);
         rightSlave1.follow(right);
-        rightSlave2.follow(right);
+        //rightSlave2.follow(right);
 
         // Encoders
         left.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
@@ -66,6 +66,7 @@ public class Drivetrain extends Subsystem {
         // Drive config
         enableRampRate();
         setBrake();
+        setLeftInverted(true);
 
         // Gyro
         gyro.reset();
@@ -82,44 +83,44 @@ public class Drivetrain extends Subsystem {
     public void setInverted(boolean isInverted) {
         left.setInverted(isInverted);
         leftSlave1.setInverted(isInverted);
-        leftSlave2.setInverted(isInverted);
+        //leftSlave2.setInverted(isInverted);
         right.setInverted(isInverted);
         rightSlave1.setInverted(isInverted);
-        rightSlave2.setInverted(isInverted);
+        //rightSlave2.setInverted(isInverted);
     }
 
     /** Inverts the left side of the drivetrain. */
     public void setLeftInverted(boolean isInverted) {
         left.setInverted(isInverted);
         leftSlave1.setInverted(isInverted);
-        leftSlave2.setInverted(isInverted);
+        //leftSlave2.setInverted(isInverted);
     }
 
     /** Inverts the right side of the drivetrain. */
     public void setRightInverted(boolean isInverted) {
         right.setInverted(isInverted);
         rightSlave1.setInverted(isInverted);
-        rightSlave2.setInverted(isInverted);
+        //rightSlave2.setInverted(isInverted);
     }
 
     /** Sets drive talons to brake mode. */
     public void setBrake() {
         left.setNeutralMode(NeutralMode.Brake);
         leftSlave1.setNeutralMode(NeutralMode.Brake);
-        leftSlave2.setNeutralMode(NeutralMode.Brake);
+        //leftSlave2.setNeutralMode(NeutralMode.Brake);
         right.setNeutralMode(NeutralMode.Brake);
         rightSlave1.setNeutralMode(NeutralMode.Brake);
-        rightSlave2.setNeutralMode(NeutralMode.Brake);
+        //rightSlave2.setNeutralMode(NeutralMode.Brake);
     }
 
     /** Sets drive talons to coast mode. */
     public void setCoast() {
         left.setNeutralMode(NeutralMode.Coast);
         leftSlave1.setNeutralMode(NeutralMode.Coast);
-        leftSlave2.setNeutralMode(NeutralMode.Coast);
+        //leftSlave2.setNeutralMode(NeutralMode.Coast);
         right.setNeutralMode(NeutralMode.Coast);
         rightSlave1.setNeutralMode(NeutralMode.Coast);
-        rightSlave2.setNeutralMode(NeutralMode.Coast);
+        //rightSlave2.setNeutralMode(NeutralMode.Coast);
     }
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
@@ -158,6 +159,11 @@ public class Drivetrain extends Subsystem {
         return right.getSelectedSensorVelocity() * ENCODER_TO_FEET * 10; // native talon is per 100ms
     }
 
+    /** Returns average motor output current. */
+    public double getMotorCurrent() {
+        return (left.getOutputCurrent() + right.getOutputCurrent()) / 2;
+    }
+
     /** Enables open and closed loop ramp rate */
     public void enableRampRate() {
         left.configClosedloopRamp(RAMP_RATE);
@@ -172,8 +178,8 @@ public class Drivetrain extends Subsystem {
 
         double MAX_INPUT = 1.0;
         double turnRatio;
-        double leftInput = xSpeed - zTurn;
-        double rightInput = xSpeed + zTurn;
+        double leftInput = xSpeed + zTurn;
+        double rightInput = xSpeed - zTurn;
 
         // ensure that input does not exceed 1.0
         // if it does, reduce greatest input to 1.0 and reduce other proportionately
@@ -273,6 +279,7 @@ public class Drivetrain extends Subsystem {
         final double SPEED = 0.2;
         final double TURN_MINOR = 0.1;
         final double TURN_MAJOR = 0.3;
+        final double LOST_TURN = 0.4;
 
         // get data from photo sensors, true = reflecting
         boolean leftSense = lineSensorLeft.get();
@@ -280,6 +287,7 @@ public class Drivetrain extends Subsystem {
         boolean rightSense = lineSensorRight.get();
         
         // drive forward until line is detected, then begin control loop
+        // lastLineTurn stores the direction needed to turn while reversing if line is lost
         if(!isFollowingLine) {
             System.out.println("Not tracking line, continuing straight.");
             arcade(SPEED, 0, 1.0);
@@ -288,27 +296,34 @@ public class Drivetrain extends Subsystem {
             if(leftSense && !midSense && !rightSense) {         // left only
                 System.out.println("Only left sensing, major turn right.");
                 arcade(SPEED, -TURN_MAJOR, 1.0);
+                lastLineTurn = -1;
             } else if(leftSense && midSense && !rightSense) {   // left and mid
                 System.out.println("Left and mid sensing, minor turn right.");
                 arcade(SPEED, -TURN_MINOR, 1.0);
+                lastLineTurn = -1;
             } else if(!leftSense && midSense && !rightSense) {  // mid only
                 System.out.println("Only mid sensing, continuing straight.");
                 arcade(SPEED, 0, 1.0);
+                lastLineTurn = 0;
             } else if(!leftSense && midSense && rightSense) {   // right and mid
                 System.out.println("Right and mid sensing, minor turn left.");
                 arcade(SPEED, TURN_MINOR, 1.0);
+                lastLineTurn = 1;
             } else if(!leftSense && !midSense && rightSense) {  // right only
                 System.out.println("Only right sensing, major turn left.");
                 arcade(SPEED, TURN_MAJOR, 1.0);
+                lastLineTurn = 1;
             } else if(leftSense && !midSense && rightSense) {   // left and right
                 System.out.println("Left and right sensing, continuing straight.");
                 arcade(SPEED, 0, 1.0);
+                lastLineTurn = 0;
             } else if(leftSense && midSense && rightSense) {    // all three
                 System.out.println("All three sensing, continuing straight.");
                 arcade(SPEED, 0, 1.0);
+                lastLineTurn = 0;
             } else {
                 System.out.println("Lost track of line, driving backwards.");
-                arcade(-SPEED, 0, 1.0);
+                arcade(-SPEED, lastLineTurn * LOST_TURN, 1.0);
             }
         }
         

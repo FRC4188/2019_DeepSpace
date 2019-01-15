@@ -1,10 +1,10 @@
 package robot;
 
+import robot.commands.drive.FollowLine;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import robot.commands.drive.FollowLine;
 
 public class OI {
 
@@ -75,25 +75,25 @@ public class OI {
 
     /** Returns y axis of Joystick on pilot controller. */
     public double getPilotY(Hand hand) {
-        if(Math.abs(pilot.getY(hand)) > Controller.DEADBAND) return 0;
+        if(Math.abs(pilot.getY(hand)) < Controller.DEADBAND) return 0;
         else return -pilot.getY(hand);
     }
 
     /** Returns x axis of Joystick on pilot controller. */
     public double getPilotX(Hand hand) {
-        if(Math.abs(pilot.getX(hand)) > Controller.DEADBAND) return 0;
+        if(Math.abs(pilot.getX(hand)) < Controller.DEADBAND) return 0;
         else return pilot.getX(hand);
     }
 
     /** Returns y axis of Joystick on coPilot controller. */
     public double getCoPilotY(Hand hand) {
-        if(Math.abs(coPilot.getY(hand)) > Controller.DEADBAND) return 0;
+        if(Math.abs(coPilot.getY(hand)) < Controller.DEADBAND) return 0;
         else return -coPilot.getY(hand);
     }
 
     /** Returns x axis of Joystick on coPilot controller. */
     public double getCoPilotX(Hand hand) {
-        if(Math.abs(coPilot.getX(hand)) > Controller.DEADBAND) return 0;
+        if(Math.abs(coPilot.getX(hand)) < Controller.DEADBAND) return 0;
         else return coPilot.getX(hand);
     }
 

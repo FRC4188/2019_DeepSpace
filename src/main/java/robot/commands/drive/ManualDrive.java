@@ -19,7 +19,7 @@ public class ManualDrive extends Command {
 
     @Override
     protected void execute() {
-        Robot.drivetrain.arcade(oi.getPilotY(Hand.kLeft), oi.getCoPilotX(Hand.kRight), 1.0);
+        Robot.drivetrain.arcade(oi.getPilotY(Hand.kLeft), oi.getPilotX(Hand.kRight), 1.0);
     }
 
     @Override
