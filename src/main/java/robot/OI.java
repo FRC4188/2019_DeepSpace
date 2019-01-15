@@ -1,6 +1,6 @@
 package robot;
 
-import robot.commands.drive.FollowLine;
+import robot.commands.drive.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 public class OI {
 
-    private class Controller {
+    public class Controller {
         final static int A = 1;
         final static int B = 2;
         final static int X = 3;
@@ -22,7 +22,7 @@ public class OI {
         final static double DEADBAND = 0.1;
     }
 
-    private class RocketBox {
+    public class RocketBox {
         final static int GROUND = 1;
         final static int CARGO_LOW = 2;
         final static int CARGO_MID = 3;
@@ -34,7 +34,7 @@ public class OI {
 
     // Controller initialization
     private XboxController pilot = new XboxController(0);
-    private XboxController coPilot = new XboxController(1);
+    private XboxController copilot = new XboxController(1);
     private Joystick rocketBox = new Joystick(3);
 
     // Button initialization
@@ -46,19 +46,19 @@ public class OI {
     private JoystickButton pilotRb = new JoystickButton(pilot, Controller.RB);
     private JoystickButton pilotBack = new JoystickButton(pilot, Controller.BACK);
     private JoystickButton pilotStart = new JoystickButton(pilot, Controller.START);
-    private JoystickButton pilotLs = new JoystickButton(pilot, Controller.LS);
-    private JoystickButton pilotRs = new JoystickButton(pilot, Controller.RS);
+    private JoystickButton pilotLS = new JoystickButton(pilot, Controller.LS);
+    private JoystickButton pilotRS = new JoystickButton(pilot, Controller.RS);
 
-    private JoystickButton coPilotA = new JoystickButton(coPilot, Controller.A);
-    private JoystickButton coPilotB = new JoystickButton(coPilot, Controller.B);
-    private JoystickButton coPilotX = new JoystickButton(coPilot, Controller.X);
-    private JoystickButton coPilotY = new JoystickButton(coPilot, Controller.Y);
-    private JoystickButton coPilotLb = new JoystickButton(coPilot, Controller.LS);
-    private JoystickButton coPilotRb = new JoystickButton(coPilot, Controller.RB);
-    private JoystickButton coPilotBack = new JoystickButton(coPilot, Controller.BACK);
-    private JoystickButton coPilotStart = new JoystickButton(coPilot, Controller.START);
-    private JoystickButton coPilotLs = new JoystickButton(coPilot, Controller.LS);
-    private JoystickButton coPilotRs = new JoystickButton(coPilot, Controller.RS);
+    private JoystickButton copilotA = new JoystickButton(copilot, Controller.A);
+    private JoystickButton copilotB = new JoystickButton(copilot, Controller.B);
+    private JoystickButton copilotX = new JoystickButton(copilot, Controller.X);
+    private JoystickButton copilotY = new JoystickButton(copilot, Controller.Y);
+    private JoystickButton copilotLb = new JoystickButton(copilot, Controller.LS);
+    private JoystickButton copilotRb = new JoystickButton(copilot, Controller.RB);
+    private JoystickButton copilotBack = new JoystickButton(copilot, Controller.BACK);
+    private JoystickButton copilotStart = new JoystickButton(copilot, Controller.START);
+    private JoystickButton copilotLS = new JoystickButton(copilot, Controller.LS);
+    private JoystickButton copilotRS = new JoystickButton(copilot, Controller.RS);
 
     private JoystickButton rbGround = new JoystickButton(rocketBox, RocketBox.GROUND);
     private JoystickButton rbCargoLow = new JoystickButton(rocketBox, RocketBox.CARGO_LOW);
@@ -71,6 +71,7 @@ public class OI {
     /** Constructs new OI object and assigns commands. */
     public OI() {
         pilotA.whenPressed(new FollowLine());
+        pilotLS.whenPressed(new ShiftGear());
     }
 
     /** Returns y axis of Joystick on pilot controller. */
@@ -85,16 +86,31 @@ public class OI {
         else return pilot.getX(hand);
     }
 
-    /** Returns y axis of Joystick on coPilot controller. */
-    public double getCoPilotY(Hand hand) {
-        if(Math.abs(coPilot.getY(hand)) < Controller.DEADBAND) return 0;
-        else return -coPilot.getY(hand);
+    /** Returns y axis of Joystick on copilot controller. */
+    public double getCopilotY(Hand hand) {
+        if(Math.abs(copilot.getY(hand)) < Controller.DEADBAND) return 0;
+        else return -copilot.getY(hand);
     }
 
-    /** Returns x axis of Joystick on coPilot controller. */
-    public double getCoPilotX(Hand hand) {
-        if(Math.abs(coPilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return coPilot.getX(hand);
+    /** Returns x axis of Joystick on copilot controller. */
+    public double getCopilotX(Hand hand) {
+        if(Math.abs(copilot.getX(hand)) < Controller.DEADBAND) return 0;
+        else return copilot.getX(hand);
+    }
+
+    /** Returns state of given button on pilot controller. */
+    public boolean getPilotButton(int button) {
+        return pilot.getRawButton(button);
+    }
+
+    /** Returns state of given button on copilot controller. */
+    public boolean getCopilotButton(int button) {
+        return copilot.getRawButton(button);
+    }
+
+    /** Returns state of given button on the rocket box. */
+    public boolean getRocketBoxButton(int button) {
+        return rocketBox.getRawButton(button);
     }
 
 }

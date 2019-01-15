@@ -7,6 +7,8 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
@@ -19,23 +21,24 @@ public class Drivetrain extends Subsystem {
     // Device initialization
     private TalonSRX left = new TalonSRX(6);
     private TalonSRX leftSlave1 = new TalonSRX(5);
-    private TalonSRX leftSlave2 = new TalonSRX(0);
+    //private TalonSRX leftSlave2 = new TalonSRX(0);
     private TalonSRX right = new TalonSRX(7);
     private TalonSRX rightSlave1 = new TalonSRX(8);
-    private TalonSRX rightSlave2 = new TalonSRX(0);
+    //private TalonSRX rightSlave2 = new TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(1);
     private DigitalInput lineSensorMid = new DigitalInput(2);
     private DigitalInput lineSensorRight = new DigitalInput(3);
+    DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Drive constants
     private final double MAX_VELOCITY = 0; // ft/s
     private final double MAX_ACCELERATION = 0; // ft/s^2
     private final double MAX_JERK = 0; // ft/s^3
     private final double WHEELBASE_WIDTH = 0; // ft
-    private final double WHEEL_DIAMETER = (0.0 / 12.0); // ft
+    private final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     private final double TICKS_PER_REV = 4096; // talon units
-    private final double RAMP_RATE = 0.5; // seconds
+    private final double RAMP_RATE = 0.05; // seconds
     private final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
     private final double DELTA_T = 0.02; // seconds
     private final double kP = 0;
@@ -159,6 +162,16 @@ public class Drivetrain extends Subsystem {
         return right.getSelectedSensorVelocity() * ENCODER_TO_FEET * 10; // native talon is per 100ms
     }
 
+    /** Returns gyro angle in degrees. */
+    public double getGyroAngle() {
+        return gyro.getAngle();
+    }
+
+    /** Returns gyro rate in degrees per sec. */
+    public double getGyroRate() {
+        return gyro.getRate();
+    }
+
     /** Returns average motor output current. */
     public double getMotorCurrent() {
         return (left.getOutputCurrent() + right.getOutputCurrent()) / 2;
@@ -170,6 +183,11 @@ public class Drivetrain extends Subsystem {
         left.configOpenloopRamp(RAMP_RATE);
         right.configOpenloopRamp(RAMP_RATE);
         right.configClosedloopRamp(RAMP_RATE);
+    }
+
+    /** Sets gear shift solenoid to given value. */
+    public void shiftGear(Value value) {
+        gearShift.set(value);
     }
 
     /** Controls drivetrain with arcade model, with positive xSpeed going forward
@@ -276,10 +294,9 @@ public class Drivetrain extends Subsystem {
     public void followLine() {
 
         // line following constants
-        final double SPEED = 0.2;
-        final double TURN_MINOR = 0.1;
-        final double TURN_MAJOR = 0.3;
-        final double LOST_TURN = 0.4;
+        final double SPEED = 0.4;
+        final double TURN_MINOR = 0.15;
+        final double TURN_MAJOR = 0.25;
 
         // get data from photo sensors, true = reflecting
         boolean leftSense = lineSensorLeft.get();
@@ -323,7 +340,7 @@ public class Drivetrain extends Subsystem {
                 lastLineTurn = 0;
             } else {
                 System.out.println("Lost track of line, driving backwards.");
-                arcade(-SPEED, lastLineTurn * LOST_TURN, 1.0);
+                arcade(-SPEED, lastLineTurn * TURN_MAJOR, 1.0);
             }
         }
         
@@ -363,6 +380,7 @@ public class Drivetrain extends Subsystem {
             leftFollower,   // 0
             rightFollower   // 1
         };
+
     }
 
     /** Follows path given array of EncoderFollowers (left at index 0, right at 1).
