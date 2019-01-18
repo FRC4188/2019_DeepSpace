@@ -1,0 +1,83 @@
+/*----------------------------------------------------------------------------*/
+/* Copyright (c) 2018 FIRST. All Rights Reserved.                             */
+/* Open Source Software - may be modified and shared by FRC teams. The code   */
+/* must be accompanied by the FIRST BSD license file in the root directory of */
+/* the project.                                                               */
+/*----------------------------------------------------------------------------*/
+
+package robot.commands.vision;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.command.Command;
+import robot.Robot;
+import robot.subsystems.LimeLight;
+
+public class ControlledVision extends Command {
+
+    public static XboxController pilot = Robot.m_oi.pilot;
+    public LimeLight limelight;
+    NetworkTable table = null;
+
+    private boolean trackingBay = false;
+
+    public ControlledVision() {
+        requires(Robot.m_limelight);
+        limelight = Robot.m_limelight;
+        table = NetworkTableInstance.getDefault().getTable("limelightData");
+    }
+
+    // Called just before this Command runs the first time
+    @Override
+    protected void initialize() {
+    }
+
+    // Called repeatedly when this Command is scheduled to run
+    @Override
+    protected void execute() {
+        if(pilot.getAButton()){
+            limelight.trackShipBay();
+            trackingBay = true;
+        }
+        if(pilot.getBButton()){
+            limelight.trackCargo();
+            trackingBay = false;
+        }
+        if(pilot.getYButton()){
+            limelight.trackHatch();
+            trackingBay = false;
+        }
+
+        double distance = limelight.getDistance();
+        double relangle = limelight.getHorizontalAngle();
+        double robotangle = limelight.getRobotAngle();
+        table.getEntry("distance").setDouble(distance);
+        table.getEntry("relangle").setDouble(relangle);
+        table.getEntry("robotangle").setDouble(robotangle);
+        if(trackingBay){
+            double horzdiff = distance * Math.sin(robotangle + relangle);
+            double vertdiff = distance * Math.cos(robotangle + relangle) - 15.0/12;
+            table.getEntry("horzdiff").setDouble(horzdiff);
+            table.getEntry("vertdiff").setDouble(vertdiff);
+            table.getEntry("turnangle").setDouble(limelight.getTurnAngleToBay());
+        }
+    }
+
+    // Make this return true when this Command no longer needs to run execute()
+    @Override
+    protected boolean isFinished() {
+        return false;
+    }
+
+    // Called once after isFinished returns true
+    @Override
+    protected void end() {
+    }
+
+    // Called when another command which requires one or more of the same
+    // subsystems is scheduled to run
+    @Override
+    protected void interrupted() {
+    }
+}

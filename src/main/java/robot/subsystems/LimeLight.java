@@ -17,6 +17,9 @@ public class LimeLight extends Subsystem {
     private double targetDistance = 0.0;
     private double targetHeight = 0.0;
 
+    // current pipeline
+    private pipeline currentPipeline = pipeline.OFF;
+
     // LED mode enum
     public enum ledMode{
         DEFAULT(0), OFF(1), BLINK(2), ON(3);
@@ -45,7 +48,7 @@ public class LimeLight extends Subsystem {
 
     // pipeline enum 
     public enum pipeline{
-        BAY(0), CARGO(1), HATCH(2);
+        OFF(0), CARGO(1), HATCH(2), BAY(3);
 
         private final int value;
         pipeline(int value){
@@ -90,6 +93,7 @@ public class LimeLight extends Subsystem {
      */
     public void setPipeline(pipeline pl){
         limelightTable.getEntry("pipeline").setNumber(pl.getValue());
+        currentPipeline = pl;
     }
 
     /**
@@ -132,16 +136,8 @@ public class LimeLight extends Subsystem {
         double a = 0.0; 
         double ty = getVerticalAngle();
         double ht = targetHeight;
-        double hc = 0.0; // TODO modify for actual camera height
+        double hc = 1.25; // TODO modify for actual camera height
         return (ht - hc)/Math.tan(Math.toRadians(a + ty)) - targetDistance;
-    }
-
-    /**
-     * Return the aspect ratio of the bounding box.
-     * @return the width/height of the bounding box
-     */
-    public double getAspectRatio(){
-        return (double)limelightTable.getEntry("thoriz").getNumber(0.0) / (double)limelightTable.getEntry("tvert").getNumber(1.0);
     }
 
     /**
@@ -149,21 +145,46 @@ public class LimeLight extends Subsystem {
      * @return the angle of the robot
      */
     public double getRobotAngle(){
-        double trueAR = 2.51078701462;
-        return Math.toDegrees(Math.acos(Math.toRadians(getAspectRatio() / trueAR)));
+        // ensure we are tracking bays
+        if(currentPipeline != pipeline.BAY) return 0;
+        // get angles to raw contours (rough guess)
+        double leftAngleX = limelightTable.getEntry("tx0").getDouble(0.0)*27;
+        double rightAngleX = limelightTable.getEntry("tx1").getDouble(0.0)*27;
+        double leftAngleY, rightAngleY;
+        if(rightAngleX < leftAngleX){
+            double temp = leftAngleX;
+            leftAngleX = rightAngleX;
+            rightAngleX = temp;
+            leftAngleY = limelightTable.getEntry("ty1").getDouble(0.0)*20.5;
+            rightAngleY = limelightTable.getEntry("ty0").getDouble(0.0)*20.5;
+        }else{
+            leftAngleY = limelightTable.getEntry("ty0").getDouble(0.0)*20.5;
+            rightAngleY = limelightTable.getEntry("ty1").getDouble(0.0)*20.5;
+        }
+
+        // calculate the distances to the two raw contours
+        double a = 0.0;
+        double ht = targetHeight;
+        double hc = 1.25;
+        double leftDistance = (ht-hc)/Math.tan(Math.toRadians(a+leftAngleY));
+        double rightDistance = (ht-hc)/Math.tan(Math.toRadians(a+rightAngleY));
+
+        // calculate the slope between the contours and get the angle
+        double diffX = rightDistance*Math.cos(Math.toRadians(rightAngleX)) - leftDistance*Math.cos(Math.toRadians(leftAngleX));
+        double diffY = rightDistance*Math.sin(Math.toRadians(rightAngleX)) - leftDistance*Math.sin(Math.toRadians(leftAngleX));
+        return Math.toDegrees(Math.atan(diffX / diffY));
     }
 
     /**
      * Return the angle to turn to be 15 inches in front of the target.
      * @return the angle to turn
      */
-    public double getTurnAngle(){
-        // math time bois
+    public double getTurnAngleToBay(){
         double distance = getDistance();
         double angle = getHorizontalAngle();
         double robotAngle = getRobotAngle();
-        double horzDiff = distance * Math.sin(robotAngle + angle);
-        double vertDiff = distance * Math.cos(robotAngle + angle) - 15.0 / 12;
+        double horzDiff = distance * Math.sin(Math.toRadians(robotAngle + angle));
+        double vertDiff = distance * Math.cos(Math.toRadians(robotAngle + angle)) - 15.0 / 12; // slightly inwards fromedge of tape
         if(vertDiff == 0) return 0;
         return robotAngle - Math.atan(horzDiff / vertDiff);
     }
@@ -176,7 +197,7 @@ public class LimeLight extends Subsystem {
         setCameraMode(cameraMode.VISION);
         setPipeline(pipeline.BAY);
         targetDistance = 1.0;
-        targetHeight = 19.0 / 12; // 1ft 7 inches from carpet
+        targetHeight = 3.05;
     }
 
     /**
@@ -187,7 +208,7 @@ public class LimeLight extends Subsystem {
         setCameraMode(cameraMode.VISION);
         setPipeline(pipeline.BAY);
         targetDistance = 1.0;
-        targetHeight = 27.5 / 12; // 2ft and 3.5 inches from carpet
+        targetHeight = 3.76;
     }
 
     /**
