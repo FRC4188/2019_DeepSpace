@@ -14,6 +14,7 @@ public class LimeLight extends Subsystem {
     // distance for target
     private double targetDistance = 0.0;
     private double targetHeight = 0.0;
+    private final double CAMERA_HEIGHT = (9.4 / 12.0);
 
     // current pipeline
     private Pipeline currentPipeline = Pipeline.OFF;
@@ -134,7 +135,7 @@ public class LimeLight extends Subsystem {
         double a = 0.0; 
         double ty = getVerticalAngle();
         double ht = targetHeight;
-        double hc = 1.25; // TODO modify for actual camera height
+        double hc = CAMERA_HEIGHT;
         return (ht - hc)/Math.tan(Math.toRadians(a + ty)) - targetDistance;
     }
 
@@ -163,7 +164,7 @@ public class LimeLight extends Subsystem {
         // calculate the distances to the two raw contours
         double a = 0.0;
         double ht = targetHeight;
-        double hc = 1.25;
+        double hc = CAMERA_HEIGHT;
         double leftDistance = (ht-hc)/Math.tan(Math.toRadians(a+leftAngleY));
         double rightDistance = (ht-hc)/Math.tan(Math.toRadians(a+rightAngleY));
 

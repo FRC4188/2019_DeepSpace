@@ -71,6 +71,7 @@ public class OI {
     /** Constructs new OI object and assigns commands. */
     public OI() {
         pilotA.whenPressed(new FollowLine());
+        pilotB.whenPressed(new FollowObject());
         pilotLS.whenPressed(new ShiftGear());
     }
 

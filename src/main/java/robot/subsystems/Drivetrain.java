@@ -29,7 +29,7 @@ public class Drivetrain extends Subsystem {
     private DigitalInput lineSensorLeft = new DigitalInput(1);
     private DigitalInput lineSensorMid = new DigitalInput(2);
     private DigitalInput lineSensorRight = new DigitalInput(3);
-    DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
+    private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Drive constants
     private final double MAX_VELOCITY = 0; // ft/s
@@ -41,9 +41,9 @@ public class Drivetrain extends Subsystem {
     private final double RAMP_RATE = 0.05; // seconds
     private final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
     private final double DELTA_T = 0.02; // seconds
-    private final double kP = 0;
+    private final double kP = 0.02;
     private final double kI = 0;
-    private final double kD = 0;
+    private final double kD = 0.0;
     private final double kV = 0;
     private final double kA = 0;
 
