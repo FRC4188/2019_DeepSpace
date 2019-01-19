@@ -2,12 +2,10 @@ package robot.subsystems;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import robot.commands.vision.LimeLightUseAsCamera;
 import edu.wpi.first.networktables.NetworkTable;
+import robot.commands.vision.LimeLightUseAsCamera;
 
-/**
-Limelight vision camera. Used to detect reflective tape.
- */
+/** Limelight vision camera. Used to detect reflective tape. */
 public class LimeLight extends Subsystem {
 
     // limelight network table

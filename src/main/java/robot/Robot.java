@@ -7,22 +7,21 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
-    
-    public static Drivetrain m_drivetrain;  
-    public static LimeLight m_limelight;
-    public static OI m_oi;
 
-    Command m_autonomousCommand;
-    SendableChooser<Command> m_chooser = new SendableChooser<>();
+    public static Drivetrain drivetrain;
+    public static LimeLight limelight;
+    public static OI oi;
+
+    Command autonomousCommand;
+    SendableChooser<Command> chooser = new SendableChooser<>();
 
     @Override
     public void robotInit() {
-        m_drivetrain = new Drivetrain();
-        m_limelight = new LimeLight();
-        m_oi = new OI();
+        drivetrain = new Drivetrain();
+        limelight = new LimeLight();
+        oi = new OI();
     }
 
     @Override
@@ -40,9 +39,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        m_autonomousCommand = m_chooser.getSelected();
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.start();
+        autonomousCommand = chooser.getSelected();
+        if (autonomousCommand != null) {
+            autonomousCommand.start();
         }
     }
 
@@ -53,19 +52,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.cancel();
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
         }
-        m_drivetrain.resetEncoders();
+        drivetrain.resetEncoders();
     }
 
     @Override
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
-        SmartDashboard.putNumber("Left position", m_drivetrain.getLeftPosition());
-        SmartDashboard.putNumber("Right position", m_drivetrain.getRightPosition());
-        SmartDashboard.putNumber("Raw left", m_drivetrain.getRawRightPosition());
-        SmartDashboard.putNumber("Raw right", m_drivetrain.getRawLeftPosition());
     }
 
     @Override

@@ -1,16 +1,18 @@
 package robot.commands.drive;
 
+import robot.OI;
 import robot.Robot;
-import edu.wpi.first.wpilibj.XboxController;
+import robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class ManualDrive extends Command {
 
-    public static XboxController pilot = Robot.m_oi.pilot;
+    OI oi = Robot.oi;
+    Drivetrain drivetrain = Robot.drivetrain;
 
     public ManualDrive() {
-        requires(Robot.m_drivetrain);
+        requires(drivetrain);
     }
 
     @Override
@@ -19,7 +21,7 @@ public class ManualDrive extends Command {
 
     @Override
     protected void execute() {
-        Robot.m_drivetrain.arcade(-pilot.getY(Hand.kLeft), pilot.getX(Hand.kRight), 1.0);
+        drivetrain.arcade(oi.getPilotY(Hand.kLeft), oi.getPilotX(Hand.kRight), 1.0);
     }
 
     @Override

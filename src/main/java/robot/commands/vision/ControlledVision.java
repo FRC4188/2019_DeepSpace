@@ -9,22 +9,21 @@ package robot.commands.vision;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.command.Command;
-import robot.Robot;
 import robot.subsystems.LimeLight;
+import robot.Robot;
+import robot.OI.Controller;
 
 public class ControlledVision extends Command {
 
-    public static XboxController pilot = Robot.m_oi.pilot;
     public LimeLight limelight;
     NetworkTable table = null;
 
     private boolean trackingBay = false;
 
     public ControlledVision() {
-        requires(Robot.m_limelight);
-        limelight = Robot.m_limelight;
+        requires(Robot.limelight);
+        limelight = Robot.limelight;
         table = NetworkTableInstance.getDefault().getTable("limelightData");
     }
 
@@ -36,15 +35,15 @@ public class ControlledVision extends Command {
     // Called repeatedly when this Command is scheduled to run
     @Override
     protected void execute() {
-        if(pilot.getAButton()){
+        if(Robot.oi.getPilotButton(Controller.A)){
             limelight.trackShipBay();
             trackingBay = true;
         }
-        if(pilot.getBButton()){
+        if(Robot.oi.getPilotButton(Controller.B)){
             limelight.trackCargo();
             trackingBay = false;
         }
-        if(pilot.getYButton()){
+        if(Robot.oi.getPilotButton(Controller.Y)){
             limelight.trackHatch();
             trackingBay = false;
         }
