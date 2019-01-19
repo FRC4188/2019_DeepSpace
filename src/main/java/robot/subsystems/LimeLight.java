@@ -16,43 +16,43 @@ public class LimeLight extends Subsystem {
     private double targetHeight = 0.0;
 
     // current pipeline
-    private pipeline currentPipeline = pipeline.OFF;
+    private Pipeline currentPipeline = Pipeline.OFF;
 
     // LED mode enum
-    public enum ledMode{
+    public enum LedMode {
         DEFAULT(0), OFF(1), BLINK(2), ON(3);
 
         private final int value;
-        ledMode(int value){
+        LedMode(int value) {
             this.value = value;
         }
-        public int getValue(){
+        public int getValue() {
             return this.value;
         }
     }
 
     // camera mode enum
-    public enum cameraMode{
+    public enum CameraMode {
         VISION(0), CAMERA(1);
 
         private final int value;
-        cameraMode(int value){
+        CameraMode(int value) {
             this.value = value;
         }
-        public int getValue(){
+        public int getValue() {
             return this.value;
         }
     }
 
     // pipeline enum 
-    public enum pipeline{
+    public enum Pipeline {
         OFF(0), CARGO(1), HATCH(2), BAY(3);
 
         private final int value;
-        pipeline(int value){
+        Pipeline(int value) {
             this.value = value;
         }
-        public int getValue(){
+        public int getValue() {
             return this.value;
         }
     }
@@ -65,7 +65,7 @@ public class LimeLight extends Subsystem {
     /**
      * Constructor for Limelight.
      */
-    public LimeLight(){
+    public LimeLight() {
         limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
     }
 
@@ -73,7 +73,7 @@ public class LimeLight extends Subsystem {
      * Sets the LED mode of the camera.
      * @param mode the LED mode to set the camera to
      */
-    public void setLightMode(ledMode mode){
+    public void setLightMode(LedMode mode) {
         limelightTable.getEntry("ledMode").setNumber(mode.getValue());
     }
 
@@ -81,7 +81,7 @@ public class LimeLight extends Subsystem {
      * Sets the camera mode of the camera.
      * @param mode the camera mode to set the camera to
      */
-    public void setCameraMode(cameraMode mode){
+    public void setCameraMode(CameraMode mode) {
         limelightTable.getEntry("camMode").setNumber(mode.getValue());
     }
 
@@ -89,7 +89,7 @@ public class LimeLight extends Subsystem {
      * Sets the pipeline for the camera to use.
      * @param pl the pipeline for the camera to use
      */
-    public void setPipeline(pipeline pl){
+    public void setPipeline(Pipeline pl) {
         limelightTable.getEntry("pipeline").setNumber(pl.getValue());
         currentPipeline = pl;
     }
@@ -98,7 +98,7 @@ public class LimeLight extends Subsystem {
      * Returns if the camera sees a target.
      * @return the camera sees a target
      */
-    public boolean hasTarget(){
+    public boolean hasTarget() {
         return limelightTable.getEntry("tv").getBoolean(false);
     }
 
@@ -106,7 +106,7 @@ public class LimeLight extends Subsystem {
      * Returns the horizontal angle from the center of the camera to the target.
      * @return the horizontal angle to the target
      */
-    public double getHorizontalAngle(){
+    public double getHorizontalAngle() {
         return limelightTable.getEntry("tx").getDouble(0.0);
     }
 
@@ -114,7 +114,7 @@ public class LimeLight extends Subsystem {
      * Returns the vertical angle from the center of the camera to the target.
      * @return the vertical angle to the target
      */
-    public double getVerticalAngle(){
+    public double getVerticalAngle() {
         return limelightTable.getEntry("ty").getDouble(0.0);
     }
 
@@ -122,7 +122,7 @@ public class LimeLight extends Subsystem {
      * Return the distance from the camera to the target.
      * @return the distance from the camera to the target
      */
-    public double getDistance(){
+    public double getDistance() {
         /*
         *Uses the equation: tan(a + ty) = (ht - hc) / d
         * a: the angle of the camera from the ground
@@ -142,14 +142,14 @@ public class LimeLight extends Subsystem {
      * Return the angle of the robot from the wall. 0 degrees means facing the wall.
      * @return the angle of the robot
      */
-    public double getRobotAngle(){
+    public double getRobotAngle() {
         // ensure we are tracking bays
-        if(currentPipeline != pipeline.BAY) return 0;
+        if(currentPipeline != Pipeline.BAY) return 0;
         // get angles to raw contours (rough guess)
         double leftAngleX = limelightTable.getEntry("tx0").getDouble(0.0)*27;
         double rightAngleX = limelightTable.getEntry("tx1").getDouble(0.0)*27;
         double leftAngleY, rightAngleY;
-        if(rightAngleX < leftAngleX){
+        if(rightAngleX < leftAngleX) {
             double temp = leftAngleX;
             leftAngleX = rightAngleX;
             rightAngleX = temp;
@@ -177,7 +177,7 @@ public class LimeLight extends Subsystem {
      * Return the angle to turn to be 15 inches in front of the target.
      * @return the angle to turn
      */
-    public double getTurnAngleToBay(){
+    public double getTurnAngleToBay() {
         double distance = getDistance();
         double angle = getHorizontalAngle();
         double robotAngle = getRobotAngle();
@@ -190,10 +190,10 @@ public class LimeLight extends Subsystem {
     /**
      * Start tracking the ship bays
      */
-    public void trackShipBay(){
-        setLightMode(ledMode.ON);
-        setCameraMode(cameraMode.VISION);
-        setPipeline(pipeline.BAY);
+    public void trackShipBay() {
+        setLightMode(LedMode.ON);
+        setCameraMode(CameraMode.VISION);
+        setPipeline(Pipeline.BAY);
         targetDistance = 1.0;
         targetHeight = 3.05;
     }
@@ -201,10 +201,10 @@ public class LimeLight extends Subsystem {
     /**
      * Start tracking the rocket bays (slightly higher up)
      */
-    public void trackRocketBay(){
-        setLightMode(ledMode.ON);
-        setCameraMode(cameraMode.VISION);
-        setPipeline(pipeline.BAY);
+    public void trackRocketBay() {
+        setLightMode(LedMode.ON);
+        setCameraMode(CameraMode.VISION);
+        setPipeline(Pipeline.BAY);
         targetDistance = 1.0;
         targetHeight = 3.76;
     }
@@ -212,10 +212,10 @@ public class LimeLight extends Subsystem {
     /**
      * Start tracking the cargo
      */
-    public void trackCargo(){
-        setLightMode(ledMode.ON);
-        setCameraMode(cameraMode.VISION);
-        setPipeline(pipeline.CARGO);
+    public void trackCargo() {
+        setLightMode(LedMode.ON);
+        setCameraMode(CameraMode.VISION);
+        setPipeline(Pipeline.CARGO);
         targetDistance = 0.5;
         targetHeight = 6.5 / 12; // 13 inch diameter, so look for center
     }
@@ -223,10 +223,10 @@ public class LimeLight extends Subsystem {
     /**
      * Start tracking the hatches
      */
-    public void trackHatch(){
-        setLightMode(ledMode.ON);
-        setCameraMode(cameraMode.VISION);
-        setPipeline(pipeline.HATCH);
+    public void trackHatch() {
+        setLightMode(LedMode.ON);
+        setCameraMode(CameraMode.VISION);
+        setPipeline(Pipeline.HATCH);
         targetDistance = 0.5;
         targetHeight = 0.0; // only track hatches when they are laying on the ground
     }
@@ -234,10 +234,10 @@ public class LimeLight extends Subsystem {
     /**
      * Use LimeLight as camera
      */
-    public void useAsCamera(){
-        setLightMode(ledMode.OFF);
-        setCameraMode(cameraMode.CAMERA);
-        setPipeline(pipeline.BAY);
+    public void useAsCamera() {
+        setLightMode(LedMode.OFF);
+        setCameraMode(CameraMode.CAMERA);
+        setPipeline(Pipeline.BAY);
         targetDistance = 0.0;
         targetHeight = 0.0;
     }
