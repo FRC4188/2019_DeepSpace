@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj.command.Command;
 /** Toggles gear shift solenoid. */
 public class ShiftGear extends Command {
 
-    boolean lastState;
     Drivetrain drivetrain = Robot.drivetrain;
+    boolean lastState;
 
     public ShiftGear() {
         requires(Robot.drivetrain);

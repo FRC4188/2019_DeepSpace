@@ -58,6 +58,7 @@ public class Drivetrain extends Subsystem {
 
         // Gyro
         resetGyro();
+        calibrateGyro();
     }
 
     /** Defines default command that will run when object is created */
@@ -184,6 +185,10 @@ public class Drivetrain extends Subsystem {
     /** Resets gyro angle to 0. */
     public void resetGyro() {
         gyro.reset();
+    }
+
+    public void calibrateGyro() {
+        gyro.calibrate();
     }
 
     /** Returns whether or not left photo sensor is reflecting. */

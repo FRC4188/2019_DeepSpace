@@ -17,5 +17,4 @@ public class CSPMath {
         return constrain(value, min, max) * sign;
     }
 
-
 }

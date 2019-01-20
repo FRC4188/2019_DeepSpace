@@ -10,20 +10,22 @@ import robot.utils.CSPMath;
 /** Follows a given object using vision processing. */
 public class FollowObject extends Command {
 
+    public enum Object {
+        CARGO, BAY_CLOSE, BAY_HIGH
+    }
+
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
+
     Object object;
+    double objectWidth;
+    double distance = 1000; // super high to make sure command doesn't terminate
+    boolean isFollowing = false;
+
     final double TURN_kP = 0.02;
     final double DIST_kP = 0.15;
     final double ANGLE_TOLERANCE = 3.0;
     final double DIST_TOLERANCE = 0.5;
-    double firstDist, objectWidth;
-    double distance = 1000; // super high to make sure command doesn't terminate
-    boolean isFollowing = false;
-
-    public enum Object {
-        CARGO(), BAY_CLOSE, BAY_HIGH
-    }
 
     public FollowObject(Object object) {
         requires(Robot.drivetrain);
@@ -44,9 +46,10 @@ public class FollowObject extends Command {
             limelight.trackRocketBayHigh();
             objectWidth = (15 / 12);
         }
+
         drivetrain.resetGyro();
-        firstDist = limelight.getDistance(); // get initial dist away
         isFollowing = false;
+
     }
 
     @Override
@@ -55,8 +58,10 @@ public class FollowObject extends Command {
         // ensures that loop doesn't terminate if dist defaults to 0
         if(distance > 0) isFollowing = true; 
 
+        // reset gyro every loop to keep cam angle relative to bot angle
         drivetrain.resetGyro();
 
+        // get angle and distance
         double angleSetpoint = limelight.getHorizontalAngle();
         SmartDashboard.putNumber("Angle", angleSetpoint);
         distance = limelight.getDistance2(objectWidth) - 3.0; // stop 3 feet away
@@ -65,10 +70,8 @@ public class FollowObject extends Command {
         // distance p loop
         double xSpeed = DIST_kP * distance;
         xSpeed = CSPMath.constrainKeepSign(xSpeed, 0.0, 1.0);
-        System.out.println(xSpeed);
 
         // angle p loop
-        // turn amount decreases as distance decreases
         double angleError = angleSetpoint - drivetrain.getGyroAngle();
         double turnOutput = TURN_kP * angleError;
         double zTurn = (Math.abs(angleError) > ANGLE_TOLERANCE) ? 
@@ -81,7 +84,7 @@ public class FollowObject extends Command {
 
     @Override
     protected boolean isFinished() {
-      return (distance < DIST_TOLERANCE) && isFollowing;
+        return (distance < DIST_TOLERANCE) && isFollowing;
     }
 
     @Override
@@ -91,5 +94,6 @@ public class FollowObject extends Command {
 
     @Override
     protected void interrupted() {
+        end();
     }
 }

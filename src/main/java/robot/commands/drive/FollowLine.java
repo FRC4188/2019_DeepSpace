@@ -2,7 +2,6 @@ package robot.commands.drive;
 
 import robot.Robot;
 import robot.subsystems.Drivetrain;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
 /** Follows line of reflective tape using photo sensors. */
