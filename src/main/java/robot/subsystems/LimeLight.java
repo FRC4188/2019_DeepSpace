@@ -2,7 +2,9 @@ package robot.subsystems;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
+import robot.Robot;
 import robot.commands.vision.LimeLightUseAsCamera;
 
 /** Limelight vision camera. Used to detect reflective tape. */
@@ -14,7 +16,8 @@ public class LimeLight extends Subsystem {
     // distance for target
     private double targetDistance = 0.0;
     private double targetHeight = 0.0;
-    private final double CAMERA_HEIGHT = (9.4 / 12.0);
+    private final double CAMERA_HEIGHT = (9.7 / 12.0);
+    private final double CAMERA_ANGLE = 0.0;
 
     // current pipeline
     private Pipeline currentPipeline = Pipeline.OFF;
@@ -47,12 +50,13 @@ public class LimeLight extends Subsystem {
 
     // pipeline enum 
     public enum Pipeline {
-        OFF(0), CARGO(1), HATCH(2), BAY(3);
+        OFF(0), CARGO(1), HATCH(2), BAY_CLOSE(3), BAY_HIGH(4);
 
         private final int value;
         Pipeline(int value) {
             this.value = value;
         }
+
         public int getValue() {
             return this.value;
         }
@@ -97,7 +101,6 @@ public class LimeLight extends Subsystem {
 
     /**
      * Returns if the camera sees a target.
-     * @return the camera sees a target
      */
     public boolean hasTarget() {
         return limelightTable.getEntry("tv").getBoolean(false);
@@ -105,23 +108,20 @@ public class LimeLight extends Subsystem {
 
     /**
      * Returns the horizontal angle from the center of the camera to the target.
-     * @return the horizontal angle to the target
      */
     public double getHorizontalAngle() {
-        return limelightTable.getEntry("tx").getDouble(0.0);
+        return limelightTable.getEntry("tx").getDouble(Robot.drivetrain.getGyroAngle());
     }
 
     /**
      * Returns the vertical angle from the center of the camera to the target.
-     * @return the vertical angle to the target
      */
     public double getVerticalAngle() {
         return limelightTable.getEntry("ty").getDouble(0.0);
     }
 
     /**
-     * Return the distance from the camera to the target.
-     * @return the distance from the camera to the target
+     * Return the distance from the camera to the target in feet.
      */
     public double getDistance() {
         /*
@@ -132,20 +132,34 @@ public class LimeLight extends Subsystem {
         * hc: the height of the camera
         * d: the distance
         */
-        double a = 0.0; 
+        double a = CAMERA_ANGLE; 
         double ty = getVerticalAngle();
         double ht = targetHeight;
         double hc = CAMERA_HEIGHT;
-        return (ht - hc)/Math.tan(Math.toRadians(a + ty)) - targetDistance;
+        double slope = Math.tan(Math.toRadians(a + ty));
+        if(slope == 0) return 0;
+        return (ht - hc)/slope;
+    }
+
+    /** Returns distance in feet from object of width s (feet). 
+     *  Uses s = r(theta). */
+    public double getDistance2(double objectWidth) {
+        final double CAMERA_WIDTH = 320; // pixels
+        final double CAMERA_FOV = Math.toRadians(54); // rads
+        double boxWidth = limelightTable.getEntry("tlong").getDouble(0.0); // pixels
+        double percentWidth = boxWidth / CAMERA_WIDTH;
+        double boxDegree = percentWidth * CAMERA_FOV;
+        double r = objectWidth / boxDegree; // feet
+        return r;
     }
 
     /**
      * Return the angle of the robot from the wall. 0 degrees means facing the wall.
      * @return the angle of the robot
      */
-    public double getRobotAngle() {
+    public double getRobotAngle() { 
         // ensure we are tracking bays
-        if(currentPipeline != Pipeline.BAY) return 0;
+        if(currentPipeline != Pipeline.BAY_CLOSE || currentPipeline != Pipeline.BAY_HIGH) return 0;
         // get angles to raw contours (rough guess)
         double leftAngleX = limelightTable.getEntry("tx0").getDouble(0.0)*27;
         double rightAngleX = limelightTable.getEntry("tx1").getDouble(0.0)*27;
@@ -162,7 +176,7 @@ public class LimeLight extends Subsystem {
         }
 
         // calculate the distances to the two raw contours
-        double a = 0.0;
+        double a = CAMERA_ANGLE;
         double ht = targetHeight;
         double hc = CAMERA_HEIGHT;
         double leftDistance = (ht-hc)/Math.tan(Math.toRadians(a+leftAngleY));
@@ -194,18 +208,29 @@ public class LimeLight extends Subsystem {
     public void trackShipBay() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY);
+        setPipeline(Pipeline.BAY_CLOSE);
         targetDistance = 1.0;
         targetHeight = 3.05;
     }
 
     /**
-     * Start tracking the rocket bays (slightly higher up)
+     * Start tracking the closest rocket bays (slightly higher up)
      */
-    public void trackRocketBay() {
+    public void trackRocketBayClose() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY);
+        setPipeline(Pipeline.BAY_CLOSE);
+        targetDistance = 1.0;
+        targetHeight = 3.76;
+    }
+
+    /**
+     * Start tracking the hightest rocket bays (slightly higher up)
+     */
+    public void trackRocketBayHigh() {
+        setLightMode(LedMode.ON);
+        setCameraMode(CameraMode.VISION);
+        setPipeline(Pipeline.BAY_HIGH);
         targetDistance = 1.0;
         targetHeight = 3.76;
     }
@@ -214,7 +239,7 @@ public class LimeLight extends Subsystem {
      * Start tracking the cargo
      */
     public void trackCargo() {
-        setLightMode(LedMode.ON);
+        setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.VISION);
         setPipeline(Pipeline.CARGO);
         targetDistance = 0.5;
@@ -238,7 +263,7 @@ public class LimeLight extends Subsystem {
     public void useAsCamera() {
         setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.CAMERA);
-        setPipeline(Pipeline.BAY);
+        setPipeline(Pipeline.BAY_CLOSE);
         targetDistance = 0.0;
         targetHeight = 0.0;
     }

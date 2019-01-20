@@ -10,11 +10,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import jaci.pathfinder.Pathfinder;
-import jaci.pathfinder.Trajectory;
-import jaci.pathfinder.Waypoint;
-import jaci.pathfinder.followers.EncoderFollower;
-import jaci.pathfinder.modifiers.TankModifier;
 
 public class Drivetrain extends Subsystem {
 
@@ -32,25 +27,15 @@ public class Drivetrain extends Subsystem {
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Drive constants
-    private final double MAX_VELOCITY = 0; // ft/s
-    private final double MAX_ACCELERATION = 0; // ft/s^2
-    private final double MAX_JERK = 0; // ft/s^3
-    private final double WHEELBASE_WIDTH = 0; // ft
-    private final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
-    private final double TICKS_PER_REV = 4096; // talon units
-    private final double RAMP_RATE = 0.05; // seconds
-    private final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
-    private final double DELTA_T = 0.02; // seconds
-    private final double kP = 0.02;
-    private final double kI = 0;
-    private final double kD = 0.0;
-    private final double kV = 0;
-    private final double kA = 0;
-
-    // State fields
-    private double lastDriveError, lastTurnError, driveIntegral, turnIntegral, lastLineTurn = 0;
-    private boolean isDriveFinished, isTurnFinished, isPathFinished = true;
-    private boolean isFollowingLine = false;
+    public final double MAX_VELOCITY = 0; // ft/s
+    public final double MAX_ACCELERATION = 0; // ft/s^2
+    public final double MAX_JERK = 0; // ft/s^3
+    public final double WHEELBASE_WIDTH = 0; // ft
+    public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
+    public final double TICKS_PER_REV = 4096; // talon units
+    public final double RAMP_RATE = 0.05; // seconds
+    public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
+    public final double DELTA_T = 0.02; // seconds
 
     /** Constructs new Drivetrain object and configures devices */
     public Drivetrain() {
@@ -72,14 +57,23 @@ public class Drivetrain extends Subsystem {
         setLeftInverted(true);
 
         // Gyro
-        gyro.reset();
-
+        resetGyro();
     }
 
     /** Defines default command that will run when object is created */
     @Override
     public void initDefaultCommand() {
         setDefaultCommand(new ManualDrive());
+    }
+
+    /** Sets left motors to given percentage (-1.0 - 1.0). */
+    public void setLeft(double percent) {
+        left.set(ControlMode.PercentOutput, percent);
+    }
+
+    /** Sets right motors to given percentage (-1.0 - 1.0). */
+    public void setRight(double percent) {
+        right.set(ControlMode.PercentOutput, percent);
     }
 
     /** Inverts drivetrain. */
@@ -162,6 +156,21 @@ public class Drivetrain extends Subsystem {
         return right.getSelectedSensorVelocity() * ENCODER_TO_FEET * 10; // native talon is per 100ms
     }
 
+    /** Returns the left motor output as a percentage. */
+    public double getLeftOutput() {
+        return left.getMotorOutputPercent();
+    }
+
+        /** Returns the right motor output as a percentage. */
+    public double getRightOutput() {
+        return right.getMotorOutputPercent();
+    }
+    
+    /** Returns average motor output current. */
+    public double getMotorCurrent() {
+        return (left.getOutputCurrent() + right.getOutputCurrent()) / 2;
+    }
+
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
         return gyro.getAngle();
@@ -172,9 +181,24 @@ public class Drivetrain extends Subsystem {
         return gyro.getRate();
     }
 
-    /** Returns average motor output current. */
-    public double getMotorCurrent() {
-        return (left.getOutputCurrent() + right.getOutputCurrent()) / 2;
+    /** Resets gyro angle to 0. */
+    public void resetGyro() {
+        gyro.reset();
+    }
+
+    /** Returns whether or not left photo sensor is reflecting. */
+    public boolean getLeftLineSensor() {
+        return lineSensorLeft.get();
+    }
+
+    /** Returns whether or not left photo sensor is reflecting. */
+    public boolean getMidLineSensor() {
+        return lineSensorMid.get();
+    }
+    
+    /** Returns whether or not left photo sensor is reflecting. */
+    public boolean getRightLineSensor() {
+        return lineSensorRight.get();
     }
 
     /** Enables open and closed loop ramp rate */
@@ -234,195 +258,6 @@ public class Drivetrain extends Subsystem {
     public void tank(double leftSpeed, double rightSpeed, double throttle) {
         left.set(ControlMode.PercentOutput, leftSpeed * throttle);
         right.set(ControlMode.PercentOutput, rightSpeed * throttle);
-    }
-
-    /** Drives to distance (in feet) using PID loop. */
-    public void driveToDistance(double distance, double tolerance) {
-        isDriveFinished = false;
-        double input = (getLeftPosition() + getRightPosition()) / 2; //avg encoder distance
-        double error = distance - input;
-        driveIntegral += error * DELTA_T;
-        double driveDerivative = (error - lastDriveError) / DELTA_T;
-        double output = kP * error + kI * driveIntegral + kD * driveDerivative;
-        lastDriveError = error;
-        tank(output, output, 1.0);
-        if(error < tolerance) {
-            isDriveFinished = true;
-        }
-    }
-
-    /** Returns true when error on currently running driveToDistance is less than tolerance */
-    public boolean isDriveFinished() {
-        return isDriveFinished;
-    }
-
-    /** Resets state fields associated with driveToDistance. Should call before
-     *  and/or after running driveToDistance(). */
-    public void resetDriveToDistance() {
-        lastDriveError = 0;
-        driveIntegral = 0;
-    }
-
-    /** Turns to angle (in degrees) using PID loop. */
-    public void turnToAngle(double angle, double tolerance) {
-        isTurnFinished = false;
-        double input = gyro.getAngle();
-        double error = angle - input;
-        turnIntegral += error * DELTA_T;
-        double turnDerivative = (error - lastTurnError) / DELTA_T;
-        double output = kP * error + kI * turnIntegral * kD * turnDerivative;
-        lastTurnError = error;
-        tank(output, -output, 1.0);
-        if(error < tolerance) {
-            isTurnFinished = true;
-        }
-    }
-
-    /** Returns true when error on currently running turnToAngle is less than tolerance. */
-    public boolean isTurnFinished() {
-        return isTurnFinished;
-    }
-
-    /** Resets state fields associated with turnToAngle. Should call before
-     *  and/or after running turnToAngle(). */
-    public void resetTurnToAngle() {
-        lastTurnError = 0;
-        turnIntegral = 0;
-    }
-
-    /** Uses photosensors to detect reflective tape on ground and drive along line. */
-    public void followLine() {
-
-        // line following constants
-        final double SPEED = 0.4;
-        final double TURN_MINOR = 0.15;
-        final double TURN_MAJOR = 0.25;
-
-        // get data from photo sensors, true = reflecting
-        boolean leftSense = lineSensorLeft.get();
-        boolean midSense = lineSensorMid.get();
-        boolean rightSense = lineSensorRight.get();
-        
-        // drive forward until line is detected, then begin control loop
-        // lastLineTurn stores the direction needed to turn while reversing if line is lost
-        if(!isFollowingLine) {
-            System.out.println("Not tracking line, continuing straight.");
-            arcade(SPEED, 0, 1.0);
-            if(leftSense || rightSense || midSense) isFollowingLine = true;
-        } else {
-            if(leftSense && !midSense && !rightSense) {         // left only
-                System.out.println("Only left sensing, major turn right.");
-                arcade(SPEED, -TURN_MAJOR, 1.0);
-                lastLineTurn = -1;
-            } else if(leftSense && midSense && !rightSense) {   // left and mid
-                System.out.println("Left and mid sensing, minor turn right.");
-                arcade(SPEED, -TURN_MINOR, 1.0);
-                lastLineTurn = -1;
-            } else if(!leftSense && midSense && !rightSense) {  // mid only
-                System.out.println("Only mid sensing, continuing straight.");
-                arcade(SPEED, 0, 1.0);
-                lastLineTurn = 0;
-            } else if(!leftSense && midSense && rightSense) {   // right and mid
-                System.out.println("Right and mid sensing, minor turn left.");
-                arcade(SPEED, TURN_MINOR, 1.0);
-                lastLineTurn = 1;
-            } else if(!leftSense && !midSense && rightSense) {  // right only
-                System.out.println("Only right sensing, major turn left.");
-                arcade(SPEED, TURN_MAJOR, 1.0);
-                lastLineTurn = 1;
-            } else if(leftSense && !midSense && rightSense) {   // left and right
-                System.out.println("Left and right sensing, continuing straight.");
-                arcade(SPEED, 0, 1.0);
-                lastLineTurn = 0;
-            } else if(leftSense && midSense && rightSense) {    // all three
-                System.out.println("All three sensing, continuing straight.");
-                arcade(SPEED, 0, 1.0);
-                lastLineTurn = 0;
-            } else {
-                System.out.println("Lost track of line, driving backwards.");
-                arcade(-SPEED, lastLineTurn * TURN_MAJOR, 1.0);
-            }
-        }
-        
-    }
-
-    /** Resets state fields associated with followLine. Should call before 
-     *  and/or after running followLine(). */
-    public void resetFollowLine() {
-        isFollowingLine = false;
-    }
-
-    /** Generates path from waypoints and returns array of EncoderFollowers
-     *  for left (0) and right (1) sides of the path. */
-    public EncoderFollower[] getEncoderFollowers(Waypoint[] points) {
-
-        // create trajectory config
-        Trajectory.Config config = new Trajectory.Config(
-                Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, DELTA_T,
-                MAX_VELOCITY, MAX_ACCELERATION, MAX_JERK);
-
-        // generate trajectory + create followers
-        Trajectory trajectory = Pathfinder.generate(points, config);
-        TankModifier modifier = new TankModifier(trajectory).modify(WHEELBASE_WIDTH);
-        EncoderFollower leftFollower = new EncoderFollower(modifier.getLeftTrajectory());
-        EncoderFollower rightFollower = new EncoderFollower(modifier.getRightTrajectory());
-
-        // follower config
-        leftFollower.configureEncoder(left.getSelectedSensorPosition(0),
-                (int) TICKS_PER_REV, WHEEL_DIAMETER);
-        rightFollower.configureEncoder(right.getSelectedSensorPosition(0),
-                (int) TICKS_PER_REV, WHEEL_DIAMETER);
-        leftFollower.configurePIDVA(kP, kI, kD, kV, kA);
-        rightFollower.configurePIDVA(kP, kI, kD, kV, kA);
-
-        // return new followers
-        return new EncoderFollower[] {
-            leftFollower,   // 0
-            rightFollower   // 1
-        };
-
-    }
-
-    /** Follows path given array of EncoderFollowers (left at index 0, right at 1).
-     *  If isReversed is true, the drivetrain will be inverted. */
-    public void followPath(EncoderFollower[] followers, boolean isReversed) {
-
-        // resets state field
-        isPathFinished = false;
-
-        // invert drivetrain if needed
-        if(isReversed) {
-            setInverted(true);
-        }
-
-        // get followers from array
-        EncoderFollower leftFollower = followers[0];
-        EncoderFollower rightFollower = followers[1];
-
-        // get motor setpoints
-        double l = leftFollower.calculate(left.getSelectedSensorPosition(0));
-        double r = rightFollower.calculate(right.getSelectedSensorPosition(0));
-
-        // turn control loop (kP from 254 presentation)
-        double gyroHeading = gyro.getAngle();
-        double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
-        double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.8 * (-1.0/80.0) * angleDifference;
-
-        // use output
-        tank(l + turn, r - turn, 1.0);
-
-        // is it finished
-        if(leftFollower.isFinished() || rightFollower.isFinished()) {
-            isPathFinished = true;
-            setInverted(false);
-        }
-
-    }
-
-    /** Returns true when currently executing path is finished. */
-    public boolean isPathFinished() {
-        return isPathFinished;
     }
 
 }

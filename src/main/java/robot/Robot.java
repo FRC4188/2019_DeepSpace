@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -26,6 +27,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        SmartDashboard.putNumber("L output", drivetrain.getLeftOutput());
+        SmartDashboard.putNumber("L pos", drivetrain.getLeftPosition());
+        limelight.trackRocketBayHigh();
+        SmartDashboard.putNumber("dist to bay", limelight.getDistance2(15/12));
     }
 
     @Override

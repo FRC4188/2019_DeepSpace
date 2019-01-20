@@ -1,6 +1,7 @@
 package robot;
 
 import robot.commands.drive.*;
+import robot.commands.drive.FollowObject.Object;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -71,7 +72,9 @@ public class OI {
     /** Constructs new OI object and assigns commands. */
     public OI() {
         pilotA.whenPressed(new FollowLine());
-        pilotB.whenPressed(new FollowObject());
+        pilotB.whenPressed(new FollowObject(Object.CARGO));
+        pilotX.whenPressed(new FollowObject(Object.BAY_CLOSE));
+        pilotY.whenPressed(new FollowObject(Object.BAY_HIGH));
         pilotLS.whenPressed(new ShiftGear());
     }
 
