@@ -149,7 +149,8 @@ public class LimeLight extends Subsystem {
         double percentWidth = boxWidth / CAMERA_WIDTH;
         double boxDegree = percentWidth * CAMERA_FOV;
         double r = objectWidth / boxDegree; // feet
-        return r;
+        if(boxWidth == 0) return 0;
+        else return r;
     }
 
     /**

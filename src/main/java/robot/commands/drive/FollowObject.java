@@ -1,7 +1,6 @@
 package robot.commands.drive;
 
 import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import robot.Robot;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
@@ -19,10 +18,10 @@ public class FollowObject extends Command {
 
     Object object;
     double objectWidth;
-    double distance = 1000; // super high to make sure command doesn't terminate
-    boolean isFollowing = false;
+    double distance, initialDist, angleSetpoint = 1000; // super high to make sure command doesn't terminate
+    boolean isFollowing, leftSense, midSense, rightSense = false;
 
-    final double TURN_kP = 0.02;
+    final double TURN_kP = 0.01;
     final double DIST_kP = 0.15;
     final double ANGLE_TOLERANCE = 3.0;
     final double DIST_TOLERANCE = 0.5;
@@ -47,6 +46,7 @@ public class FollowObject extends Command {
             objectWidth = (15 / 12);
         }
 
+        // reset
         drivetrain.resetGyro();
         isFollowing = false;
 
@@ -56,26 +56,33 @@ public class FollowObject extends Command {
     protected void execute() {
 
         // ensures that loop doesn't terminate if dist defaults to 0
-        if(distance > 0) isFollowing = true; 
+        if(distance > 0 && !isFollowing) {
+            isFollowing = true;
+            initialDist = distance;
+        }
+
+        // see if any line followers have detected line
+        leftSense = drivetrain.getLeftLineSensor();
+        midSense = drivetrain.getMidLineSensor();
+        rightSense = drivetrain.getRightLineSensor();
 
         // reset gyro every loop to keep cam angle relative to bot angle
         drivetrain.resetGyro();
 
         // get angle and distance
-        double angleSetpoint = limelight.getHorizontalAngle();
-        SmartDashboard.putNumber("Angle", angleSetpoint);
-        distance = limelight.getDistance2(objectWidth) - 3.0; // stop 3 feet away
-        SmartDashboard.putNumber("Dist", distance);
+        angleSetpoint = limelight.getHorizontalAngle();
+        distance = limelight.getDistance2(objectWidth) - (15 / 12); // stop 15 in away
 
         // distance p loop
         double xSpeed = DIST_kP * distance;
         xSpeed = CSPMath.constrainKeepSign(xSpeed, 0.0, 1.0);
 
-        // angle p loop
+        // angle p loop, turns less as distance shrinks
         double angleError = angleSetpoint - drivetrain.getGyroAngle();
-        double turnOutput = TURN_kP * angleError;
-        double zTurn = (Math.abs(angleError) > ANGLE_TOLERANCE) ? 
-                CSPMath.constrainKeepSign(turnOutput, 0.25, 1.0) : 0;
+        double turnAmount = distance / initialDist;
+        double turnOutput = TURN_kP * angleError * turnAmount;
+        double zTurn = (Math.abs(angleError) > ANGLE_TOLERANCE) ?
+                CSPMath.constrainKeepSign(turnOutput, 0.12, 1.0) : 0;
 
         // command motor output
         drivetrain.arcade(xSpeed, zTurn, 1.0);
@@ -84,7 +91,11 @@ public class FollowObject extends Command {
 
     @Override
     protected boolean isFinished() {
-        return (distance < DIST_TOLERANCE) && isFollowing;
+        // end if dist and angle are within tolerance and it was following
+        // or if any line followers sens a line
+        return ((Math.abs(angleSetpoint) < ANGLE_TOLERANCE)
+                && (Math.abs(distance) < DIST_TOLERANCE) && isFollowing)
+                || (leftSense || midSense || rightSense);
     }
 
     @Override
@@ -96,4 +107,5 @@ public class FollowObject extends Command {
     protected void interrupted() {
         end();
     }
+
 }

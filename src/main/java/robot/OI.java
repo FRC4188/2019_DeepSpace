@@ -2,6 +2,7 @@ package robot;
 
 import robot.commands.drive.*;
 import robot.commands.drive.FollowObject.Object;
+import robot.commands.groups.DepositToBay;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -75,8 +76,8 @@ public class OI {
     public OI() {
         pilotA.whenPressed(new FollowLine());
         pilotB.whenPressed(new FollowObject(Object.CARGO));
-        pilotX.whenPressed(new FollowObject(Object.BAY_CLOSE));
-        pilotY.whenPressed(new FollowObject(Object.BAY_HIGH));
+        pilotX.whenPressed(new FollowObject(Object.BAY_HIGH));
+        pilotY.whenPressed(new DepositToBay());
         pilotLS.whenPressed(new ShiftGear());
     }
 
@@ -104,7 +105,7 @@ public class OI {
     /** Returns x axis of Joystick on pilot controller. */
     public double getPilotX(Hand hand) {
         if(Math.abs(pilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return scaleJoystick(pilot.getX(hand), JoystickSens.SQUARED);
+        else return scaleJoystick(pilot.getX(hand), JoystickSens.CUBED);
     }
 
     /** Returns y axis of Joystick on copilot controller. */
@@ -116,7 +117,7 @@ public class OI {
     /** Returns x axis of Joystick on copilot controller. */
     public double getCopilotX(Hand hand) {
         if(Math.abs(copilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return scaleJoystick(copilot.getX(hand), JoystickSens.SQUARED);
+        else return scaleJoystick(copilot.getX(hand), JoystickSens.CUBED);
     }
 
     /** Returns state of given button on pilot controller. */

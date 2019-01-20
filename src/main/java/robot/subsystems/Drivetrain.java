@@ -4,7 +4,7 @@ import robot.commands.drive.ManualDrive;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -14,12 +14,12 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 public class Drivetrain extends Subsystem {
 
     // Device initialization
-    private TalonSRX left = new TalonSRX(6);
-    private TalonSRX leftSlave1 = new TalonSRX(5);
-    //private TalonSRX leftSlave2 = new TalonSRX(0);
-    private TalonSRX right = new TalonSRX(7);
-    private TalonSRX rightSlave1 = new TalonSRX(8);
-    //private TalonSRX rightSlave2 = new TalonSRX(0);
+    private WPI_TalonSRX left = new WPI_TalonSRX(6);
+    private WPI_TalonSRX leftSlave1 = new WPI_TalonSRX(5);
+    //private WPI_TalonSRX leftSlave2 = new WPI_TalonSRX(0);
+    private WPI_TalonSRX right = new WPI_TalonSRX(7);
+    private WPI_TalonSRX rightSlave1 = new WPI_TalonSRX(8);
+    //private WPI_TalonSRX rightSlave2 = new WPI_TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(1);
     private DigitalInput lineSensorMid = new DigitalInput(2);
