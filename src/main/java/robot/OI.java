@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 public class OI {
 
+    // button mappings for logitech controller
     public class Controller {
         public final static int A = 1;
         public final static int B = 2;
@@ -23,6 +24,7 @@ public class OI {
         public final static double DEADBAND = 0.1;
     }
 
+    // button mappings for rocket box
     public class RocketBox {
         public final static int GROUND = 1;
         public final static int CARGO_LOW = 2;
@@ -78,28 +80,43 @@ public class OI {
         pilotLS.whenPressed(new ShiftGear());
     }
 
+    // options to scale joystick input
+    private enum JoystickSens {
+        LINEAR, // most sensitive
+        SQUARED, // sensitive
+        CUBED // least sensitive
+    }
+
+    /** Returns value scaled to proper sensitivity based on current JoystickSens. */
+    private double scaleJoystick(double val, JoystickSens sens) {
+        if(sens == JoystickSens.LINEAR) return val;
+        else if(sens == JoystickSens.SQUARED) return Math.signum(val) * val * val;
+        else if(sens == JoystickSens.SQUARED) return val * val * val;
+        else return val;
+    }
+
     /** Returns y axis of Joystick on pilot controller. */
     public double getPilotY(Hand hand) {
         if(Math.abs(pilot.getY(hand)) < Controller.DEADBAND) return 0;
-        else return -pilot.getY(hand);
+        else return scaleJoystick(-pilot.getY(hand), JoystickSens.SQUARED);
     }
 
     /** Returns x axis of Joystick on pilot controller. */
     public double getPilotX(Hand hand) {
         if(Math.abs(pilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return pilot.getX(hand);
+        else return scaleJoystick(pilot.getX(hand), JoystickSens.SQUARED);
     }
 
     /** Returns y axis of Joystick on copilot controller. */
     public double getCopilotY(Hand hand) {
         if(Math.abs(copilot.getY(hand)) < Controller.DEADBAND) return 0;
-        else return -copilot.getY(hand);
+        else return scaleJoystick(-copilot.getY(hand), JoystickSens.SQUARED);
     }
 
     /** Returns x axis of Joystick on copilot controller. */
     public double getCopilotX(Hand hand) {
         if(Math.abs(copilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return copilot.getX(hand);
+        else return scaleJoystick(copilot.getX(hand), JoystickSens.SQUARED);
     }
 
     /** Returns state of given button on pilot controller. */
