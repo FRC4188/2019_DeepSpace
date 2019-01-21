@@ -71,7 +71,7 @@ public class FollowObject extends Command {
 
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle();
-        distance = limelight.getDistance2(objectWidth) - (15 / 12); // stop 15 in away
+        distance = limelight.getDistance(objectWidth) - (15 / 12); // stop 15 in away
 
         // distance p loop
         double xSpeed = DIST_kP * distance;
@@ -82,7 +82,7 @@ public class FollowObject extends Command {
         double turnAmount = distance / initialDist;
         double turnOutput = TURN_kP * angleError * turnAmount;
         double zTurn = (Math.abs(angleError) > ANGLE_TOLERANCE) ?
-                CSPMath.constrainKeepSign(turnOutput, 0.12, 1.0) : 0;
+                CSPMath.constrainKeepSign(turnOutput, 0.15, 1.0) : 0;
 
         // command motor output
         drivetrain.arcade(xSpeed, zTurn, 1.0);

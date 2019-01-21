@@ -48,19 +48,10 @@ public class ControlledVision extends Command {
             trackingBay = false;
         }
 
-        double distance = limelight.getDistance();
+        double distance = limelight.getDistance(limelight.getPipeline().getWidth());
         double relangle = limelight.getHorizontalAngle();
-        double robotangle = limelight.getRobotAngle();
         table.getEntry("distance").setDouble(distance);
         table.getEntry("relangle").setDouble(relangle);
-        table.getEntry("robotangle").setDouble(robotangle);
-        if(trackingBay){
-            double horzdiff = distance * Math.sin(robotangle + relangle);
-            double vertdiff = distance * Math.cos(robotangle + relangle) - 15.0/12;
-            table.getEntry("horzdiff").setDouble(horzdiff);
-            table.getEntry("vertdiff").setDouble(vertdiff);
-            table.getEntry("turnangle").setDouble(limelight.getTurnAngleToBay());
-        }
     }
 
     // Make this return true when this Command no longer needs to run execute()

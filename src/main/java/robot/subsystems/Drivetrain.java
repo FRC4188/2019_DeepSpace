@@ -21,6 +21,7 @@ public class Drivetrain extends Subsystem {
     private WPI_TalonSRX rightSlave1 = new WPI_TalonSRX(8);
     //private WPI_TalonSRX rightSlave2 = new WPI_TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+    // YELLOW WIRE UP
     private DigitalInput lineSensorLeft = new DigitalInput(1);
     private DigitalInput lineSensorMid = new DigitalInput(2);
     private DigitalInput lineSensorRight = new DigitalInput(3);

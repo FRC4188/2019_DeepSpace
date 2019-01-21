@@ -27,6 +27,10 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        limelight.trackRocketBayClose();
+        SmartDashboard.putNumber("limelightAngle", limelight.getHorizontalAngle());
+        SmartDashboard.putNumber("limelightDistance", limelight.getDistance(limelight.getPipeline().getWidth()));
+        SmartDashboard.putNumber("limelightCorrection", limelight.getCorrectionAngle());
     }
 
     @Override
