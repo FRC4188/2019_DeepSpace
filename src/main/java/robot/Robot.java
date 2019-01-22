@@ -28,13 +28,19 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         limelight.trackRocketBayClose();
+        SmartDashboard.putNumber("Gyro", drivetrain.getGyroAngle());
         SmartDashboard.putNumber("limelightAngle", limelight.getHorizontalAngle());
         SmartDashboard.putNumber("limelightDistance", limelight.getDistance(limelight.getPipeline().getWidth()));
         SmartDashboard.putNumber("limelightCorrection", limelight.getCorrectionAngle());
+        drivetrain.trackFieldPosition();
+        SmartDashboard.putNumber("Field pos x", drivetrain.getFieldPosX());
+        SmartDashboard.putNumber("Field pos y", drivetrain.getFieldPosY());
     }
 
     @Override
     public void disabledInit() {
+        drivetrain.resetEncoders();
+        drivetrain.resetGyro();
     }
 
     @Override
@@ -60,7 +66,6 @@ public class Robot extends TimedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
-        drivetrain.resetEncoders();
     }
 
     @Override

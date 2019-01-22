@@ -9,9 +9,9 @@ public class FollowLine extends Command {
 
     Drivetrain drivetrain = Robot.drivetrain;
 
-    final double SPEED = 0.4;
-    final double TURN_MINOR = 0.15;
-    final double TURN_MAJOR = 0.25;
+    final double SPEED = 0.25;
+    final double TURN_MINOR = 0.1;
+    final double TURN_MAJOR = 0.2;
     boolean isFollowingLine;
     double lastLineTurn;
 

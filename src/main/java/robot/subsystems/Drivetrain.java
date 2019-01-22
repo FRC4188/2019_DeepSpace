@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import jaci.pathfinder.Pathfinder;
 
 public class Drivetrain extends Subsystem {
 
@@ -21,8 +22,7 @@ public class Drivetrain extends Subsystem {
     private WPI_TalonSRX rightSlave1 = new WPI_TalonSRX(8);
     //private WPI_TalonSRX rightSlave2 = new WPI_TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
-    // YELLOW WIRE UP
-    private DigitalInput lineSensorLeft = new DigitalInput(1);
+    private DigitalInput lineSensorLeft = new DigitalInput(1); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(2);
     private DigitalInput lineSensorRight = new DigitalInput(3);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
@@ -37,6 +37,9 @@ public class Drivetrain extends Subsystem {
     public final double RAMP_RATE = 0.05; // seconds
     public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
     public final double DELTA_T = 0.02; // seconds
+
+    // State vars
+    private double fieldPosX, fieldPosY = 0;
 
     /** Constructs new Drivetrain object and configures devices */
     public Drivetrain() {
@@ -158,6 +161,11 @@ public class Drivetrain extends Subsystem {
         return right.getSelectedSensorVelocity() * ENCODER_TO_FEET * 10; // native talon is per 100ms
     }
 
+    /** Returns average robot velocity in feet per second. */
+    public double getVelocity() {
+        return (getLeftVelocity() + getRightVelocity()) / 2;
+    }
+
     /** Returns the left motor output as a percentage. */
     public double getLeftOutput() {
         return left.getMotorOutputPercent();
@@ -167,7 +175,7 @@ public class Drivetrain extends Subsystem {
     public double getRightOutput() {
         return right.getMotorOutputPercent();
     }
-    
+
     /** Returns average motor output current. */
     public double getMotorCurrent() {
         return (left.getOutputCurrent() + right.getOutputCurrent()) / 2;
@@ -175,7 +183,7 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return gyro.getAngle();
+        return Pathfinder.boundHalfDegrees(gyro.getAngle());
     }
 
     /** Returns gyro rate in degrees per sec. */
@@ -183,7 +191,7 @@ public class Drivetrain extends Subsystem {
         return gyro.getRate();
     }
 
-    /** Resets gyro angle to 0. */
+    /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
         gyro.reset();
     }
@@ -201,10 +209,26 @@ public class Drivetrain extends Subsystem {
     public boolean getMidLineSensor() {
         return lineSensorMid.get();
     }
-    
+
     /** Returns whether or not left photo sensor is reflecting. */
     public boolean getRightLineSensor() {
         return lineSensorRight.get();
+    }
+
+    /** Tracks robot position on field. To be called in robotPeriodic(). */
+    public void trackFieldPosition() {
+        fieldPosX += getVelocity() * Math.cos(getGyroAngle()) * DELTA_T;
+        fieldPosY += getVelocity() * Math.sin(getGyroAngle()) * DELTA_T;
+    }
+
+    /** Returns estimate of robot's x location relative to starting point in feet. */
+    public double getFieldPosX() {
+        return fieldPosX;
+    }
+
+    /** Returns estimate of robot's y location relative to starting point in feet. */
+    public double getFieldPosY() {
+        return fieldPosY;
     }
 
     /** Enables open and closed loop ramp rate */
@@ -256,7 +280,7 @@ public class Drivetrain extends Subsystem {
         // command motor output
         left.set(ControlMode.PercentOutput, leftInput * throttle);
         right.set(ControlMode.PercentOutput, rightInput * throttle);
-            
+
     }
 
     /** Controls drivetrain with tank model, individually moving left and

@@ -16,10 +16,10 @@ public class FollowObject extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
 
-    Object object;
-    double objectWidth;
-    double distance, initialDist, angleSetpoint = 1000; // super high to make sure command doesn't terminate
+    // super high to make sure command doesn't terminate
+    double distance, initialDist, distErr, angleSetpoint = 1000;
     boolean isFollowing, leftSense, midSense, rightSense = false;
+    Object object;
 
     final double TURN_kP = 0.01;
     final double DIST_kP = 0.15;
@@ -37,17 +37,13 @@ public class FollowObject extends Command {
 
         if(object == Object.CARGO) {
             limelight.trackCargo();
-            objectWidth = (13 / 12);
         } else if(object == Object.BAY_CLOSE) {
             limelight.trackRocketBayClose();
-            objectWidth = (15 / 12);
         } else if(object == Object.BAY_HIGH) {
             limelight.trackRocketBayHigh();
-            objectWidth = (15 / 12);
         }
 
         // reset
-        drivetrain.resetGyro();
         isFollowing = false;
 
     }
@@ -66,33 +62,34 @@ public class FollowObject extends Command {
         midSense = drivetrain.getMidLineSensor();
         rightSense = drivetrain.getRightLineSensor();
 
-        // reset gyro every loop to keep cam angle relative to bot angle
-        drivetrain.resetGyro();
-
         // get angle and distance
-        angleSetpoint = limelight.getHorizontalAngle();
-        distance = limelight.getDistance(objectWidth) - (15 / 12); // stop 15 in away
+        angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
+        distance = limelight.getDistance(limelight.getPipeline().getWidth());
+        distErr = distance - 2; // stop 2 ft away
 
         // distance p loop
-        double xSpeed = DIST_kP * distance;
+        double xSpeed = DIST_kP * distErr;
         xSpeed = CSPMath.constrainKeepSign(xSpeed, 0.0, 1.0);
 
         // angle p loop, turns less as distance shrinks
         double angleError = angleSetpoint - drivetrain.getGyroAngle();
-        double turnAmount = distance / initialDist;
-        double turnOutput = TURN_kP * angleError * turnAmount;
+        double distReducer = distance / initialDist;
+        double turnOutput = TURN_kP * angleError * distReducer;
         double zTurn = (Math.abs(angleError) > ANGLE_TOLERANCE) ?
                 CSPMath.constrainKeepSign(turnOutput, 0.15, 1.0) : 0;
 
         // command motor output
         drivetrain.arcade(xSpeed, zTurn, 1.0);
-        
+
+        if(!(Math.abs(angleSetpoint) < ANGLE_TOLERANCE)) System.out.println("turning" + turnOutput);
+        if(!(Math.abs(distance) < DIST_TOLERANCE)) System.out.println("driving");
+
     }
 
     @Override
     protected boolean isFinished() {
         // end if dist and angle are within tolerance and it was following
-        // or if any line followers sens a line
+        // or if any line followers sense a line or if no valid targets found
         return ((Math.abs(angleSetpoint) < ANGLE_TOLERANCE)
                 && (Math.abs(distance) < DIST_TOLERANCE) && isFollowing)
                 || (leftSense || midSense || rightSense);

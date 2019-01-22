@@ -84,15 +84,17 @@ public class OI {
     // options to scale joystick input
     private enum JoystickSens {
         LINEAR, // most sensitive
-        SQUARED, // sensitive
-        CUBED // least sensitive
+        SQUARED,
+        CUBED,
+        TESSERACTED // least sensitive
     }
 
     /** Returns value scaled to proper sensitivity based on current JoystickSens. */
     private double scaleJoystick(double val, JoystickSens sens) {
         if(sens == JoystickSens.LINEAR) return val;
-        else if(sens == JoystickSens.SQUARED) return Math.signum(val) * val * val;
-        else if(sens == JoystickSens.SQUARED) return val * val * val;
+        else if(sens == JoystickSens.SQUARED) return Math.signum(val) * Math.pow(val, 2);
+        else if(sens == JoystickSens.CUBED) return Math.pow(val, 3);
+        else if(sens == JoystickSens.TESSERACTED) return Math.signum(val) * Math.pow(val, 4);
         else return val;
     }
 
@@ -105,7 +107,7 @@ public class OI {
     /** Returns x axis of Joystick on pilot controller. */
     public double getPilotX(Hand hand) {
         if(Math.abs(pilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return scaleJoystick(pilot.getX(hand), JoystickSens.CUBED);
+        else return scaleJoystick(pilot.getX(hand), JoystickSens.TESSERACTED);
     }
 
     /** Returns y axis of Joystick on copilot controller. */
@@ -117,7 +119,7 @@ public class OI {
     /** Returns x axis of Joystick on copilot controller. */
     public double getCopilotX(Hand hand) {
         if(Math.abs(copilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return scaleJoystick(copilot.getX(hand), JoystickSens.CUBED);
+        else return scaleJoystick(copilot.getX(hand), JoystickSens.TESSERACTED);
     }
 
     /** Returns state of given button on pilot controller. */

@@ -2,7 +2,7 @@ package robot.subsystems;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 import robot.Robot;
 import robot.commands.vision.LimeLightUseAsCamera;
@@ -47,7 +47,8 @@ public class LimeLight extends Subsystem {
 
     // pipeline enum 
     public enum Pipeline {
-        OFF(0, 0.0), CARGO(1, 13.0/12), HATCH(2, 19.0/12), BAY_CLOSE(3, 15.0/12), BAY_HIGH(4, 15.0/12);
+        OFF(0, 0.0), CARGO(1, 13.0/12), HATCH(2, 19.0/12),
+                BAY_CLOSE(3, 15.0/12), BAY_HIGH(4, 15.0/12);
 
         private final int value;
         private final double width;
@@ -151,7 +152,8 @@ public class LimeLight extends Subsystem {
     }
 
     /**
-     * 
+     * Returns a guesstimate angle to try and square up on bay by comparing size
+     * of left and right contours.
      */
     public double getCorrectionAngle() {
         // ensure we are tracking bays
@@ -160,18 +162,19 @@ public class LimeLight extends Subsystem {
         double leftArea, rightArea;
         if(limelightTable.getEntry("tx0").getDouble(0.0) < limelightTable.getEntry("tx1").getDouble(0.0)) {
             // 0 is left, 1 is right
-            leftArea = limelightTable.getEntry("ta0").getDouble(0.0);
-            rightArea = limelightTable.getEntry("ta1").getDouble(0.0);
+            leftArea = limelightTable.getEntry("tvert0").getDouble(0.0);
+            rightArea = limelightTable.getEntry("tvert1").getDouble(0.0);
         } else {
             // 1 is left, 0 is right
-            leftArea = limelightTable.getEntry("ta1").getDouble(0.0);
-            rightArea = limelightTable.getEntry("ta0").getDouble(0.0);
+            leftArea = limelightTable.getEntry("tvert1").getDouble(0.0);
+            rightArea = limelightTable.getEntry("tvert0").getDouble(0.0);
         }
         final double threshold = Math.log10(1.1);
         double areaRatio = leftArea / rightArea;
+        SmartDashboard.putNumber("ratio", areaRatio);
         double logRatio = Math.log10(areaRatio); // positive : turn right
         if(Math.abs(logRatio) < threshold) return 0; // camera is centered enough to not need correction
-        return logRatio * 100; // guess
+        return logRatio * 200; // guess to get angle from ratio
     }
     
     /**
