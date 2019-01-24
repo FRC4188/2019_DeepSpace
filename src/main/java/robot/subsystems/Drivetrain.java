@@ -141,6 +141,11 @@ public class Drivetrain extends Subsystem {
         return right.getSelectedSensorPosition() * ENCODER_TO_FEET;
     }
 
+    /** Returns encoder position in feet as average of left and right encoders. */
+    public double getPosition() {
+        return (getLeftPosition() + getRightPosition()) / 2;
+    }
+
     /** Returns left encoder position in native talon units */
     public double getRawLeftPosition() {
         return left.getSelectedSensorPosition();

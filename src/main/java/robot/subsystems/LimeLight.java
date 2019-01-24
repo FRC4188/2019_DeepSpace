@@ -176,6 +176,43 @@ public class LimeLight extends Subsystem {
         if(Math.abs(logRatio) < threshold) return 0; // camera is centered enough to not need correction
         return logRatio * 200; // guess to get angle from ratio
     }
+
+    /** Returns necessary distances and turns to get from current location to
+     * line perpendicular to vision target, perpLength away. Returns a double array
+     * with the angle needed to turn to drive on line to point [0], the distance to 
+     * drive to the point [1], and the angle to turn to face perpendicular to target
+     * once distance has been driven [2]. Returned in units of feet and degrees. */
+    public double[] solvePerpendicular(double perpLength) {
+
+        // get known side lengths and angles (feet and degrees)
+        double robotAngle = Robot.drivetrain.getGyroAngle();
+        double limelightAngle = getHorizontalAngle();
+        double distToTarget = getDistance(getPipeline().getWidth());
+
+        // angle between line from camera to target and perpendicular line in degrees
+        // found using parallel lines
+        double camToPerpAngle = robotAngle - limelightAngle;
+
+        // solve for distance to point perpendicular to target, perpLength away
+        // uses law of cosines
+        double distToPerp = Math.sqrt(Math.pow(perpLength, 2) + Math.pow(distToTarget, 2)
+                - 2 * perpLength * distToTarget * Math.cos(camToPerpAngle));
+
+        // solve for angle to turn to drive on straight line to point perpendicular to target
+        // uses law of sines, returns in degrees
+        double botToDistAngle = Math.asin((perpLength * Math.sin(camToPerpAngle)) / distToPerp);
+
+        // solve for angle between distToPerp line and perpendicular line using the formed triangle
+        double distToPerpAngle = 180 - botToDistAngle - camToPerpAngle;
+
+        // return values as array
+        return (new double[]{
+            botToDistAngle, // 0
+            distToPerp,     // 1
+            distToPerpAngle // 2
+        });
+
+    }
     
     /**
      * Returns the pipeline the camera is running
