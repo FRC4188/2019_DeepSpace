@@ -1,5 +1,6 @@
 package robot;
 
+import robot.commands.KillAll;
 import robot.commands.drive.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -72,6 +73,8 @@ public class OI {
     public OI() {
         pilotA.whenPressed(new FollowLine());
         pilotLS.whenPressed(new ShiftGear());
+        pilotBack.whenPressed(new KillAll());
+        copilotBack.whenPressed(new KillAll());
     }
 
     /** Returns y axis of Joystick on pilot controller. */
