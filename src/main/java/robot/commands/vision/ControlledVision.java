@@ -48,7 +48,7 @@ public class ControlledVision extends Command {
             trackingBay = false;
         }
 
-        double distance = limelight.getDistance(limelight.getPipeline().getWidth());
+        double distance = limelight.getDistance(limelight.getPipeline().getHeight());
         double relangle = limelight.getHorizontalAngle();
         table.getEntry("distance").setDouble(distance);
         table.getEntry("relangle").setDouble(relangle);

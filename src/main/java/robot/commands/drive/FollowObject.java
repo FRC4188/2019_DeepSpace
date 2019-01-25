@@ -64,7 +64,7 @@ public class FollowObject extends Command {
 
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
-        distance = limelight.getDistance(limelight.getPipeline().getWidth());
+        distance = limelight.getDistance(limelight.getPipeline().getHeight());
         distErr = distance - 2; // stop 2 ft away
 
         // distance p loop

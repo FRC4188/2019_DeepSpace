@@ -14,7 +14,7 @@ public class LimeLight extends Subsystem {
     NetworkTable limelightTable = null;
 
     // distance for target
-    private final double TAPE_WIDTH = 3.25;
+    private final double TAPE_HEIGHT = 6.0/12;
 
     // current pipeline
     private Pipeline currentPipeline = Pipeline.OFF;
@@ -48,22 +48,22 @@ public class LimeLight extends Subsystem {
     // pipeline enum 
     public enum Pipeline {
         OFF(0, 0.0), CARGO(1, 13.0/12), HATCH(2, 19.0/12),
-                BAY_CLOSE(3, 15.0/12), BAY_HIGH(4, 15.0/12);
+                BAY_CLOSE(3, 6.0/12), BAY_HIGH(4, 6.0/12);
 
         private final int value;
-        private final double width;
+        private final double height;
 
-        Pipeline(int value, double width) {
+        Pipeline(int value, double height) {
             this.value = value;
-            this.width = width;
+            this.height = height;
         }
 
         public int getValue() {
             return this.value;
         }
 
-        public double getWidth() {
-            return this.width;
+        public double getHeight() {
+            return this.height;
         }
     }
 
@@ -125,56 +125,30 @@ public class LimeLight extends Subsystem {
         return limelightTable.getEntry("ty").getDouble(0.0);
     }
 
-    /** Returns distance in feet from object of width s (feet). 
+    /** Returns distance in feet from object of height s (feet). 
      *  Uses s = r(theta). */
-    public double getDistance(double objectWidth) {
-        final double CAMERA_WIDTH = 320; // pixels
-        final double CAMERA_FOV = Math.toRadians(54); // rads
-        double boxWidth = limelightTable.getEntry("thor").getDouble(0.0); // pixels
-        if(boxWidth == 0) return 0;
-        double percentWidth = boxWidth / CAMERA_WIDTH;
-        double boxDegree = percentWidth * CAMERA_FOV;
-        double r = objectWidth / boxDegree; // feet
-        return r;
+    public double getDistance(double objectHeight) {
+        final double CAMERA_HEIGHT = 240; // pixels
+        final double CAMERA_FOV = Math.toRadians(41); // rads
+        double boxHeight = limelightTable.getEntry("tvert").getDouble(0.0); // pixels
+        if(boxHeight == 0) return 0;
+        double percentHeight = boxHeight / CAMERA_HEIGHT;
+        double boxDegree = percentHeight * CAMERA_FOV;
+        double r = objectHeight / boxDegree; // feet
+        return r * 0.95; // fudge boy
     }
 
     /**
      * Returns distance in feet from object of width given
      */
-    public double getDistance(double objectWidth, double boxWidth) {
-        if(boxWidth == 0) return 0;
-        final double CAMERA_WIDTH = 320; // pixels
-        final double CAMERA_FOX = Math.toRadians(54); // rads
-        double percentWidth = boxWidth / CAMERA_WIDTH;
-        double boxDegree = percentWidth * CAMERA_FOX;
-        double r = objectWidth / boxDegree;
-        return r;
-    }
-
-    /**
-     * Returns a guesstimate angle to try and square up on bay by comparing size
-     * of left and right contours.
-     */
-    public double getCorrectionAngle() {
-        // ensure we are tracking bays
-        if(!(currentPipeline == Pipeline.BAY_CLOSE || currentPipeline == Pipeline.BAY_HIGH)) return 0;
-        // get angles to raw contours (rough guess)
-        double leftArea, rightArea;
-        if(limelightTable.getEntry("tx0").getDouble(0.0) < limelightTable.getEntry("tx1").getDouble(0.0)) {
-            // 0 is left, 1 is right
-            leftArea = limelightTable.getEntry("tvert0").getDouble(0.0);
-            rightArea = limelightTable.getEntry("tvert1").getDouble(0.0);
-        } else {
-            // 1 is left, 0 is right
-            leftArea = limelightTable.getEntry("tvert1").getDouble(0.0);
-            rightArea = limelightTable.getEntry("tvert0").getDouble(0.0);
-        }
-        final double threshold = Math.log10(1.1);
-        double areaRatio = leftArea / rightArea;
-        SmartDashboard.putNumber("ratio", areaRatio);
-        double logRatio = Math.log10(areaRatio); // positive : turn right
-        if(Math.abs(logRatio) < threshold) return 0; // camera is centered enough to not need correction
-        return logRatio * 200; // guess to get angle from ratio
+    public double getDistance(double objectHeight, double boxHeight) {
+        if(boxHeight == 0) return 0;
+        final double CAMERA_HEIGHT = 240; // pixels
+        final double CAMERA_FOV = Math.toRadians(41); // rads
+        double percentHeight = boxHeight / CAMERA_HEIGHT;
+        double boxDegree = percentHeight * CAMERA_FOV;
+        double r = objectHeight / boxDegree; // feet
+        return r * 0.95; // fudge lad
     }
 
     /** Returns necessary distances and turns to get from current location to
@@ -187,7 +161,7 @@ public class LimeLight extends Subsystem {
         // get known side lengths and angles (feet and degrees)
         double robotAngle = Robot.drivetrain.getGyroAngle();
         double limelightAngle = getHorizontalAngle();
-        double distToTarget = getDistance(getPipeline().getWidth());
+        double distToTarget = getDistance(getPipeline().getHeight());
 
         // angle between line from camera to target and perpendicular line in degrees
         // found using parallel lines
