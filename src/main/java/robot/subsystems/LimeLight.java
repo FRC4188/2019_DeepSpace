@@ -15,6 +15,8 @@ public class LimeLight extends Subsystem {
 
     // distance for target
     private final double TAPE_HEIGHT = 6.0/12;
+    private final double HORIZONTAL_SCALE = Math.tan(Math.toRadians(27));
+    private final double VERTICAL_SCALE = Math.tan(Math.toRadians(20.5));
 
     // current pipeline
     private Pipeline currentPipeline = Pipeline.OFF;
@@ -151,41 +153,59 @@ public class LimeLight extends Subsystem {
         return r * 0.95; // fudge lad
     }
 
+    /**
+     * Returns the robot angle relative to the wall.
+     */
+    public double getRobotAngle(){
+        // ensure we are tracking a bay
+        if(!(currentPipeline == Pipeline.BAY_CLOSE || currentPipeline == Pipeline.BAY_HIGH)) return 0;
+        //double horAngle0 = Math.toRadians(limelightTable.getEntry("tx0").getDouble(0.0) * 27); // rad
+        //double horAngle1 = Math.toRadians(limelightTable.getEntry("tx1").getDouble(0.0) * 27); // rad
+        double horAngle0 = Math.toRadians(Math.atan(HORIZONTAL_SCALE * limelightTable.getEntry("tx0").getDouble(0.0)));
+        double horAngle1 = Math.toRadians(Math.atan(HORIZONTAL_SCALE * limelightTable.getEntry("tx1").getDouble(0.0)));
+        double tvert0 = limelightTable.getEntry("tvert0").getDouble(0.0); // ft
+        double tvert1 = limelightTable.getEntry("tvert1").getDouble(0.0); // ft
+        // get the distance and the horizontal angle of the two raw contours
+        double leftAngle, rightAngle; // rad
+        double leftDistance, rightDistance; // ft
+        if(horAngle0 < horAngle1){
+            // 0 is left, 1 is right
+            leftAngle = horAngle0;
+            rightAngle = horAngle1;
+            leftDistance = getDistance(TAPE_HEIGHT, tvert0);
+            rightDistance = getDistance(TAPE_HEIGHT, tvert1);
+        } else {
+            // 1 is left, 0 is right
+            leftAngle = horAngle1;
+            rightAngle = horAngle0;
+            leftDistance = getDistance(TAPE_HEIGHT, tvert1);
+            rightDistance = getDistance(TAPE_HEIGHT, tvert0);
+        }
+        // calculate the distance between the tape strips, and find the angle
+        double horzDiff = rightDistance * Math.sin(rightAngle) - leftDistance * Math.sin(leftAngle);
+        double vertDiff = rightDistance * Math.cos(rightAngle) - leftDistance * Math.cos(leftAngle);
+        return Math.toDegrees(Math.atan2(vertDiff, horzDiff));
+    }
+
     /** Returns necessary distances and turns to get from current location to
      * line perpendicular to vision target, perpLength away. Returns a double array
      * with the angle needed to turn to drive on line to point [0], the distance to 
      * drive to the point [1], and the angle to turn to face perpendicular to target
      * once distance has been driven [2]. Returned in units of feet and degrees. */
     public double[] solvePerpendicular(double perpLength) {
-
-        // get known side lengths and angles (feet and degrees)
-        double robotAngle = Robot.drivetrain.getGyroAngle();
-        double limelightAngle = getHorizontalAngle();
-        double distToTarget = getDistance(getPipeline().getHeight());
-
-        // angle between line from camera to target and perpendicular line in degrees
-        // found using parallel lines
-        double camToPerpAngle = robotAngle - limelightAngle;
-
-        // solve for distance to point perpendicular to target, perpLength away
-        // uses law of cosines
-        double distToPerp = Math.sqrt(Math.pow(perpLength, 2) + Math.pow(distToTarget, 2)
-                - 2 * perpLength * distToTarget * Math.cos(camToPerpAngle));
-
-        // solve for angle to turn to drive on straight line to point perpendicular to target
-        // uses law of sines, returns in degrees
-        double botToDistAngle = Math.asin((perpLength * Math.sin(camToPerpAngle)) / distToPerp);
-
-        // solve for angle between distToPerp line and perpendicular line using the formed triangle
-        double distToPerpAngle = 180 - botToDistAngle - camToPerpAngle;
-
-        // return values as array
-        return (new double[]{
-            botToDistAngle, // 0
-            distToPerp,     // 1
-            distToPerpAngle // 2
-        });
-
+        // ensure we are tracking a bay
+        if(!(currentPipeline == Pipeline.BAY_CLOSE || currentPipeline == Pipeline.BAY_HIGH)) return new double[]{0.0, 0.0, 0.0};
+        // get data
+        double distance = getDistance(currentPipeline.getHeight());
+        double relativeAngle = getHorizontalAngle();
+        double robotAngle = getRobotAngle();
+        // calculate the distances to the destination
+        double horzDiff = distance * Math.sin(Math.toRadians(relativeAngle + robotAngle)); // feet
+        double vertDiff = distance * Math.cos(Math.toRadians(relativeAngle + robotAngle)) - perpLength; // feet
+        double turnAngle = Math.toDegrees(Math.atan2(horzDiff , vertDiff)) - robotAngle;
+        double newDistance = Math.sqrt(horzDiff * horzDiff + vertDiff * vertDiff);
+        double secondTurnAngle = -Math.toDegrees(Math.atan2(vertDiff, horzDiff));
+        return new double[]{turnAngle, newDistance, secondTurnAngle};
     }
     
     /**

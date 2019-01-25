@@ -31,6 +31,7 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("Gyro", drivetrain.getGyroAngle());
         SmartDashboard.putNumber("limelightAngle", limelight.getHorizontalAngle());
         SmartDashboard.putNumber("limelightDistance", limelight.getDistance(limelight.getPipeline().getHeight()));
+        SmartDashboard.putNumber("limelightRobotAngle", limelight.getRobotAngle());
         drivetrain.trackFieldPosition();
         SmartDashboard.putNumber("Field pos x", drivetrain.getFieldPosX());
         SmartDashboard.putNumber("Field pos y", drivetrain.getFieldPosY());
