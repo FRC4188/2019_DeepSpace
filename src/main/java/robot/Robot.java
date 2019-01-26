@@ -1,15 +1,12 @@
 package robot;
 
 import robot.OI;
-import robot.OI.Controller;
-import robot.commands.groups.DepositToBay;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -29,11 +26,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        limelight.trackRocketBayClose();
-        SmartDashboard.putNumber("Gyro", drivetrain.getGyroAngle());
-        SmartDashboard.putNumber("pos", drivetrain.getPosition());
-        SmartDashboard.putNumber("limelightAngle", limelight.getHorizontalAngle());
-        SmartDashboard.putNumber("limelightDistance", limelight.getDistance(limelight.getPipeline().getHeight()));
     }
 
     @Override
@@ -70,7 +62,6 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
-        if(oi.getPilotButton(Controller.Y)) new DepositToBay().start();
     }
 
     @Override

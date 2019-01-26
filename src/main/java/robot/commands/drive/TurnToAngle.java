@@ -29,11 +29,8 @@ public class TurnToAngle extends Command {
 
     @Override
     protected void initialize() {
-
-        // reset fields
         lastError = 0;
         integral = 0;
-
         if(type == Angle.RELATIVE) angle += drivetrain.getGyroAngle();
     }
 
