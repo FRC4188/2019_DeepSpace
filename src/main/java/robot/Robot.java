@@ -29,7 +29,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        limelight.trackRocketBayHigh();
+        limelight.trackRocketBayClose();
         SmartDashboard.putNumber("Gyro", drivetrain.getGyroAngle());
         SmartDashboard.putNumber("pos", drivetrain.getPosition());
         SmartDashboard.putNumber("limelightAngle", limelight.getHorizontalAngle());

@@ -65,7 +65,7 @@ public class FollowObject extends Command {
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
         distance = limelight.getDistance(limelight.getPipeline().getHeight());
-        distErr = distance - 2; // stop 2 ft away
+        distErr = distance - (15 / 12); // stop 2 ft away
 
         // distance p loop
         double xSpeed = DIST_kP * distErr;
@@ -81,8 +81,8 @@ public class FollowObject extends Command {
         // command motor output
         drivetrain.arcade(xSpeed, zTurn, 1.0);
 
-        if(!(Math.abs(angleSetpoint) < ANGLE_TOLERANCE)) System.out.println("turning" + turnOutput);
-        if(!(Math.abs(distance) < DIST_TOLERANCE)) System.out.println("driving");
+        if(!(Math.abs(angleError) < ANGLE_TOLERANCE)) System.out.println("turning" + angleError);
+        if(!(Math.abs(distErr) < DIST_TOLERANCE)) System.out.println("driving");
 
     }
 
@@ -91,7 +91,7 @@ public class FollowObject extends Command {
         // end if dist and angle are within tolerance and it was following
         // or if any line followers sense a line or if no valid targets found
         return ((Math.abs(angleSetpoint) < ANGLE_TOLERANCE)
-                && (Math.abs(distance) < DIST_TOLERANCE) && isFollowing)
+                && (Math.abs(distErr) < DIST_TOLERANCE) && isFollowing)
                 || (leftSense || midSense || rightSense);
     }
 

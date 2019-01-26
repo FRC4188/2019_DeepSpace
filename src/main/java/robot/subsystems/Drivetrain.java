@@ -63,7 +63,7 @@ public class Drivetrain extends Subsystem {
         // Gyro
         resetGyro();
         calibrateGyro();
-        
+
     }
 
     /** Defines default command that will run when object is created */
