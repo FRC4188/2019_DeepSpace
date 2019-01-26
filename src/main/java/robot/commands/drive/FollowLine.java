@@ -2,44 +2,88 @@ package robot.commands.drive;
 
 import robot.Robot;
 import robot.subsystems.Drivetrain;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Follows line of reflective tape using photo sensors
- *  until robot hits wall. */
+/** Follows line of reflective tape using photo sensors. */
 public class FollowLine extends Command {
 
-    Timer timer = new Timer();
     Drivetrain drivetrain = Robot.drivetrain;
+
+    final double SPEED = 0.25;
+    final double TURN_MINOR = 0.1;
+    final double TURN_MAJOR = 0.2;
+    boolean isFollowingLine;
+    double lastLineTurn;
 
     public FollowLine() {
         requires(Robot.drivetrain);
-        setTimeout(10);
     }
 
     @Override
     protected void initialize() {
-        Robot.drivetrain.resetFollowLine();
-        timer.start();
+        isFollowingLine = false;
+        lastLineTurn = 0;
     }
 
     @Override
     protected void execute() {
-        Robot.drivetrain.followLine();
+
+        // get data from photo sensors, true = reflecting
+        boolean leftSense = drivetrain.getLeftLineSensor();
+        boolean midSense = drivetrain.getMidLineSensor();
+        boolean rightSense = drivetrain.getRightLineSensor();
+
+        // drive forward until line is detected, then begin control loop
+        // lastLineTurn stores the direction needed to turn while reversing if line is lost
+        if(!isFollowingLine) {
+            System.out.println("Not tracking line, continuing straight.");
+            drivetrain.arcade(SPEED, 0, 1.0);
+            if(leftSense || rightSense || midSense) isFollowingLine = true;
+        } else {
+            if(leftSense && !midSense && !rightSense) {         // left only
+                System.out.println("Only left sensing, major turn right.");
+                drivetrain.arcade(SPEED, -TURN_MAJOR, 1.0);
+                lastLineTurn = -1;
+            } else if(leftSense && midSense && !rightSense) {   // left and mid
+                System.out.println("Left and mid sensing, minor turn right.");
+                drivetrain.arcade(SPEED, -TURN_MINOR, 1.0);
+                lastLineTurn = -1;
+            } else if(!leftSense && midSense && !rightSense) {  // mid only
+                System.out.println("Only mid sensing, continuing straight.");
+                drivetrain.arcade(SPEED, 0, 1.0);
+                lastLineTurn = 0;
+            } else if(!leftSense && midSense && rightSense) {   // right and mid
+                System.out.println("Right and mid sensing, minor turn left.");
+                drivetrain.arcade(SPEED, TURN_MINOR, 1.0);
+                lastLineTurn = 1;
+            } else if(!leftSense && !midSense && rightSense) {  // right only
+                System.out.println("Only right sensing, major turn left.");
+                drivetrain.arcade(SPEED, TURN_MAJOR, 1.0);
+                lastLineTurn = 1;
+            } else if(leftSense && !midSense && rightSense) {   // left and right
+                System.out.println("Left and right sensing, continuing straight.");
+                drivetrain.arcade(SPEED, 0, 1.0);
+                lastLineTurn = 0;
+            } else if(leftSense && midSense && rightSense) {    // all three
+                System.out.println("All three sensing, continuing straight.");
+                drivetrain.arcade(SPEED, 0, 1.0);
+                lastLineTurn = 0;
+            } else {
+                System.out.println("Lost track of line, driving backwards.");
+                drivetrain.arcade(-SPEED, lastLineTurn * TURN_MAJOR, 1.0);
+            }
+        }
+
     }
 
     @Override
     protected boolean isFinished() {
-        // end if motor current spikes (hit wall) or on timeout
-        // timer allows it to ignore initial current spike as motors are ramped up
         return false;
     }
 
     @Override
     protected void end() {
-        timer.stop();
-        Robot.drivetrain.tank(0, 0, 0);
-        Robot.drivetrain.resetFollowLine();
+        drivetrain.tank(0, 0, 0);
     }
 
     @Override

@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.command.Command;
 import robot.Robot;
 
 public class LimeLightUseAsCamera extends Command {
-
     public LimeLightUseAsCamera() {
         requires(Robot.limelight);
     }
@@ -30,5 +29,4 @@ public class LimeLightUseAsCamera extends Command {
     @Override
     protected void interrupted() {
     }
-
 }

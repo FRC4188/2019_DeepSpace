@@ -30,6 +30,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
+        drivetrain.resetEncoders();
+        drivetrain.resetGyro();
     }
 
     @Override
@@ -55,7 +57,6 @@ public class Robot extends TimedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
-        drivetrain.resetEncoders();
     }
 
     @Override
