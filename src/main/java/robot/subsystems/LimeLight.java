@@ -158,32 +158,36 @@ public class LimeLight extends Subsystem {
      * once distance has been driven [2]. Returned in units of feet and degrees. */
     public double[] solvePerpendicular(double perpLength) {
 
+        // estimate field relative target angle based off current heading
+        double targetAngle = 90;
+
         // get known side lengths and angles (feet and degrees)
-        double robotAngle = Robot.drivetrain.getGyroAngle();
+        // all angles relative to target, not field
+        double robotAngle = Robot.drivetrain.getGyroAngle() - targetAngle;
         double limelightAngle = getHorizontalAngle();
         double distToTarget = getDistance(getPipeline().getHeight());
 
-        // angle between line from camera to target and perpendicular line in degrees
+        // angle between line from camera to target and perpendicular line in radians
         // found using parallel lines
-        double camToPerpAngle = robotAngle - limelightAngle;
+        double camToPerpAngle = Math.toRadians(robotAngle - limelightAngle);
 
         // solve for distance to point perpendicular to target, perpLength away
         // uses law of cosines
-        double distToPerp = Math.sqrt(Math.pow(perpLength, 2) + Math.pow(distToTarget, 2)
+        double driveDist = Math.sqrt(Math.pow(perpLength, 2) + Math.pow(distToTarget, 2)
                 - 2 * perpLength * distToTarget * Math.cos(camToPerpAngle));
+        driveDist += Robot.drivetrain.getPosition(); // absolute
 
         // solve for angle to turn to drive on straight line to point perpendicular to target
         // uses law of sines, returns in degrees
-        double botToDistAngle = Math.asin((perpLength * Math.sin(camToPerpAngle)) / distToPerp);
-
-        // solve for angle between distToPerp line and perpendicular line using the formed triangle
-        double distToPerpAngle = 180 - botToDistAngle - camToPerpAngle;
+        double angleC = Math.toDegrees(Math.asin((perpLength *
+                Math.sin(camToPerpAngle)) / driveDist));
+        double firstTurn = Robot.drivetrain.getGyroAngle() + limelightAngle + angleC;
 
         // return values as array
         return (new double[]{
-            botToDistAngle, // 0
-            distToPerp,     // 1
-            distToPerpAngle // 2
+            firstTurn,  // 0
+            driveDist,  // 1
+            targetAngle // 2
         });
 
     }
