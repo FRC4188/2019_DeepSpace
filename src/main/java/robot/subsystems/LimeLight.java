@@ -2,8 +2,10 @@ package robot.subsystems;
 
 import robot.Robot;
 import robot.commands.vision.LimeLightUseAsCamera;
+import robot.utils.CSPMath;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 
 /** Limelight vision camera. Used to detect reflective tape. */
@@ -151,14 +153,27 @@ public class LimeLight extends Subsystem {
     }
 
     /** Returns necessary distances and turns to get from current location to
-     * line perpendicular to vision target, perpLength away. Returns a double array
+     * line perpendicular to vision target, 4 ft away. Returns a double array
      * with the angle needed to turn to drive on line to point [0], the distance to 
      * drive to the point [1], and the angle to turn to face perpendicular to target
      * once distance has been driven [2]. Returned in units of feet and degrees. */
-    public double[] solvePerpendicular(double perpLength) {
+    public double[] solvePerpendicular() {
+
+        // length away we want to be from target once perpendicular (ft)
+        final double PERP_LENGTH = 4;
 
         // estimate field relative target angle based off current heading
-        double targetAngle = 90;
+        // currently works for all targets except two on end of ship
+        // NEEDS WORK
+        double targetAngle;
+        double gyroAngle = Robot.drivetrain.getGyroAngle();
+        if(CSPMath.isBetween(gyroAngle, 0, 39)) targetAngle = 28.75;
+        else if(CSPMath.isBetween(gyroAngle, 40, 140)) targetAngle = 90;
+        else if(CSPMath.isBetween(gyroAngle, 141, 180)) targetAngle = 151.25;
+        else if(CSPMath.isBetween(gyroAngle, -1, -39)) targetAngle = -28.75;
+        else if(CSPMath.isBetween(gyroAngle, -40, -140)) targetAngle = -90;
+        else if(CSPMath.isBetween(gyroAngle, -141, -180)) targetAngle = -151.25;
+        else targetAngle = 0;
 
         // get known side lengths and angles (feet and degrees)
         // all angles relative to target, not field
@@ -170,20 +185,24 @@ public class LimeLight extends Subsystem {
         // found using parallel lines
         double camToPerpAngle = Math.toRadians(robotAngle - limelightAngle);
 
-        // solve for distance to point perpendicular to target, perpLength away
+        // solve for distance to point perpendicular to target, PERP_LENGTH away
         // uses law of cosines
-        double driveDist = Math.sqrt(Math.pow(perpLength, 2) + Math.pow(distToTarget, 2)
-                - 2 * perpLength * distToTarget * Math.cos(camToPerpAngle));
-        driveDist += Robot.drivetrain.getPosition(); // absolute
+        double driveDist = Math.sqrt(Math.pow(PERP_LENGTH, 2) + Math.pow(distToTarget, 2)
+                - 2 * PERP_LENGTH * distToTarget * Math.cos(camToPerpAngle));
 
         // solve for angle to turn to drive on straight line to point perpendicular to target
         // uses law of sines, returns in degrees
-        double angleC = Math.toDegrees(Math.asin((perpLength *
+        double angleC = Math.toDegrees(Math.asin((PERP_LENGTH *
                 Math.sin(camToPerpAngle)) / driveDist));
         double firstTurn = Robot.drivetrain.getGyroAngle() + limelightAngle + angleC;
 
+        // if already almost perpendicular (5 deg tolerance) then return 0
+        if(Math.abs(camToPerpAngle) > 5.0) {
+            return (new double[] { 0, 0, 0});
+        }
+
         // return values as array
-        return (new double[]{
+        return (new double[] {
             firstTurn,  // 0
             driveDist,  // 1
             targetAngle // 2

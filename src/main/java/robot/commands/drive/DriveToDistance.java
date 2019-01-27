@@ -2,14 +2,16 @@ package robot.commands.drive;
 
 import robot.Robot;
 import robot.subsystems.Drivetrain;
+import robot.subsystems.LimeLight;
 import edu.wpi.first.wpilibj.command.Command;
 
 /** Drives to a given distance in feet using PID loop. */
 public class DriveToDistance extends Command {
 
-    public enum Distance { RELATIVE, ABSOLUTE }
+    public enum Distance { RELATIVE, ABSOLUTE, PERP_LENGTH }
 
     Drivetrain drivetrain = Robot.drivetrain;
+    LimeLight limelight = Robot.limelight;
     
     final double kP = 0.1;
     final double kI = 0;
@@ -17,13 +19,26 @@ public class DriveToDistance extends Command {
 
     double lastError, integral = 0;
     double distance, tolerance;
-    Distance type;
 
     public DriveToDistance(double distance, double tolerance, Distance type) {
-        requires(Robot.drivetrain);
+        requires(drivetrain);
         this.distance = distance;
         this.tolerance = tolerance;
-        this.type = type;
+        if(type == Distance.RELATIVE) distance += drivetrain.getPosition();
+    }
+
+    /** Drives necessary length to reach perpendicular point of target
+     *  if type is set to PERP_LENGTH. Otherwise, do nothing. */
+    public DriveToDistance(Distance type) {
+        requires(drivetrain);
+        requires(limelight);
+        this.distance = limelight.solvePerpendicular()[1];
+        this.tolerance = 1.0;
+        if(type == Distance.PERP_LENGTH) {
+            distance = limelight.solvePerpendicular()[1] + drivetrain.getPosition();
+        } else {
+            distance = drivetrain.getPosition();
+        }
     }
 
     @Override
@@ -31,7 +46,6 @@ public class DriveToDistance extends Command {
         // reset fields
         lastError = 0;
         integral = 0;
-        if(type == Distance.RELATIVE) distance += drivetrain.getPosition();
     }
 
     @Override

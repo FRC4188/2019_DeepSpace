@@ -17,4 +17,9 @@ public class CSPMath {
         return constrain(value, min, max) * sign;
     }
 
+    /** Returns true if specified value is between the min and max, inclusive. */
+    public static boolean isBetween(double value, double min, double max) {
+        return (value >= min && value <= max);
+    }
+
 }

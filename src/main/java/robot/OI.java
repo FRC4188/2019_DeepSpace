@@ -78,6 +78,7 @@ public class OI {
         pilotA.whenPressed(new FollowLine());
         pilotB.whenPressed(new TurnToAngle(27, 5, Angle.ABSOLUTE));
         pilotX.whenPressed(new FollowObject(Object.BAY_HIGH));
+        pilotY.whenPressed(new DepositToBay());
         pilotLS.whenPressed(new ShiftGear());
     }
 
