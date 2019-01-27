@@ -7,19 +7,23 @@ import edu.wpi.first.wpilibj.command.Command;
 /** Drives to a given distance in feet using PID loop. */
 public class DriveToDistance extends Command {
 
+    public enum Distance { RELATIVE, ABSOLUTE }
+
     Drivetrain drivetrain = Robot.drivetrain;
     
-    final double kP = 0;
+    final double kP = 0.1;
     final double kI = 0;
     final double kD = 0;
 
     double lastError, integral = 0;
     double distance, tolerance;
+    Distance type;
 
-    public DriveToDistance(double distance, double tolerance) {
+    public DriveToDistance(double distance, double tolerance, Distance type) {
         requires(Robot.drivetrain);
         this.distance = distance;
         this.tolerance = tolerance;
+        this.type = type;
     }
 
     @Override
@@ -27,6 +31,7 @@ public class DriveToDistance extends Command {
         // reset fields
         lastError = 0;
         integral = 0;
+        if(type == Distance.RELATIVE) distance += drivetrain.getPosition();
     }
 
     @Override

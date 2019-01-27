@@ -17,7 +17,7 @@ public class FollowObject extends Command {
     LimeLight limelight = Robot.limelight;
 
     // super high to make sure command doesn't terminate
-    double distance, initialDist, distErr, angleSetpoint = 1000;
+    double distance, initialDist, distErr, angleSetpoint, angleErr = 1000;
     boolean isFollowing, leftSense, midSense, rightSense = false;
     Object object;
 
@@ -65,33 +65,34 @@ public class FollowObject extends Command {
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
         distance = limelight.getDistance(limelight.getPipeline().getHeight());
-        distErr = distance - 2; // stop 2 ft away
+        distErr = distance - (15 / 12); // stop 2 ft away
 
         // distance p loop
         double xSpeed = DIST_kP * distErr;
         xSpeed = CSPMath.constrainKeepSign(xSpeed, 0.0, 1.0);
 
         // angle p loop, turns less as distance shrinks
-        double angleError = angleSetpoint - drivetrain.getGyroAngle();
+        angleErr = angleSetpoint - drivetrain.getGyroAngle();
         double distReducer = distance / initialDist;
-        double turnOutput = TURN_kP * angleError * distReducer;
-        double zTurn = (Math.abs(angleError) > ANGLE_TOLERANCE) ?
+        double turnOutput = TURN_kP * angleErr * distReducer;
+        double zTurn = (Math.abs(angleErr) > ANGLE_TOLERANCE) ?
                 CSPMath.constrainKeepSign(turnOutput, 0.15, 1.0) : 0;
 
         // command motor output
         drivetrain.arcade(xSpeed, zTurn, 1.0);
 
-        if(!(Math.abs(angleSetpoint) < ANGLE_TOLERANCE)) System.out.println("turning" + turnOutput);
-        if(!(Math.abs(distance) < DIST_TOLERANCE)) System.out.println("driving");
+        // debugging
+        if(!(Math.abs(angleErr) < ANGLE_TOLERANCE)) System.out.println("turning" + angleErr);
+        if(!(Math.abs(distErr) < DIST_TOLERANCE)) System.out.println("driving " + distErr);
 
     }
 
     @Override
     protected boolean isFinished() {
         // end if dist and angle are within tolerance and it was following
-        // or if any line followers sense a line or if no valid targets found
-        return ((Math.abs(angleSetpoint) < ANGLE_TOLERANCE)
-                && (Math.abs(distance) < DIST_TOLERANCE) && isFollowing)
+        // or if any line followers sense a line
+        return ((Math.abs(angleErr) < ANGLE_TOLERANCE)
+                && (Math.abs(distErr) < DIST_TOLERANCE) && isFollowing)
                 || (leftSense || midSense || rightSense);
     }
 

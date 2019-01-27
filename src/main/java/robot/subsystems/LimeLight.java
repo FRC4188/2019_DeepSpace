@@ -1,11 +1,10 @@
 package robot.subsystems;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.networktables.NetworkTable;
 import robot.Robot;
 import robot.commands.vision.LimeLightUseAsCamera;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.networktables.NetworkTable;
 
 /** Limelight vision camera. Used to detect reflective tape. */
 public class LimeLight extends Subsystem {
@@ -193,6 +192,7 @@ public class LimeLight extends Subsystem {
      * drive to the point [1], and the angle to turn to face perpendicular to target
      * once distance has been driven [2]. Returned in units of feet and degrees. */
     public double[] solvePerpendicular(double perpLength) {
+<<<<<<< HEAD
         // ensure we are tracking a bay
         if(!(currentPipeline == Pipeline.BAY_CLOSE || currentPipeline == Pipeline.BAY_HIGH)) return new double[]{0.0, 0.0, 0.0};
         // get data
@@ -206,6 +206,41 @@ public class LimeLight extends Subsystem {
         double newDistance = Math.sqrt(horzDiff * horzDiff + vertDiff * vertDiff);
         double secondTurnAngle = -Math.toDegrees(Math.atan2(vertDiff, horzDiff));
         return new double[]{turnAngle, newDistance, secondTurnAngle};
+=======
+
+        // estimate field relative target angle based off current heading
+        double targetAngle = 90;
+
+        // get known side lengths and angles (feet and degrees)
+        // all angles relative to target, not field
+        double robotAngle = Robot.drivetrain.getGyroAngle() - targetAngle;
+        double limelightAngle = getHorizontalAngle();
+        double distToTarget = getDistance(getPipeline().getHeight());
+
+        // angle between line from camera to target and perpendicular line in radians
+        // found using parallel lines
+        double camToPerpAngle = Math.toRadians(robotAngle - limelightAngle);
+
+        // solve for distance to point perpendicular to target, perpLength away
+        // uses law of cosines
+        double driveDist = Math.sqrt(Math.pow(perpLength, 2) + Math.pow(distToTarget, 2)
+                - 2 * perpLength * distToTarget * Math.cos(camToPerpAngle));
+        driveDist += Robot.drivetrain.getPosition(); // absolute
+
+        // solve for angle to turn to drive on straight line to point perpendicular to target
+        // uses law of sines, returns in degrees
+        double angleC = Math.toDegrees(Math.asin((perpLength *
+                Math.sin(camToPerpAngle)) / driveDist));
+        double firstTurn = Robot.drivetrain.getGyroAngle() + limelightAngle + angleC;
+
+        // return values as array
+        return (new double[]{
+            firstTurn,  // 0
+            driveDist,  // 1
+            targetAngle // 2
+        });
+
+>>>>>>> dac3939d77f91e09c190c6a08d125c91966dc38d
     }
     
     /**
