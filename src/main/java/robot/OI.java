@@ -4,6 +4,7 @@ import robot.commands.drive.*;
 import robot.commands.drive.FollowObject.Object;
 import robot.commands.drive.TurnToAngle.Angle;
 import robot.commands.groups.DepositToBay;
+import robot.utils.Paths;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -75,8 +76,8 @@ public class OI {
 
     /** Constructs new OI object and assigns commands. */
     public OI() {
-        pilotA.whenPressed(new FollowLine());
-        pilotB.whenPressed(new TurnToAngle(27, 5, Angle.ABSOLUTE));
+        pilotA.whenPressed(new FollowPath(Paths.testPath, false));
+        pilotB.whenPressed(new TurnToAngle(27, 5, Angle.RELATIVE));
         pilotX.whenPressed(new FollowObject(Object.BAY_HIGH));
         pilotY.whenPressed(new DepositToBay());
         pilotLS.whenPressed(new ShiftGear());

@@ -18,13 +18,14 @@ public class DriveToDistance extends Command {
     final double kD = 0;
 
     double lastError, integral = 0;
-    double distance, tolerance;
+    double distance, tolerance, distanceParam;
+    Distance type;
 
     public DriveToDistance(double distance, double tolerance, Distance type) {
         requires(drivetrain);
-        this.distance = distance;
+        this.distanceParam = distance;
         this.tolerance = tolerance;
-        if(type == Distance.RELATIVE) distance += drivetrain.getPosition();
+        this.type = type;
     }
 
     /** Drives necessary length to reach perpendicular point of target
@@ -32,20 +33,22 @@ public class DriveToDistance extends Command {
     public DriveToDistance(Distance type) {
         requires(drivetrain);
         requires(limelight);
-        this.distance = limelight.solvePerpendicular()[1];
-        this.tolerance = 1.0;
-        if(type == Distance.PERP_LENGTH) {
-            distance = limelight.solvePerpendicular()[1] + drivetrain.getPosition();
-        } else {
-            distance = drivetrain.getPosition();
-        }
+        this.tolerance = 0.5;
+        this.type = type;
     }
 
     @Override
     protected void initialize() {
+
+        // determine setpoint based on type
+        if(type == Distance.RELATIVE) distance = distanceParam + drivetrain.getPosition();
+        if(type == Distance.PERP_LENGTH) distance = limelight.solvePerpendicular()[1];
+        else distance = distanceParam;
+
         // reset fields
         lastError = 0;
         integral = 0;
+        
     }
 
     @Override

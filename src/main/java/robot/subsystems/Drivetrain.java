@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
 
 public class Drivetrain extends Subsystem {
@@ -41,7 +42,7 @@ public class Drivetrain extends Subsystem {
     // State vars
     private double fieldPosX, fieldPosY = 0;
 
-    /** Constructs new Drivetrain object and configures devices */
+    /** Constructs new Drivetrain object and configures devices. */
     public Drivetrain() {
 
         // Slave control
@@ -66,10 +67,35 @@ public class Drivetrain extends Subsystem {
 
     }
 
-    /** Defines default command that will run when object is created */
+    /** Defines default command that will run when object is created. */
     @Override
     public void initDefaultCommand() {
         setDefaultCommand(new ManualDrive());
+    }
+
+    /** Prints necessary info to dashboard. */
+    private void updateShuffleboard() {
+        SmartDashboard.putNumber("L Pos", getLeftPosition());
+        SmartDashboard.putNumber("R Pos", getRightPosition());
+        SmartDashboard.putNumber("L Vel", getLeftVelocity());
+        SmartDashboard.putNumber("R Vel", getRightVelocity());
+        SmartDashboard.putNumber("Gyro", getGyroAngle());
+        SmartDashboard.putNumber("Field X", getFieldPosX());
+        SmartDashboard.putNumber("Field Y", getFieldPosY());
+    }
+
+    /** Runs every loop. */
+    @Override
+    public void periodic() {
+        trackFieldPosition();
+        updateShuffleboard();
+    }
+
+    /** Resets necessary drive devices. */
+    public void reset() {
+        resetEncoders();
+        resetGyro();
+        resetFieldPos();
     }
 
     /** Sets left motors to given percentage (-1.0 - 1.0). */
@@ -223,18 +249,26 @@ public class Drivetrain extends Subsystem {
 
     /** Tracks robot position on field. To be called in robotPeriodic(). */
     public void trackFieldPosition() {
-        fieldPosX += getVelocity() * Math.cos(getGyroAngle()) * DELTA_T;
-        fieldPosY += getVelocity() * Math.sin(getGyroAngle()) * DELTA_T;
+        fieldPosX += getVelocity() * Math.cos(Math.toRadians(getGyroAngle())) * DELTA_T;
+        fieldPosY += getVelocity() * Math.sin(Math.toRadians(getGyroAngle())) * DELTA_T;
     }
 
-    /** Returns estimate of robot's x location relative to starting point in feet. */
+    /** Returns estimate of robot's x (forward / reverse) location relative
+     *  to starting point in feet. */
     public double getFieldPosX() {
         return fieldPosX;
     }
 
-    /** Returns estimate of robot's y location relative to starting point in feet. */
+    /** Returns estimate of robot's y (left / right) location relative
+     *  to starting point in feet. */
     public double getFieldPosY() {
         return fieldPosY;
+    }
+
+    /** Resets field position variables to 0. */
+    public void resetFieldPos() {
+        fieldPosX = 0;
+        fieldPosY = 0;
     }
 
     /** Enables open and closed loop ramp rate */
