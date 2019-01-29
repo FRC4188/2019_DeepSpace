@@ -29,10 +29,10 @@ public class Drivetrain extends Subsystem {
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Drive constants
-    public final double MAX_VELOCITY = 0; // ft/s
-    public final double MAX_ACCELERATION = 0; // ft/s^2
-    public final double MAX_JERK = 0; // ft/s^3
-    public final double WHEELBASE_WIDTH = 0; // ft
+    public final double MAX_VELOCITY = 9; // ft/s
+    public final double MAX_ACCELERATION = 5; // ft/s^2
+    public final double MAX_JERK = 190; // ft/s^3
+    public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double TICKS_PER_REV = 4096; // talon units
     public final double RAMP_RATE = 0.05; // seconds
@@ -41,6 +41,7 @@ public class Drivetrain extends Subsystem {
 
     // State vars
     private double fieldPosX, fieldPosY = 0;
+    private boolean leftInverted, rightInverted;
 
     /** Constructs new Drivetrain object and configures devices. */
     public Drivetrain() {
@@ -59,7 +60,9 @@ public class Drivetrain extends Subsystem {
         // Drive config
         enableRampRate();
         setBrake();
-        setLeftInverted(true);
+        leftInverted = true;
+        rightInverted = false;
+        setInverted(false);
 
         // Gyro
         resetGyro();
@@ -108,25 +111,26 @@ public class Drivetrain extends Subsystem {
         right.set(ControlMode.PercentOutput, percent);
     }
 
-    /** Inverts drivetrain. */
+    /** Inverts drivetrain. True inverts each side from the
+     *  current state set in the Drivetrain constructor. */
     public void setInverted(boolean isInverted) {
-        left.setInverted(isInverted);
-        leftSlave1.setInverted(isInverted);
-        //leftSlave2.setInverted(isInverted);
-        right.setInverted(isInverted);
-        rightSlave1.setInverted(isInverted);
-        //rightSlave2.setInverted(isInverted);
+        setLeftInverted(isInverted);
+        setRightInverted(isInverted);
     }
 
-    /** Inverts the left side of the drivetrain. */
+    /** Inverts the left side of the drivetrain. True inverts it
+     *  from the current state set in the Drivetrain constructor. */
     public void setLeftInverted(boolean isInverted) {
+        if(leftInverted) isInverted = !isInverted;
         left.setInverted(isInverted);
         leftSlave1.setInverted(isInverted);
         //leftSlave2.setInverted(isInverted);
     }
 
-    /** Inverts the right side of the drivetrain. */
+    /** Inverts the right side of the drivetrain. True inverts it
+     *  from the current state set in the Drivetrain constructor. */
     public void setRightInverted(boolean isInverted) {
+        if(rightInverted) isInverted = !isInverted;
         right.setInverted(isInverted);
         rightSlave1.setInverted(isInverted);
         //rightSlave2.setInverted(isInverted);
@@ -228,6 +232,7 @@ public class Drivetrain extends Subsystem {
         gyro.reset();
     }
 
+    /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
     public void calibrateGyro() {
         gyro.calibrate();
     }

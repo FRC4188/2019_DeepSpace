@@ -18,10 +18,10 @@ public class FollowPath extends Command {
     EncoderFollower leftFollower, rightFollower;
     Drivetrain drivetrain = Robot.drivetrain;
 
-    final double kP = 0;
+    final double kP = 0.1;
     final double kI = 0;
     final double kD = 0;
-    final double kV = 0;
+    final double kV = 1.0 / drivetrain.MAX_VELOCITY;
     final double kA = 0;
 
     /** Follows path from given waypoints. isReversed causes the path
@@ -34,7 +34,7 @@ public class FollowPath extends Command {
 
     @Override
     protected void initialize() {
-        
+
         // create trajectory config
         Trajectory.Config config = new Trajectory.Config(
                 Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, drivetrain.DELTA_T,
@@ -72,7 +72,8 @@ public class FollowPath extends Command {
         double gyroHeading = drivetrain.getGyroAngle();
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.8 * (-1.0/80.0) * angleDifference;
+        double turn = 0.8 * (1.0/80.0) * angleDifference;
+        System.out.println("angleDiff: " + angleDifference + " turn val: " + turn);
 
         // use output
         drivetrain.tank(l + turn, r - turn, 1.0);

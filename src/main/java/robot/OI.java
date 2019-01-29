@@ -4,6 +4,7 @@ import robot.commands.drive.*;
 import robot.commands.drive.FollowObject.Object;
 import robot.commands.drive.TurnToAngle.Angle;
 import robot.commands.groups.DepositToBay;
+import robot.utils.KillAll;
 import robot.utils.Paths;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -81,6 +82,8 @@ public class OI {
         pilotX.whenPressed(new FollowObject(Object.BAY_HIGH));
         pilotY.whenPressed(new DepositToBay());
         pilotLS.whenPressed(new ShiftGear());
+        pilotBack.whenPressed(new KillAll());
+        copilotBack.whenPressed(new KillAll());
     }
 
     // options to scale joystick input
