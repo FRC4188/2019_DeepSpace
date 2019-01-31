@@ -1,8 +1,6 @@
 package robot;
 
 import robot.OI;
-import robot.OI.Controller;
-import robot.commands.groups.DepositToBay;
 import robot.subsystems.*;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -35,7 +33,7 @@ public class Robot extends TimedRobot {
     public void disabledInit() {
         drivetrain.resetEncoders();
         drivetrain.resetGyro();
-        arm.resetEncoders();
+        arm.reset();
     }
 
     @Override

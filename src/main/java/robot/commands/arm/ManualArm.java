@@ -6,12 +6,12 @@ import robot.subsystems.Arm;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
-public class Manipulate extends Command {
-        
+public class ManualArm extends Command {
+
     OI oi = Robot.oi;
     Arm arm = Robot.arm;
 
-    public Manipulate() {
+    public ManualArm() {
         requires(arm);
     }
 
