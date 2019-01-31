@@ -1,6 +1,6 @@
 package robot.subsystems;
 
-import robot.commands.arm.Manipulate;
+import robot.commands.arm.ManualArm;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -49,7 +49,7 @@ public class Arm extends Subsystem {
     /** Defines default command that will run when object is created. */
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new Manipulate());
+        setDefaultCommand(new ManualArm());
     }
 
     /** Prints necessary info to the dashboard. */
