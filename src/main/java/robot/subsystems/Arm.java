@@ -1,6 +1,6 @@
 package robot.subsystems;
 
-import robot.commands.arm.Manipulate;
+import robot.commands.arm.ManipulateArm;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.ControlMode;
