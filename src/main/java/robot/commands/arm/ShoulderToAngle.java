@@ -4,7 +4,7 @@ import robot.Robot;
 import robot.subsystems.Arm;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Sets shoulder to given angle while keeping wrist level. */
+/** Sets shoulder on arm to given angle in degrees. */
 public class ShoulderToAngle extends Command {
 
     Arm arm = Robot.arm;
@@ -30,23 +30,13 @@ public class ShoulderToAngle extends Command {
 
     @Override
     protected void execute() {
-
-        // PID loop on shoulder angle
-        double shoulderInput = arm.getShoulderPosition();
-        double shoulderError = angle - shoulderInput;
-        integral += shoulderError * arm.DELTA_T;
-        double derivative = (shoulderError - lastError) / arm.DELTA_T;
-        double shoulderOutput = kP * shoulderError + kI * integral + kD * derivative;
-        lastError = shoulderError;
-
-        // P loop on wrist angle
-        double wristInput = arm.getWristPosition();
-        double wristError = 0 - wristInput; // drive wrist to 0 degrees
-        double wristOutput = kP * wristError;
-
-        // command motor output
-        arm.control(shoulderOutput, wristOutput, 1.0);
-
+        double input = arm.getPosition();
+        double error = angle - input;
+        integral += error * arm.DELTA_T;
+        double derivative = (error - lastError) / arm.DELTA_T;
+        double output = kP * error + kI * integral + kD * derivative;
+        lastError = error;
+        arm.set(output);
     }
 
     @Override
@@ -56,7 +46,7 @@ public class ShoulderToAngle extends Command {
 
     @Override
     protected void end() {
-        arm.control(0, 0, 0);
+        arm.set(0);
     }
 
     @Override
