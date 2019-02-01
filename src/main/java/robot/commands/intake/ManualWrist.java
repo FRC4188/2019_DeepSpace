@@ -6,12 +6,13 @@ import robot.subsystems.Intake;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
-public class IntakeSpin extends Command {
+/** Moves intake wrist using y val of right copilot stick. */
+public class ManualWrist extends Command {
 
     OI oi = Robot.oi;
     Intake intake = Robot.intake;
 
-    public IntakeSpin() {
+    public ManualWrist() {
         requires(intake);
     }
 
@@ -21,8 +22,7 @@ public class IntakeSpin extends Command {
 
     @Override
     protected void execute() {
-        // change this binding, this is already taken by arm
-        intake.controlSpin(oi.getCopilotX(Hand.kRight), 1.0);
+        intake.setWrist(oi.getCopilotY(Hand.kRight));
     }
 
     @Override

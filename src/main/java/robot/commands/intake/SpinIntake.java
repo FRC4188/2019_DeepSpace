@@ -3,26 +3,33 @@ package robot.commands.intake;
 import robot.OI;
 import robot.Robot;
 import robot.subsystems.Intake;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
-public class IntakeWrist extends Command {
+/** Spins cargo intake to percent speed (-1.0, 1.0) in given direction. */
+public class SpinIntake extends Command {
+
+    public enum Direction { IN, OUT }
 
     OI oi = Robot.oi;
     Intake intake = Robot.intake;
 
-    public IntakeWrist() {
+    double speed;
+    Direction direction;
+
+    public SpinIntake(double speed, Direction direction) {
         requires(intake);
+        this.speed = speed;
+        this.direction = direction;
     }
 
     @Override
     protected void initialize() {
+        if(direction == Direction.IN) speed = -speed;
     }
 
     @Override
     protected void execute() {
-        // change this binding, this is already taken by arm
-        intake.controlWrist(oi.getCopilotY(Hand.kLeft), 0.5);
+        intake.spinIntake(speed);
     }
 
     @Override
