@@ -30,7 +30,6 @@ public class Intake extends Subsystem {
     public Intake(){
 
         // Encoders
-        intake.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
         wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
         resetEncoders();
 
@@ -98,12 +97,6 @@ public class Intake extends Subsystem {
         wrist.setInverted(isInverted);
     }
 
-    /** Sets intake talons to brake mode. */
-    public void setBrake() {
-        intake.setNeutralMode(NeutralMode.Brake);
-        wrist.setNeutralMode(NeutralMode.Brake);
-    }
-
     /** Sets intake talons to coast mode. */
     public void setCoast() {
         intake.setNeutralMode(NeutralMode.Brake);
@@ -112,13 +105,7 @@ public class Intake extends Subsystem {
 
     /** Resets encoder values to 0 for both intake and intake wrist. */
     public void resetEncoders() {
-        intake.setSelectedSensorPosition(0, 0, 10);
         wrist.setSelectedSensorPosition(0, 0, 10);
-    }
-
-    /** Returns intake encoder position in degrees. */
-    public double getIntakePosition() {
-        return intake.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
     }
 
     /** Returns intake wrist encoder position in degrees. */
@@ -126,19 +113,9 @@ public class Intake extends Subsystem {
         return intake.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
     }
 
-    /** Returns intake encoder position in native talon units. */
-    public double getRawIntakePosition() {
-        return intake.getSelectedSensorPosition();
-    }
-
     /** Returns intake wrist encoder position in native talon units. */
     public double getRawIntakeWristPosition() {
         return wrist.getSelectedSensorPosition();
-    }
-
-    /** Returns intake encoder velocity in degrees per second. */
-    public double getIntakeVelocity() {
-        return intake.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
     }
 
     /** Returns intake wrist encoder velocity in degrees per second. */
