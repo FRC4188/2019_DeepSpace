@@ -1,6 +1,7 @@
 package robot.subsystems;
 
 import robot.commands.arm.ManualArm;
+import robot.utils.CSPMath;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -18,6 +19,7 @@ public class Arm extends Subsystem {
     private final double TICKS_PER_REV = 4096; // talon units
     private final double ENCODER_TO_DEGREES = 360 / TICKS_PER_REV; // degrees
     private final double RAMP_RATE = 0.05; // seconds
+    private final double FEEDFORWARD = 0; // percent out
     public final double DELTA_T = 0.02; // seconds
 
     // State vars
@@ -63,9 +65,12 @@ public class Arm extends Subsystem {
         resetEncoders();
     }
 
-    /** Sets shoulder motors to given percentage (-1.0, 1.0) */
+    /** Sets shoulder motors to given percentage (-1.0, 1.0). */
     public void set(double percent) {
-        shoulder.set(ControlMode.PercentOutput, percent);
+        // add dynamic feedforward to counteract gravity and linearize response
+        double output = percent + FEEDFORWARD * Math.cos(Math.toRadians(getPosition()));
+        output = CSPMath.constrainKeepSign(output, 0, 1.0);
+        shoulder.set(ControlMode.PercentOutput, output);
     }
 
     /** Inverts the the arm. */
