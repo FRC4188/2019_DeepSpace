@@ -1,31 +1,49 @@
 package robot;
 
+import badlog.lib.BadLog;
 import robot.OI;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
+import robot.utils.Logger;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot {
 
     public static Drivetrain drivetrain;
     public static LimeLight limelight;
     public static OI oi;
+    public static Logger logger;
+    
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
 
     @Override
     public void robotInit() {
+        logger.init();
+
         drivetrain = new Drivetrain();
         limelight = new LimeLight();
         oi = new OI();
+
+        BadLog.createTopic("Match Time", "s", () -> DriverStation.getInstance().getMatchTime());
+        BadLog.createTopic("Voltage", "V", () -> RobotController.getBatteryVoltage());
+
+        logger.finishInit();
     }
 
     @Override
     public void robotPeriodic() {
+        logger.update();
     }
 
     @Override
