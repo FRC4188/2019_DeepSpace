@@ -73,7 +73,7 @@ public class FollowPath extends Command {
             double turnAngle = Math.toRadians(limelight.solvePerpendicular()[0]);
             double driveDist = limelight.solvePerpendicular()[1];
             double x = driveDist * Math.cos(turnAngle);
-            double y = Math.signum(turnAngle) * driveDist * Math.sin(turnAngle);
+            double y = driveDist * Math.sin(turnAngle);
             double targetAngle = Math.toRadians(limelight.solvePerpendicular()[2]);
 
             SmartDashboard.putNumber("driveDist", driveDist);
