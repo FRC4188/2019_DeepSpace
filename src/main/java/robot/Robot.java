@@ -5,8 +5,6 @@ import robot.OI;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
 import robot.utils.Logger;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -30,11 +28,6 @@ public class Robot extends TimedRobot {
         drivetrain = new Drivetrain();
         limelight = new LimeLight();
         oi = new OI();
-
-        BadLog.createTopic("Match Time", "s", () -> DriverStation.getInstance().getMatchTime());
-        BadLog.createTopic("Voltage", "V", () -> RobotController.getBatteryVoltage());
-
-        logger.finishInit();
     }
 
     @Override
