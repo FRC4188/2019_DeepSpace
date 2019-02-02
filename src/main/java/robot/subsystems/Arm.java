@@ -8,15 +8,23 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.CANEncoder;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMax.IdleMode;
 
 public class Arm extends Subsystem {
 
     // Device initialization
-    private TalonSRX shoulder = new TalonSRX(0);
-    private TalonSRX shoulderSlave= new TalonSRX(0);
+    private CANSparkMax shoulder = new CANSparkMax(0, MotorType.kBrushless);
+    private CANSparkMax shoulderSlave = new CANSparkMax(0, MotorType.kBrushless);
+
+    // Encoders
+    private CANEncoder shoulderEncoder = new CANEncoder(shoulder);
 
     // Manipulation constants
-    private final double TICKS_PER_REV = 4096; // talon units
+    private final double TICKS_PER_REV = 1; // talon units
     private final double ENCODER_TO_DEGREES = 360 / TICKS_PER_REV; // degrees
     private final double RAMP_RATE = 0.05; // seconds
     private final double FEEDFORWARD = 0; // percent out
@@ -32,7 +40,6 @@ public class Arm extends Subsystem {
         shoulderSlave.follow(shoulder);
 
         // Encoders
-        shoulder.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
         resetEncoders();
 
         // Arm config
@@ -70,7 +77,7 @@ public class Arm extends Subsystem {
         // add dynamic feedforward to counteract gravity and linearize response
         double output = percent + FEEDFORWARD * Math.cos(Math.toRadians(getPosition()));
         output = CSPMath.constrainKeepSign(output, 0, 1.0);
-        shoulder.set(ControlMode.PercentOutput, output);
+        shoulder.set(output);
     }
 
     /** Inverts the the arm. */
@@ -82,33 +89,33 @@ public class Arm extends Subsystem {
 
     /** Sets arm talons brake mode - Only mode that should be used. */
     public void setBrake() {
-        shoulder.setNeutralMode(NeutralMode.Brake);
-        shoulderSlave.setNeutralMode(NeutralMode.Brake);
+        shoulder.setIdleMode(IdleMode.kBrake);
+        shoulderSlave.setIdleMode(IdleMode.kBrake);
     }
 
     /** Resets encoder values to 0 for both shoulder and wrist. */
     public void resetEncoders() {
-        shoulder.setSelectedSensorPosition(0, 0, 10);
+
     }
 
     /** Returns left encoder position in degrees. */
     public double getPosition() {
-        return shoulder.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
+        return shoulderEncoder.getPosition() * ENCODER_TO_DEGREES;
     }
 
     /** Returns shoulder encoder position in native talon units. */
     public double getRawPosition() {
-        return shoulder.getSelectedSensorPosition();
+        return shoulderEncoder.getPosition();
     }
 
     /** Returns shoulder encoder velocity in degrees per second. */
     public double getVelocity() {
-        return shoulder.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
+        return shoulderEncoder.getVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
     }
 
     /** Returns shoulder motor output as a percentage. */
     public double getOutput() {
-        return shoulder.getMotorOutputPercent();
+        return shoulder.get();
     }
 
     /** Returns shoulder motor output current. */
@@ -118,8 +125,7 @@ public class Arm extends Subsystem {
 
     /** Enables open and closed loop ramp rate. */
     public void enableRampRate() {
-        shoulder.configClosedloopRamp(RAMP_RATE);
-        shoulder.configOpenloopRamp(RAMP_RATE);
+        shoulder.setRampRate(RAMP_RATE);
     }
 
 }
