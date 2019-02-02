@@ -2,8 +2,10 @@ package robot.commands.drive;
 
 import robot.Robot;
 import robot.subsystems.Drivetrain;
+import robot.subsystems.LimeLight;
 import edu.wpi.first.wpilibj.command.Command;
 import jaci.pathfinder.Pathfinder;
+import jaci.pathfinder.PathfinderFRC;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.followers.EncoderFollower;
@@ -13,10 +15,28 @@ import jaci.pathfinder.modifiers.TankModifier;
  *  If isReversed == true, the path will run backwards. */
 public class FollowPath extends Command {
 
-    boolean isReversed;
+    public enum Path {
+
+        TO_PERPENDICULAR(null), TEST("test");
+
+        private final String file;
+        Path(String file) {
+            this.file = file;
+        }
+
+        public String getFile() {
+            return file;
+        }
+
+    }
+
+    Drivetrain drivetrain = Robot.drivetrain;
+    LimeLight limelight = Robot.limelight;
+
+    boolean isReversed, fromFile;
     Waypoint[] points;
     EncoderFollower leftFollower, rightFollower;
-    Drivetrain drivetrain = Robot.drivetrain;
+    Path path;
 
     final double kP = 0.1;
     final double kI = 0;
@@ -30,21 +50,64 @@ public class FollowPath extends Command {
         requires(drivetrain);
         this.points = points;
         this.isReversed = isReversed;
+        this.fromFile = false;
+    }
+
+    public FollowPath(Path path, boolean isReversed) {
+        requires(drivetrain);
+        this.isReversed = isReversed;
+        this.path = path;
+        if(path == Path.TO_PERPENDICULAR) this.fromFile = false;
+        else this.fromFile = true;
     }
 
     @Override
     protected void initialize() {
 
-        // create trajectory config
-        Trajectory.Config config = new Trajectory.Config(
-                Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, drivetrain.DELTA_T,
-                drivetrain.MAX_VELOCITY, drivetrain.MAX_ACCELERATION, drivetrain.MAX_JERK);
+        // create waypoints if going to perpendicular
+        if(path == Path.TO_PERPENDICULAR) {
 
-        // generate trajectory + create followers
-        Trajectory trajectory = Pathfinder.generate(points, config);
-        TankModifier modifier = new TankModifier(trajectory).modify(drivetrain.WHEELBASE_WIDTH);
-        leftFollower = new EncoderFollower(modifier.getLeftTrajectory());
-        rightFollower = new EncoderFollower(modifier.getRightTrajectory());
+            // get necessary info from camera
+            double currentAngle = drivetrain.getGyroAngle();
+            double turnAngle = limelight.solvePerpendicular()[0];
+            double driveDist = limelight.solvePerpendicular()[1];
+            double x = driveDist * Math.cos(Math.toRadians(turnAngle));
+            double y = driveDist * Math.sin(Math.toRadians(turnAngle));
+            double targetAngle = limelight.solvePerpendicular()[2];
+
+            // create points
+            points = new Waypoint[] {
+                new Waypoint(0, 0, currentAngle),
+                new Waypoint(x, y, targetAngle)
+            };
+
+        }
+
+        // generate points if not from file
+        if(!fromFile) {
+
+            // generate trajectory
+            Trajectory.Config config = new Trajectory.Config(
+                    Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_FAST, drivetrain.DELTA_T,
+                    drivetrain.MAX_VELOCITY, drivetrain.MAX_ACCELERATION, drivetrain.MAX_JERK);
+            Trajectory trajectory = Pathfinder.generate(points, config);
+
+            // create followers
+            TankModifier modifier = new TankModifier(trajectory).modify(drivetrain.WHEELBASE_WIDTH);
+            leftFollower = new EncoderFollower(modifier.getLeftTrajectory());
+            rightFollower = new EncoderFollower(modifier.getRightTrajectory());
+
+        } else {
+
+            // get left and right trajectories
+            Trajectory leftTrajectory = PathfinderFRC.getTrajectory(path.getFile() + ".left");
+            Trajectory rightTrajectory = PathfinderFRC.getTrajectory(path.getFile() + ".right");
+
+            // create followers
+            leftFollower = new EncoderFollower(leftTrajectory);
+            rightFollower = new EncoderFollower(rightTrajectory);
+
+        }
 
         // follower config
         leftFollower.configureEncoder((int) drivetrain.getRawLeftPosition(),
