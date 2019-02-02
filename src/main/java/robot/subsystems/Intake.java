@@ -31,14 +31,9 @@ public class Intake extends Subsystem {
 
         // Encoders
         wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-        resetEncoders();
 
-        // Intake config
-        enableRampRate();
-        setBrake();
-        intakeInverted = false;
-        wristInverted = false;
-        setInverted(false);
+        // Reset
+        reset();
 
     }
 
@@ -62,6 +57,11 @@ public class Intake extends Subsystem {
     /** Resets necessary devices. */
     public void reset() {
         resetEncoders();
+        enableRampRate();
+        setBrake();
+        intakeInverted = false;
+        wristInverted = false;
+        setInverted(false);
     }
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */
@@ -97,10 +97,16 @@ public class Intake extends Subsystem {
         wrist.setInverted(isInverted);
     }
 
-    /** Sets intake talons to coast mode. */
-    public void setCoast() {
+    /** Sets intake talons to brake mode. */
+    public void setBrake() {
         intake.setNeutralMode(NeutralMode.Brake);
         wrist.setNeutralMode(NeutralMode.Brake);
+    }
+
+    /** Sets intake talons to coast mode. */
+    public void setCoast() {
+        intake.setNeutralMode(NeutralMode.Coast);
+        wrist.setNeutralMode(NeutralMode.Coast);
     }
 
     /** Resets encoder values to 0 for both intake and intake wrist. */
