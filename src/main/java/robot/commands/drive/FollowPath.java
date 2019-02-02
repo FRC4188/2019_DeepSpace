@@ -4,6 +4,7 @@ import robot.Robot;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.PathfinderFRC;
 import jaci.pathfinder.Trajectory;
@@ -68,12 +69,18 @@ public class FollowPath extends Command {
         if(path == Path.TO_PERPENDICULAR) {
 
             // get necessary info from camera
-            double currentAngle = drivetrain.getGyroAngle();
-            double turnAngle = limelight.solvePerpendicular()[0];
+            double currentAngle = Math.toRadians(drivetrain.getGyroAngle());
+            double turnAngle = Math.toRadians(limelight.solvePerpendicular()[0]);
             double driveDist = limelight.solvePerpendicular()[1];
-            double x = driveDist * Math.cos(Math.toRadians(turnAngle));
-            double y = driveDist * Math.sin(Math.toRadians(turnAngle));
-            double targetAngle = limelight.solvePerpendicular()[2];
+            double x = driveDist * Math.cos(turnAngle);
+            double y = Math.signum(turnAngle) * driveDist * Math.sin(turnAngle);
+            double targetAngle = Math.toRadians(limelight.solvePerpendicular()[2]);
+
+            SmartDashboard.putNumber("driveDist", driveDist);
+            SmartDashboard.putNumber("current angle", currentAngle);
+            SmartDashboard.putNumber("x drive", x);
+            SmartDashboard.putNumber("y drive", y);
+            SmartDashboard.putNumber("target angle", targetAngle);
 
             // create points
             points = new Waypoint[] {
