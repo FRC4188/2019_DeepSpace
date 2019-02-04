@@ -12,7 +12,9 @@ public class Robot extends TimedRobot {
     public static Drivetrain drivetrain;
     public static Arm arm;
     public static LimeLight limelight;
+    public static Intake intake;
     public static OI oi;
+    
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -22,6 +24,7 @@ public class Robot extends TimedRobot {
         drivetrain = new Drivetrain();
         arm = new Arm();
         limelight = new LimeLight();
+        intake = new Intake();
         oi = new OI();
     }
 
@@ -33,6 +36,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         arm.reset();
+        intake.reset();
         drivetrain.reset();
     }
 
