@@ -115,6 +115,11 @@ public class OI {
         else return scaleJoystick(pilot.getX(hand), JoystickSens.SQUARED);
     }
 
+    /** Returns trigger axis on pilot controller. */
+    public double getPilotTrigger(Hand hand) {
+        return pilot.getTriggerAxis(hand);
+    }
+
     /** Returns y axis of Joystick on copilot controller. */
     public double getCopilotY(Hand hand) {
         if(Math.abs(copilot.getY(hand)) < Controller.DEADBAND) return 0;
@@ -125,6 +130,11 @@ public class OI {
     public double getCopilotX(Hand hand) {
         if(Math.abs(copilot.getX(hand)) < Controller.DEADBAND) return 0;
         else return scaleJoystick(copilot.getX(hand), JoystickSens.SQUARED);
+    }
+    
+    /** Returns trigger axis on pilot controller. */
+    public double getCopilotTrigger(Hand hand) {
+        return copilot.getTriggerAxis(hand);
     }
 
     /** Returns state of given button on pilot controller. */

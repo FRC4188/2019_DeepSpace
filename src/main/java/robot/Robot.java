@@ -14,7 +14,7 @@ public class Robot extends TimedRobot {
     public static LimeLight limelight;
     public static Intake intake;
     public static OI oi;
-    
+    public static Elevator elevator;
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -26,6 +26,7 @@ public class Robot extends TimedRobot {
         limelight = new LimeLight();
         intake = new Intake();
         oi = new OI();
+        elevator = new Elevator();
     }
 
     @Override
