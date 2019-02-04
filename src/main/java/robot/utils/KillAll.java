@@ -1,25 +1,26 @@
-package robot.commands.vision;
+package robot.utils;
 
 import edu.wpi.first.wpilibj.command.Command;
-import robot.Robot;
+import edu.wpi.first.wpilibj.command.Scheduler;
 
-public class LimeLightDefault extends Command {
-    public LimeLightDefault() {
-        requires(Robot.limelight);
+/** Kills all currently running processes on the robot. */
+public class KillAll extends Command {
+
+    public KillAll() {
     }
 
     @Override
     protected void initialize() {
-        Robot.limelight.useAsCamera();
     }
 
     @Override
     protected void execute() {
+        Scheduler.getInstance().removeAll();
     }
 
     @Override
     protected boolean isFinished() {
-        return false;
+        return true;
     }
 
     @Override
@@ -29,5 +30,5 @@ public class LimeLightDefault extends Command {
     @Override
     protected void interrupted() {
     }
-    
+
 }

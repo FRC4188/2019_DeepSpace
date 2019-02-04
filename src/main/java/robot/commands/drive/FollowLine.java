@@ -69,8 +69,15 @@ public class FollowLine extends Command {
                 drivetrain.arcade(SPEED, 0, 1.0);
                 lastLineTurn = 0;
             } else {
-                System.out.println("Lost track of line, driving backwards.");
-                drivetrain.arcade(-SPEED, lastLineTurn * TURN_MAJOR, 1.0);
+                String lastSense;
+                if(lastLineTurn == 0) {
+                    drivetrain.arcade(SPEED, 0, 1.0);
+                    System.out.println("Lost line, driving forward.");
+                } else {
+                    lastSense = (lastLineTurn == 1) ? "right" : "left";
+                    drivetrain.arcade(-SPEED, lastLineTurn * TURN_MAJOR, 1.0);
+                    System.out.println("Lost line, driving backwards and " + lastSense);
+                }
             }
         }
 
