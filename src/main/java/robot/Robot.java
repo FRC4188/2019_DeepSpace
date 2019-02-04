@@ -30,14 +30,14 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        limelight.trackRocketBayClose();
     }
 
     @Override
     public void disabledInit() {
-        drivetrain.resetEncoders();
-        drivetrain.resetGyro();
         arm.reset();
         intake.reset();
+        drivetrain.reset();
     }
 
     @Override

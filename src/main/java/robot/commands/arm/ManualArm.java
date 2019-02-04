@@ -21,7 +21,7 @@ public class ManualArm extends Command {
 
     @Override
     protected void execute() {
-        arm.control(oi.getCopilotY(Hand.kLeft), oi.getCopilotX(Hand.kRight), 1.0);
+        arm.set(oi.getCopilotY(Hand.kLeft));
     }
 
     @Override
