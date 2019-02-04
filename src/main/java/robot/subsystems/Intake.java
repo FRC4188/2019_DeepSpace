@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Intake extends Subsystem {
 
     // Device init
-    private WPI_TalonSRX intake = new WPI_TalonSRX(0);
-    private WPI_TalonSRX wrist = new WPI_TalonSRX(0);
+    private WPI_TalonSRX intakeMotor = new WPI_TalonSRX(0);
+    private WPI_TalonSRX wristMotor = new WPI_TalonSRX(0);
     private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(0, 1);
 
     // Manipulation constants
@@ -30,7 +30,7 @@ public class Intake extends Subsystem {
     public Intake(){
 
         // Encoders
-        wrist.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+        wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 
         // Reset
         reset();
@@ -66,12 +66,12 @@ public class Intake extends Subsystem {
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */
     public void spinIntake(double percent) {
-        intake.set(ControlMode.PercentOutput, percent);
+        intakeMotor.set(ControlMode.PercentOutput, percent);
     }
 
     /** Sets intake wrist motors to given percentage (-1.0, 1.0) */
     public void setWrist(double percent) {
-        wrist.set(ControlMode.PercentOutput, percent);
+        wristMotor.set(ControlMode.PercentOutput, percent);
     }
 
     /** Fires hatch solenoid in given direction. */
@@ -88,73 +88,73 @@ public class Intake extends Subsystem {
     /** Inverts the motors of the intake. */
     public void setIntakeInverted(boolean isInverted) {
         if(intakeInverted) isInverted = !isInverted;
-        intake.setInverted(isInverted);
+        intakeMotor.setInverted(isInverted);
     }
 
     /** Inverts the wrist of the intake. */
     public void setWristInverted(boolean isInverted) {
         if(wristInverted) isInverted = !isInverted;
-        wrist.setInverted(isInverted);
+        wristMotor.setInverted(isInverted);
     }
 
     /** Sets intake talons to brake mode. */
     public void setBrake() {
-        intake.setNeutralMode(NeutralMode.Brake);
-        wrist.setNeutralMode(NeutralMode.Brake);
+        intakeMotor.setNeutralMode(NeutralMode.Brake);
+        wristMotor.setNeutralMode(NeutralMode.Brake);
     }
 
     /** Sets intake talons to coast mode. */
     public void setCoast() {
-        intake.setNeutralMode(NeutralMode.Coast);
-        wrist.setNeutralMode(NeutralMode.Coast);
+        intakeMotor.setNeutralMode(NeutralMode.Coast);
+        wristMotor.setNeutralMode(NeutralMode.Coast);
     }
 
     /** Resets encoder values to 0 for both intake and intake wrist. */
     public void resetEncoders() {
-        wrist.setSelectedSensorPosition(0, 0, 10);
+        wristMotor.setSelectedSensorPosition(0, 0, 10);
     }
 
     /** Returns intake wrist encoder position in degrees. */
     public double getWristPosition() {
-        return intake.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
+        return intakeMotor.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
     }
 
     /** Returns intake wrist encoder position in native talon units. */
     public double getRawIntakeWristPosition() {
-        return wrist.getSelectedSensorPosition();
+        return wristMotor.getSelectedSensorPosition();
     }
 
     /** Returns intake wrist encoder velocity in degrees per second. */
     public double getIntakeWristVelocity() {
-        return wrist.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
+        return wristMotor.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
     }
 
     /** Returns intake motor output as a percentage. */
     public double getIntakeOutput() {
-        return intake.getMotorOutputPercent();
+        return intakeMotor.getMotorOutputPercent();
     }
 
     /** Returns intake wrist motor output as a percentage. */
     public double getWristOutput() {
-        return wrist.getMotorOutputPercent();
+        return wristMotor.getMotorOutputPercent();
     }
 
     /** Returns intake motor output current. */
     public double getIntakeCurrent() {
-        return intake.getOutputCurrent();
+        return intakeMotor.getOutputCurrent();
     }
 
     /** Returns intake wrist motor output current. */
     public double getWristCurrent() {
-        return wrist.getOutputCurrent();
+        return wristMotor.getOutputCurrent();
     }
 
     /** Enables open and closed loop ramp rate. */
     public void enableRampRate() {
-        intake.configClosedloopRamp(RAMP_RATE);
-        intake.configOpenloopRamp(RAMP_RATE);
-        wrist.configOpenloopRamp(RAMP_RATE);
-        wrist.configClosedloopRamp(RAMP_RATE);
+        intakeMotor.configClosedloopRamp(RAMP_RATE);
+        intakeMotor.configOpenloopRamp(RAMP_RATE);
+        wristMotor.configOpenloopRamp(RAMP_RATE);
+        wristMotor.configClosedloopRamp(RAMP_RATE);
     }
 
 }

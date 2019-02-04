@@ -23,22 +23,22 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         drivetrain = new Drivetrain();
         arm = new Arm();
-        limelight = new LimeLight();
         intake = new Intake();
-        oi = new OI();
         elevator = new Elevator();
+        limelight = new LimeLight();
+        oi = new OI();
     }
 
     @Override
     public void robotPeriodic() {
-        limelight.trackRocketBayClose();
     }
 
     @Override
     public void disabledInit() {
+        drivetrain.reset();
         arm.reset();
         intake.reset();
-        drivetrain.reset();
+        elevator.reset();
     }
 
     @Override

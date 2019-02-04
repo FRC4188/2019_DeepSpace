@@ -17,16 +17,16 @@ import com.revrobotics.CANSparkMax.IdleMode;
 public class Arm extends Subsystem {
 
     // Device initialization
-    private CANSparkMax shoulder = new CANSparkMax(0, MotorType.kBrushless);
+    private CANSparkMax shoulderMotor = new CANSparkMax(0, MotorType.kBrushless);
     private CANSparkMax shoulderSlave = new CANSparkMax(0, MotorType.kBrushless);
 
     // Encoders
-    private CANEncoder shoulderEncoder = new CANEncoder(shoulder);
+    private CANEncoder shoulderEncoder = new CANEncoder(shoulderMotor);
 
     // Manipulation constants
-    private final double TICKS_PER_REV = 1; // talon units
+    private final double TICKS_PER_REV = 1.0; // neo
     private final double ENCODER_TO_DEGREES = 360 / TICKS_PER_REV; // degrees
-    private final double RAMP_RATE = 0.05; // seconds
+    private final double RAMP_RATE = 0.5; // seconds
     private final double FEEDFORWARD = 0; // percent out
     public final double DELTA_T = 0.02; // seconds
 
@@ -37,16 +37,10 @@ public class Arm extends Subsystem {
     public Arm() {
 
         // Slave control
-        shoulderSlave.follow(shoulder);
+        shoulderSlave.follow(shoulderMotor);
 
-        // Encoders
-        resetEncoders();
-
-        // Arm config
-        enableRampRate();
-        setBrake();
-        shoulderInverted = false;
-        setInverted(false);
+        // Reset
+        reset();
 
     }
 
@@ -70,6 +64,10 @@ public class Arm extends Subsystem {
     /** Resets necessary devices. */
     public void reset() {
         resetEncoders();
+        enableRampRate();
+        setBrake();
+        shoulderInverted = false;
+        setInverted(false);
     }
 
     /** Sets shoulder motors to given percentage (-1.0, 1.0). */
@@ -77,25 +75,24 @@ public class Arm extends Subsystem {
         // add dynamic feedforward to counteract gravity and linearize response
         double output = percent + FEEDFORWARD * Math.cos(Math.toRadians(getPosition()));
         output = CSPMath.constrainKeepSign(output, 0, 1.0);
-        shoulder.set(output);
+        shoulderMotor.set(output);
     }
 
     /** Inverts the the arm. */
     public void setInverted(boolean isInverted) {
         if(shoulderInverted) isInverted = !isInverted;
-        shoulder.setInverted(isInverted);
+        shoulderMotor.setInverted(isInverted);
         shoulderSlave.setInverted(isInverted);
     }
 
-    /** Sets arm talons brake mode - Only mode that should be used. */
+    /** Sets shoulder to brake mode - Only mode that should be used. */
     public void setBrake() {
-        shoulder.setIdleMode(IdleMode.kBrake);
+        shoulderMotor.setIdleMode(IdleMode.kBrake);
         shoulderSlave.setIdleMode(IdleMode.kBrake);
     }
 
-    /** Resets encoder values to 0 for both shoulder and wrist. */
+    /** Resets shoulder encoder value to 0. */
     public void resetEncoders() {
-
     }
 
     /** Returns left encoder position in degrees. */
@@ -103,29 +100,29 @@ public class Arm extends Subsystem {
         return shoulderEncoder.getPosition() * ENCODER_TO_DEGREES;
     }
 
-    /** Returns shoulder encoder position in native talon units. */
+    /** Returns shoulder encoder position in native Spark units (revolutions). */
     public double getRawPosition() {
         return shoulderEncoder.getPosition();
     }
 
     /** Returns shoulder encoder velocity in degrees per second. */
     public double getVelocity() {
-        return shoulderEncoder.getVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
+        return shoulderEncoder.getVelocity() * ENCODER_TO_DEGREES / 60; // native is rpm
     }
 
     /** Returns shoulder motor output as a percentage. */
     public double getOutput() {
-        return shoulder.get();
+        return shoulderMotor.get();
     }
 
     /** Returns shoulder motor output current. */
     public double getCurrent() {
-        return shoulder.getOutputCurrent();
+        return shoulderMotor.getOutputCurrent();
     }
 
     /** Enables open and closed loop ramp rate. */
     public void enableRampRate() {
-        shoulder.setRampRate(RAMP_RATE);
+        shoulderMotor.setRampRate(RAMP_RATE);
     }
 
 }

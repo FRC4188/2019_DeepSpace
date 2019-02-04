@@ -11,13 +11,13 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 public class Elevator extends Subsystem {
 
     // Device initialization
-    private TalonSRX left = new TalonSRX(0);
-    private TalonSRX right = new TalonSRX(0);
+    private TalonSRX elevatorMotor = new TalonSRX(0);
+    private TalonSRX elevatorSlave = new TalonSRX(0);
 
     // Elevator constants
     private final double TICKS_PER_REV = 4096; // talon units
     private final double ENCODER_TO_DEGREES = 360 / TICKS_PER_REV; // degrees
-    private final double RAMP_RATE = 0.05; // seconds
+    private final double RAMP_RATE = 0.2; // seconds
     public final double DELTA_T = 0.02; // seconds
 
     // State vars
@@ -27,17 +27,13 @@ public class Elevator extends Subsystem {
     public Elevator() {
 
         // Slave control
-        left.follow(right);
+        elevatorSlave.follow(elevatorMotor);
 
         // Encoders
-        right.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-        resetEncoders();
+        elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 
-        // Arm config
-        enableRampRate();
-        setBrake();
-        elevatorInverted = false;
-        setInverted(false);
+        // Reset
+        reset();
 
     }
 
@@ -61,60 +57,64 @@ public class Elevator extends Subsystem {
     /** Resets necessary devices. */
     public void reset() {
         resetEncoders();
+        enableRampRate();
+        setBrake();
+        elevatorInverted = false;
+        setInverted(false);
     }
 
     /** Sets shoulder motors to given percentage (-1.0, 1.0) */
     public void set(double percent) {
-        right.set(ControlMode.PercentOutput, percent);
+        elevatorMotor.set(ControlMode.PercentOutput, percent);
     }
 
     /** Inverts the the elevator. */
     public void setInverted(boolean isInverted) {
         if(elevatorInverted) isInverted = !isInverted;
-        right.setInverted(isInverted);
-        left.setInverted(isInverted);
+        elevatorMotor.setInverted(isInverted);
+        elevatorSlave.setInverted(isInverted);
     }
 
     /** Sets arm talons brake mode - Only mode that should be used. */
     public void setBrake() {
-        right.setNeutralMode(NeutralMode.Brake);
-        left.setNeutralMode(NeutralMode.Brake);
+        elevatorMotor.setNeutralMode(NeutralMode.Brake);
+        elevatorSlave.setNeutralMode(NeutralMode.Brake);
     }
 
     /** Resets encoder values to 0 for both shoulder and wrist. */
     public void resetEncoders() {
-        right.setSelectedSensorPosition(0, 0, 10);
+        elevatorMotor.setSelectedSensorPosition(0, 0, 10);
     }
 
     /** Returns left encoder position in degrees. */
     public double getPosition() {
-        return right.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
+        return elevatorMotor.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
     }
 
     /** Returns elevator encoder position in native talon units. */
     public double getRawPosition() {
-        return right.getSelectedSensorPosition();
+        return elevatorMotor.getSelectedSensorPosition();
     }
 
     /** Returns elevator encoder velocity in degrees per second. */
     public double getVelocity() {
-        return right.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
+        return elevatorMotor.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
     }
 
     /** Returns elevator motor output as a percentage. */
     public double getOutput() {
-        return right.getMotorOutputPercent();
+        return elevatorMotor.getMotorOutputPercent();
     }
 
     /** Returns elevator motor output current. */
     public double getCurrent() {
-        return right.getOutputCurrent();
+        return elevatorMotor.getOutputCurrent();
     }
 
     /** Enables open and closed loop ramp rate. */
     public void enableRampRate() {
-        right.configClosedloopRamp(RAMP_RATE);
-        right.configOpenloopRamp(RAMP_RATE);
+        elevatorMotor.configClosedloopRamp(RAMP_RATE);
+        elevatorMotor.configOpenloopRamp(RAMP_RATE);
     }
 
 }

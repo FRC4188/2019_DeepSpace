@@ -16,14 +16,14 @@ import jaci.pathfinder.Pathfinder;
 public class Drivetrain extends Subsystem {
 
     // Device initialization
-    private CANSparkMax left = new CANSparkMax(0, MotorType.kBrushless);
+    private CANSparkMax leftMotor = new CANSparkMax(0, MotorType.kBrushless);
     private CANSparkMax leftSlave1 = new CANSparkMax(0, MotorType.kBrushless);
     private CANSparkMax leftSlave2 = new CANSparkMax(0, MotorType.kBrushless);
-    private CANSparkMax right = new CANSparkMax(0, MotorType.kBrushless);
+    private CANSparkMax rightMotor = new CANSparkMax(0, MotorType.kBrushless);
     private CANSparkMax rightSlave1 = new CANSparkMax(0, MotorType.kBrushless);
     private CANSparkMax rightSlave2 = new CANSparkMax(0, MotorType.kBrushless);
-    private CANEncoder leftEncoder = new CANEncoder(left);
-    private CANEncoder rightEncoder = new CANEncoder(right);
+    private CANEncoder leftEncoder = new CANEncoder(leftMotor);
+    private CANEncoder rightEncoder = new CANEncoder(rightMotor);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(1); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(2);
@@ -37,7 +37,7 @@ public class Drivetrain extends Subsystem {
     public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double TICKS_PER_REV = 1.0; // neo
-    public final double RAMP_RATE = 0.05; // seconds
+    public final double RAMP_RATE = 0.5; // seconds
     public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
     public final double DELTA_T = 0.02; // seconds
 
@@ -49,10 +49,10 @@ public class Drivetrain extends Subsystem {
     public Drivetrain() {
 
         // Slave control
-        leftSlave1.follow(left);
-        leftSlave2.follow(left);
-        rightSlave1.follow(right);
-        rightSlave2.follow(right);
+        leftSlave1.follow(leftMotor);
+        leftSlave2.follow(leftMotor);
+        rightSlave1.follow(rightMotor);
+        rightSlave2.follow(rightMotor);
 
         // Reset
         reset();
@@ -98,12 +98,12 @@ public class Drivetrain extends Subsystem {
 
     /** Sets left motors to given percentage (-1.0 - 1.0). */
     public void setLeft(double percent) {
-        left.set(percent);
+        leftMotor.set(percent);
     }
 
     /** Sets right motors to given percentage (-1.0 - 1.0). */
     public void setRight(double percent) {
-        right.set(percent);
+        rightMotor.set(percent);
     }
 
     /** Inverts drivetrain. True inverts each side from the
@@ -117,7 +117,7 @@ public class Drivetrain extends Subsystem {
      *  from the current state set in the Drivetrain constructor. */
     public void setLeftInverted(boolean isInverted) {
         if(leftInverted) isInverted = !isInverted;
-        left.setInverted(isInverted);
+        leftMotor.setInverted(isInverted);
         leftSlave1.setInverted(isInverted);
         leftSlave2.setInverted(isInverted);
     }
@@ -126,27 +126,27 @@ public class Drivetrain extends Subsystem {
      *  from the current state set in the Drivetrain constructor. */
     public void setRightInverted(boolean isInverted) {
         if(rightInverted) isInverted = !isInverted;
-        right.setInverted(isInverted);
+        rightMotor.setInverted(isInverted);
         rightSlave1.setInverted(isInverted);
         rightSlave2.setInverted(isInverted);
     }
 
-    /** Sets drive talons to brake mode. */
+    /** Sets drivetrain to brake mode. */
     public void setBrake() {
-        left.setIdleMode(IdleMode.kBrake);
+        leftMotor.setIdleMode(IdleMode.kBrake);
         leftSlave1.setIdleMode(IdleMode.kBrake);
         leftSlave2.setIdleMode(IdleMode.kBrake);
-        right.setIdleMode(IdleMode.kBrake);
+        rightMotor.setIdleMode(IdleMode.kBrake);
         rightSlave1.setIdleMode(IdleMode.kBrake);
         rightSlave2.setIdleMode(IdleMode.kBrake);
     }
 
-    /** Sets drive talons to coast mode. */
+    /** Sets drivetrain to coast mode. */
     public void setCoast() {
-        left.setIdleMode(IdleMode.kCoast);
+        leftMotor.setIdleMode(IdleMode.kCoast);
         leftSlave1.setIdleMode(IdleMode.kCoast);
         leftSlave2.setIdleMode(IdleMode.kCoast);
-        right.setIdleMode(IdleMode.kCoast);
+        rightMotor.setIdleMode(IdleMode.kCoast);
         rightSlave1.setIdleMode(IdleMode.kCoast);
         rightSlave2.setIdleMode(IdleMode.kCoast);
     }
@@ -197,17 +197,17 @@ public class Drivetrain extends Subsystem {
 
     /** Returns the left motor output as a percentage. */
     public double getLeftOutput() {
-        return left.get();
+        return leftMotor.get();
     }
 
         /** Returns the right motor output as a percentage. */
     public double getRightOutput() {
-        return right.get();
+        return rightMotor.get();
     }
 
     /** Returns average motor output current. */
     public double getMotorCurrent() {
-        return (left.getOutputCurrent() + right.getOutputCurrent()) / 2;
+        return (leftMotor.getOutputCurrent() + rightMotor.getOutputCurrent()) / 2;
     }
 
     /** Returns gyro angle in degrees. */
@@ -271,8 +271,8 @@ public class Drivetrain extends Subsystem {
 
     /** Enables open and closed loop ramp rate */
     public void enableRampRate() {
-        left.setRampRate(RAMP_RATE);
-        right.setRampRate(RAMP_RATE);
+        leftMotor.setRampRate(RAMP_RATE);
+        rightMotor.setRampRate(RAMP_RATE);
     }
 
     /** Sets gear shift solenoid to given value. */
