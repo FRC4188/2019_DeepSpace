@@ -1,9 +1,7 @@
 package robot;
 
 import robot.OI;
-import robot.subsystems.Drivetrain;
-import robot.subsystems.Elevator;
-import robot.subsystems.LimeLight;
+import robot.subsystems.*;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -12,7 +10,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 public class Robot extends TimedRobot {
 
     public static Drivetrain drivetrain;
+    public static Arm arm;
     public static LimeLight limelight;
+    public static Intake intake;
     public static OI oi;
     public static Elevator elevator;
 
@@ -22,19 +22,23 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         drivetrain = new Drivetrain();
+        arm = new Arm();
         limelight = new LimeLight();
+        intake = new Intake();
         oi = new OI();
         elevator = new Elevator();
     }
 
     @Override
     public void robotPeriodic() {
+        limelight.trackRocketBayClose();
     }
 
     @Override
     public void disabledInit() {
-        drivetrain.resetEncoders();
-        drivetrain.resetGyro();
+        arm.reset();
+        intake.reset();
+        drivetrain.reset();
     }
 
     @Override

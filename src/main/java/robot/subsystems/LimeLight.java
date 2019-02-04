@@ -5,7 +5,6 @@ import robot.commands.vision.LimeLightUseAsCamera;
 import robot.utils.CSPMath;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 
 /** Limelight vision camera. Used to detect reflective tape. */
@@ -196,20 +195,19 @@ public class LimeLight extends Subsystem {
                 Math.sin(camToPerpAngle)) / driveDist));
         double firstTurn = Robot.drivetrain.getGyroAngle() + limelightAngle + angleC;
 
-        // if already almost perpendicular (5 deg tolerance) then return 0
-        if(Math.abs(camToPerpAngle) > 5.0) {
-            return (new double[] { 0, 0, 0});
+        // if already almost perpendicular (5 deg tolerance) then return 0, else return vals
+        if(Math.abs(camToPerpAngle) < Math.toRadians(5.0)) {
+            return (new double[] { 0, 0, 0 });
+        } else {
+            return (new double[] {
+                firstTurn,  // 0
+                driveDist,  // 1
+                targetAngle // 2
+            });
         }
 
-        // return values as array
-        return (new double[] {
-            firstTurn,  // 0
-            driveDist,  // 1
-            targetAngle // 2
-        });
-
     }
-    
+
     /**
      * Returns the pipeline the camera is running
      */
