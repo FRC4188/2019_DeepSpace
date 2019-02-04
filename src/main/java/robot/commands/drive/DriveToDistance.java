@@ -12,7 +12,7 @@ public class DriveToDistance extends Command {
 
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
-    
+
     final double kP = 0.1;
     final double kI = 0;
     final double kD = 0;
@@ -48,7 +48,7 @@ public class DriveToDistance extends Command {
         // reset fields
         lastError = 0;
         integral = 0;
-        
+
     }
 
     @Override
