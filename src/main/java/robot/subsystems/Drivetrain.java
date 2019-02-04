@@ -16,18 +16,18 @@ import jaci.pathfinder.Pathfinder;
 public class Drivetrain extends Subsystem {
 
     // Device initialization
-    private CANSparkMax leftMotor = new CANSparkMax(0, MotorType.kBrushless);
-    private CANSparkMax leftSlave1 = new CANSparkMax(0, MotorType.kBrushless);
-    private CANSparkMax leftSlave2 = new CANSparkMax(0, MotorType.kBrushless);
-    private CANSparkMax rightMotor = new CANSparkMax(0, MotorType.kBrushless);
-    private CANSparkMax rightSlave1 = new CANSparkMax(0, MotorType.kBrushless);
-    private CANSparkMax rightSlave2 = new CANSparkMax(0, MotorType.kBrushless);
+    private CANSparkMax leftMotor = new CANSparkMax(1, MotorType.kBrushless);
+    private CANSparkMax leftSlave1 = new CANSparkMax(2, MotorType.kBrushless);
+    private CANSparkMax leftSlave2 = new CANSparkMax(3, MotorType.kBrushless);
+    private CANSparkMax rightMotor = new CANSparkMax(4, MotorType.kBrushless);
+    private CANSparkMax rightSlave1 = new CANSparkMax(5, MotorType.kBrushless);
+    private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
     private CANEncoder leftEncoder = new CANEncoder(leftMotor);
     private CANEncoder rightEncoder = new CANEncoder(rightMotor);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
-    private DigitalInput lineSensorLeft = new DigitalInput(1); // yellow wire up
-    private DigitalInput lineSensorMid = new DigitalInput(2);
-    private DigitalInput lineSensorRight = new DigitalInput(3);
+    private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
+    private DigitalInput lineSensorMid = new DigitalInput(1);
+    private DigitalInput lineSensorRight = new DigitalInput(2);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Drive constants
@@ -269,7 +269,7 @@ public class Drivetrain extends Subsystem {
         fieldPosY = 0;
     }
 
-    /** Enables open and closed loop ramp rate */
+    /** Enables ramp rate */
     public void enableRampRate() {
         leftMotor.setRampRate(RAMP_RATE);
         rightMotor.setRampRate(RAMP_RATE);

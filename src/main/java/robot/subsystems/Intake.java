@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Intake extends Subsystem {
 
     // Device init
-    private WPI_TalonSRX intakeMotor = new WPI_TalonSRX(0);
-    private WPI_TalonSRX wristMotor = new WPI_TalonSRX(0);
+    private WPI_TalonSRX wristMotor = new WPI_TalonSRX(31);
+    private WPI_TalonSRX intakeMotor = new WPI_TalonSRX(32);
     private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(0, 1);
 
     // Manipulation constants

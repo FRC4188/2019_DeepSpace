@@ -4,21 +4,16 @@ import robot.commands.arm.ManualArm;
 import robot.utils.CSPMath;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.IdleMode;
 
 public class Arm extends Subsystem {
 
     // Device initialization
-    private CANSparkMax shoulderMotor = new CANSparkMax(0, MotorType.kBrushless);
-    private CANSparkMax shoulderSlave = new CANSparkMax(0, MotorType.kBrushless);
+    private CANSparkMax shoulderMotor = new CANSparkMax(21, MotorType.kBrushless);
+    private CANSparkMax shoulderSlave = new CANSparkMax(22, MotorType.kBrushless);
 
     // Encoders
     private CANEncoder shoulderEncoder = new CANEncoder(shoulderMotor);
