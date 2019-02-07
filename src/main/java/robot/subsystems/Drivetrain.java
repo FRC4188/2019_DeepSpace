@@ -75,6 +75,7 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Gyro", getGyroAngle());
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
+        SmartDashboard.putNumber("Target angle", getTargetAngle());
     }
 
     /** Runs every loop. */
@@ -269,7 +270,33 @@ public class Drivetrain extends Subsystem {
         fieldPosY = 0;
     }
 
-    /** Enables ramp rate */
+    /** Estimates target angle based off of field position and gyro angle. */
+    public double getTargetAngle() {
+
+        // get robot info
+        double y = getFieldPosY();
+        double theta = getGyroAngle();
+
+        // vars based on info
+        double angleDir = (theta > 0) ? 1 : -1;
+        boolean inHab = CSPMath.isBetween(y, -6, 6);
+
+        // estimate angle
+        if(inHab && CSPMath.isBetween(theta, -30, 30)) {
+            return 0; // front of ship
+        } else if(!inHab && CSPMath.isBetween(theta, -30, 30)) {
+            return 28.75 * angleDir; // front of rocket
+        } else if(CSPMath.isBetween(theta, 31 * angleDir, 130 * angleDir)) {
+            return 90 * angleDir; // middle of rocket or side of ship
+        } else if(CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
+            return 151.25 * angleDir; // back of rocket
+        } else {
+            return 0; // default
+        }
+
+    }
+
+    /** Enables ramp rate. */
     public void enableRampRate() {
         leftMotor.setRampRate(RAMP_RATE);
         rightMotor.setRampRate(RAMP_RATE);
