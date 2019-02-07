@@ -161,21 +161,8 @@ public class LimeLight extends Subsystem {
         // length away we want to be from target once perpendicular (ft)
         final double PERP_LENGTH = 4;
 
-        // estimate field relative target angle based off current heading
-        // currently works for all targets except two on end of ship
-        // NEEDS WORK
-        double targetAngle;
-        double gyroAngle = Robot.drivetrain.getGyroAngle();
-        if(CSPMath.isBetween(gyroAngle, 0, 39)) targetAngle = 28.75;
-        else if(CSPMath.isBetween(gyroAngle, 40, 140)) targetAngle = 90;
-        else if(CSPMath.isBetween(gyroAngle, 141, 180)) targetAngle = 151.25;
-        else if(CSPMath.isBetween(gyroAngle, -1, -39)) targetAngle = -28.75;
-        else if(CSPMath.isBetween(gyroAngle, -40, -140)) targetAngle = -90;
-        else if(CSPMath.isBetween(gyroAngle, -141, -180)) targetAngle = -151.25;
-        else targetAngle = 0;
-
         // get known side lengths and angles (feet and degrees)
-        // all angles relative to target, not field
+        double targetAngle = Robot.drivetrain.getTargetAngle();
         double robotAngle = Robot.drivetrain.getGyroAngle() - targetAngle;
         double limelightAngle = getHorizontalAngle();
         double distToTarget = getDistance(getPipeline().getHeight());

@@ -1,6 +1,7 @@
 package robot.subsystems;
 
 import robot.commands.drive.ManualDrive;
+import robot.utils.CSPMath;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -18,10 +19,8 @@ public class Drivetrain extends Subsystem {
     // Device initialization
     private WPI_TalonSRX left = new WPI_TalonSRX(6);
     private WPI_TalonSRX leftSlave1 = new WPI_TalonSRX(5);
-    //private WPI_TalonSRX leftSlave2 = new WPI_TalonSRX(0);
     private WPI_TalonSRX right = new WPI_TalonSRX(7);
     private WPI_TalonSRX rightSlave1 = new WPI_TalonSRX(8);
-    //private WPI_TalonSRX rightSlave2 = new WPI_TalonSRX(0);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(1); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(2);
@@ -48,9 +47,7 @@ public class Drivetrain extends Subsystem {
 
         // Slave control
         leftSlave1.follow(left);
-        //leftSlave2.follow(left);
         rightSlave1.follow(right);
-        //rightSlave2.follow(right);
 
         // Encoders
         left.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
@@ -85,6 +82,7 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Gyro", getGyroAngle());
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
+        SmartDashboard.putNumber("Target angle", getTargetAngle());
     }
 
     /** Runs every loop. */
@@ -124,7 +122,6 @@ public class Drivetrain extends Subsystem {
         if(leftInverted) isInverted = !isInverted;
         left.setInverted(isInverted);
         leftSlave1.setInverted(isInverted);
-        //leftSlave2.setInverted(isInverted);
     }
 
     /** Inverts the right side of the drivetrain. True inverts it
@@ -133,27 +130,22 @@ public class Drivetrain extends Subsystem {
         if(rightInverted) isInverted = !isInverted;
         right.setInverted(isInverted);
         rightSlave1.setInverted(isInverted);
-        //rightSlave2.setInverted(isInverted);
     }
 
     /** Sets drive talons to brake mode. */
     public void setBrake() {
         left.setNeutralMode(NeutralMode.Brake);
         leftSlave1.setNeutralMode(NeutralMode.Brake);
-        //leftSlave2.setNeutralMode(NeutralMode.Brake);
         right.setNeutralMode(NeutralMode.Brake);
         rightSlave1.setNeutralMode(NeutralMode.Brake);
-        //rightSlave2.setNeutralMode(NeutralMode.Brake);
     }
 
     /** Sets drive talons to coast mode. */
     public void setCoast() {
         left.setNeutralMode(NeutralMode.Coast);
         leftSlave1.setNeutralMode(NeutralMode.Coast);
-        //leftSlave2.setNeutralMode(NeutralMode.Coast);
         right.setNeutralMode(NeutralMode.Coast);
         rightSlave1.setNeutralMode(NeutralMode.Coast);
-        //rightSlave2.setNeutralMode(NeutralMode.Coast);
     }
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
@@ -274,6 +266,32 @@ public class Drivetrain extends Subsystem {
     public void resetFieldPos() {
         fieldPosX = 0;
         fieldPosY = 0;
+    }
+
+    /** Estimates target angle based off of field position and gyro angle. */
+    public double getTargetAngle() {
+
+        // get robot info
+        double y = getFieldPosY();
+        double theta = getGyroAngle();
+
+        // vars based on info
+        double angleDir = (theta > 0) ? 1 : -1;
+        boolean inHab = CSPMath.isBetween(y, -6, 6);
+
+        // estimate angle
+        if(inHab && CSPMath.isBetween(theta, -30, 30)) {
+            return 0; // front of ship
+        } else if(!inHab && CSPMath.isBetween(theta, -30, 30)) {
+            return 28.75 * angleDir; // front of rocket
+        } else if(CSPMath.isBetween(theta, 31 * angleDir, 130 * angleDir)) {
+            return 90 * angleDir; // middle of rocket or side of ship
+        } else if(CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
+            return 151.25 * angleDir; // back of rocket
+        } else {
+            return 0; // default
+        }
+
     }
 
     /** Enables open and closed loop ramp rate */
