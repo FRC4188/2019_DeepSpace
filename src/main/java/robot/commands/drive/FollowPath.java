@@ -71,7 +71,7 @@ public class FollowPath extends Command {
             // get necessary info from camera
             double currentAngle = Math.toRadians(drivetrain.getGyroAngle());
             double turnAngle = Math.toRadians(limelight.solvePerpendicular()[0]);
-            double driveDist = limelight.solvePerpendicular()[1];
+            double driveDist = limelight.solvePerpendicular()[1] * 0.9;
             double x = driveDist * Math.cos(turnAngle);
             double y = driveDist * Math.sin(turnAngle);
             double targetAngle = Math.toRadians(limelight.solvePerpendicular()[2]);

@@ -74,8 +74,8 @@ public class FollowObject extends Command {
 
         // angle p loop, turns less as distance shrinks
         angleErr = angleSetpoint - drivetrain.getGyroAngle();
-        double distReducer = distance / initialDist;
-        double turnOutput = TURN_kP * angleErr * distReducer;
+        //double distReducer = distance / initialDist;
+        double turnOutput = TURN_kP * angleErr;
         double zTurn = (Math.abs(angleErr) > ANGLE_TOLERANCE) ?
                 CSPMath.constrainKeepSign(turnOutput, 0.15, 1.0) : 0;
 
