@@ -3,9 +3,12 @@ package robot.subsystems;
 import robot.Robot;
 import robot.commands.vision.LimeLightDefault;
 import robot.utils.CSPMath;
+import robot.utils.PointFinder;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.networktables.NetworkTable;
+import org.opencv.calib3d.*;
+import org.opencv.core.*;
 
 /** Limelight vision camera. Used to detect reflective tape. */
 public class LimeLight extends Subsystem {
@@ -13,13 +16,16 @@ public class LimeLight extends Subsystem {
     // limelight network table
     NetworkTable limelightTable = null;
 
-    // distance for target
-    private final double TAPE_HEIGHT = 6.0/12;
-    private final double HORIZONTAL_SCALE = Math.tan(Math.toRadians(27));
-    private final double VERTICAL_SCALE = Math.tan(Math.toRadians(20.5));
-
     // current pipeline
     private Pipeline currentPipeline = Pipeline.OFF;
+
+    // matrix stuff
+    private MatOfPoint3f mObjectPoints;
+    private Mat mCameraMatrix;
+    private MatOfDouble mDistortionCoefficients;
+
+    // flipped status
+    private boolean isFlipped = false;
 
     // LED mode enum
     public enum LedMode {
@@ -50,7 +56,9 @@ public class LimeLight extends Subsystem {
     // pipeline enum 
     public enum Pipeline {
         OFF(0, 0.0), CARGO(1, 13.0/12), HATCH(2, 19.0/12),
-                BAY_CLOSE(3, 6.0/12), BAY_HIGH(4, 6.0/12);
+                BAY_CLOSE(3, 6.0/12), BAY_HIGH(4, 6.0/12),
+                CARGO_FLIP(5, 13.0/12), HATCH_FLIP(6, 19.0/12),
+                BAY_CLOSE_FLIP(7, 6.0/12), BAY_HIGH_FLIP(8, 6.0/12);
 
         private final int value;
         private final double height;
@@ -79,6 +87,19 @@ public class LimeLight extends Subsystem {
      */
     public LimeLight() {
         limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+        mObjectPoints = new MatOfPoint3f(new Point3(0.0, 0.0, 0.0), // bottom right
+                new Point3(-1.9363, 0.5008, 0.0), // bottom left
+                new Point3(-0.5593, 5.8258, 0.0), // top-left
+                new Point3(1.377, 5.325, 0.0) // top-right
+        );
+        mCameraMatrix = Mat.eye(3, 3, CvType.CV_64F);
+        mCameraMatrix.put(0, 0, 2.5751292067328632e+02);
+        mCameraMatrix.put(0, 2, 1.5971077914723165e+02);
+        mCameraMatrix.put(1, 1, 2.5635071715912881e+02);
+        mCameraMatrix.put(1, 2, 1.1971433393615548e+02);
+
+        mDistortionCoefficients = new MatOfDouble(2.9684613693070039e-01, -1.4380252254747885e+00,
+                -2.2098421479494509e-03, -3.3894563533907176e-03, 2.5344430354806740e+00);
     }
 
     /**
@@ -157,8 +178,41 @@ public class LimeLight extends Subsystem {
      * Returns the robot angle relative to the wall.
      */
     public double getRobotAngle(){
-       // wait until Limelight gives orientation function
-       return 0.0;
+        // get corner data
+        double[] cornX = limelightTable.getEntry("tcornx").getDoubleArray(new double[0]);
+        double[] cornY = limelightTable.getEntry("tcorny").getDoubleArray(new double[0]);
+        if (cornX.length != 4 || cornY.length != 4) {
+            System.out.println("[ERROR] Could not find 4 points from image");
+            return 0.0;
+        }
+        // find the corners
+        PointFinder pointFinder = new PointFinder(cornX, cornY);
+        MatOfPoint2f imagePoints = new MatOfPoint2f(pointFinder.getBottomRight(), pointFinder.getBottomLeft(),
+                pointFinder.getTopLeft(), pointFinder.getTopRight());
+        Mat rotationVector = new Mat();
+        Mat translationVector = new Mat();
+        Calib3d.solvePnP(mObjectPoints, imagePoints, mCameraMatrix, mDistortionCoefficients, rotationVector,
+                translationVector);
+        Mat rotationMatrix = new Mat();
+        Calib3d.Rodrigues(rotationVector, rotationMatrix);
+        
+        Mat projectionMatrix = new Mat(3, 4, CvType.CV_64F);
+        projectionMatrix.put(0, 0, rotationMatrix.get(0, 0)[0], rotationMatrix.get(0, 1)[0],
+                rotationMatrix.get(0, 2)[0], translationVector.get(0, 0)[0], rotationMatrix.get(1, 0)[0],
+                rotationMatrix.get(1, 1)[0], rotationMatrix.get(1, 2)[0], translationVector.get(1, 0)[0],
+                rotationMatrix.get(2, 0)[0], rotationMatrix.get(2, 1)[0], rotationMatrix.get(2, 2)[0],
+                translationVector.get(2, 0)[0]);
+
+        Mat cameraMatrix = new Mat();
+        Mat rotMatrix = new Mat();
+        Mat transVect = new Mat();
+        Mat rotMatrixX = new Mat();
+        Mat rotMatrixY = new Mat();
+        Mat rotMatrixZ = new Mat();
+        Mat eulerAngles = new Mat();
+        Calib3d.decomposeProjectionMatrix(projectionMatrix, cameraMatrix, rotMatrix, transVect, rotMatrixX, rotMatrixY,
+                rotMatrixZ, eulerAngles);
+        return eulerAngles.get(1, 0)[0]; 
     }
 
     /** Returns necessary distances and turns to get from current location to
@@ -219,6 +273,13 @@ public class LimeLight extends Subsystem {
     }
 
     /**
+     * Flips the LimeLight so it faces the other way
+     */
+    public void flipCamera(){
+        isFlipped = !isFlipped;
+    }
+
+    /**
      * Returns the pipeline the camera is running
      */
     public Pipeline getPipeline() {
@@ -231,7 +292,11 @@ public class LimeLight extends Subsystem {
     public void trackShipBay() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY_CLOSE);
+        if(isFlipped){
+            setPipeline(Pipeline.BAY_CLOSE_FLIP);
+        } else {
+            setPipeline(Pipeline.BAY_CLOSE);
+        }
     }
 
     /**
@@ -240,7 +305,11 @@ public class LimeLight extends Subsystem {
     public void trackRocketBayClose() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY_CLOSE);
+        if(isFlipped){
+            setPipeline(Pipeline.BAY_CLOSE_FLIP);
+        } else {
+            setPipeline(Pipeline.BAY_CLOSE);
+        }
     }
 
     /**
@@ -249,7 +318,11 @@ public class LimeLight extends Subsystem {
     public void trackRocketBayHigh() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY_HIGH);
+        if(isFlipped){
+            setPipeline(Pipeline.BAY_HIGH_FLIP);
+        } else {
+            setPipeline(Pipeline.BAY_HIGH);
+        }
     }
 
     /**
@@ -258,7 +331,11 @@ public class LimeLight extends Subsystem {
     public void trackCargo() {
         setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.CARGO);
+        if(isFlipped){
+            setPipeline(Pipeline.CARGO_FLIP);
+        } else {
+            setPipeline(Pipeline.CARGO);
+        }
     }
 
     /**
@@ -267,7 +344,11 @@ public class LimeLight extends Subsystem {
     public void trackHatch() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.HATCH);
+        if (isFlipped) {
+            setPipeline(Pipeline.HATCH_FLIP);
+        } else {
+            setPipeline(Pipeline.HATCH);
+        }
     }
 
     /**
