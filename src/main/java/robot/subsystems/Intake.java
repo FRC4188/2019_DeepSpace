@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -16,6 +17,8 @@ public class Intake extends Subsystem {
     private WPI_TalonSRX wristMotor = new WPI_TalonSRX(31);
     private WPI_TalonSRX intakeMotor = new WPI_TalonSRX(32);
     private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(0, 1);
+    private DigitalInput frontCargoSensor = new DigitalInput(4);
+    private DigitalInput rearCargoSensor = new DigitalInput(5);
 
     // Manipulation constants
     private final double TICKS_PER_REV = 4096; // talon units
@@ -23,8 +26,14 @@ public class Intake extends Subsystem {
     private final double RAMP_RATE = 0.05; // seconds
     public final double DELTA_T = 0.02; // seconds
 
+    // State enums
+    public enum WristState { CARGO, HATCH }
+    public enum IntakeState { EMPTY, FULL }
+
     // State vars
     private boolean intakeInverted, wristInverted;
+    private WristState wristState;
+    private IntakeState intakeState;
 
     /** Constructs intake object and configures devices. */
     public Intake(){
@@ -46,6 +55,8 @@ public class Intake extends Subsystem {
     /** Prints info to dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Wrist pos", getWristPosition());
+        SmartDashboard.putString("Wrist state", getWristState().toString());
+        SmartDashboard.putString("Intake state", getIntakeState().toString());
     }
 
     /** Runs every loop. */
@@ -62,6 +73,8 @@ public class Intake extends Subsystem {
         intakeInverted = false;
         wristInverted = false;
         setInverted(false);
+        setWristState(WristState.HATCH);
+        setIntakeState(IntakeState.FULL);
     }
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */
@@ -74,9 +87,18 @@ public class Intake extends Subsystem {
         wristMotor.set(ControlMode.PercentOutput, percent);
     }
 
-    /** Fires hatch solenoid in given direction. */
-    public void fireHatchSolenoid(Value value) {
-        hatchSolenoid.set(value);
+    /** Fires hatch cylinders inward. */
+    public void hatchCylindersIn() {
+        hatchSolenoid.set(Value.kReverse);
+    }
+
+    /** Fires hatch cylinders outward. */
+    public void hatchCylindersOut() {
+        hatchSolenoid.set(Value.kForward);
+    }
+
+    public void hatchSolenoidOff() {
+        hatchSolenoid.set(Value.kOff);
     }
 
     /** Inverts intake. */
@@ -155,6 +177,36 @@ public class Intake extends Subsystem {
         intakeMotor.configOpenloopRamp(RAMP_RATE);
         wristMotor.configOpenloopRamp(RAMP_RATE);
         wristMotor.configClosedloopRamp(RAMP_RATE);
+    }
+
+    /** Returns the current state of the wrist orientation (cargo or hatch). */
+    public WristState getWristState() {
+        return wristState;
+    }
+
+    /** Returns the current state of the intake (empty or full). */
+    public IntakeState getIntakeState() {
+        return intakeState;
+    }
+
+    /** Sets wrist orientation state variable to cargo or hatch. */
+    public void setWristState(WristState state) {
+        wristState = state;
+    }
+
+    /** Sets intake state variable to empty or full. */
+    public void setIntakeState(IntakeState state) {
+        intakeState = state;
+    }
+
+    /** Returns true if the front cargo sensor sees an object. */
+    public boolean getFrontCargoSensor() {
+        return frontCargoSensor.get();
+    }
+
+    /** Returns true if the rear cargo sensor sees an object. */
+    public boolean getRearCargoSensor() {
+        return rearCargoSensor.get();
     }
 
 }
