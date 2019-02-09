@@ -3,7 +3,6 @@ package robot;
 import robot.OI;
 import robot.subsystems.*;
 import robot.utils.Logger;
-import badlog.lib.BadLog;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -18,6 +17,7 @@ public class Robot extends TimedRobot {
     public static Elevator elevator;
     public static OI oi;
     public static Logger logger;
+    public static Climber climber;
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -32,6 +32,7 @@ public class Robot extends TimedRobot {
         elevator = new Elevator();
         limelight = new LimeLight();
         oi = new OI();
+        climber = new Climber();
 
         // start logger
         logger.init();
@@ -47,8 +48,9 @@ public class Robot extends TimedRobot {
     public void disabledInit() {
         drivetrain.reset();
         arm.reset();
-        intake.reset();
+        intake.reset(); 
         elevator.reset();
+        climber.reset();
     }
 
     @Override
