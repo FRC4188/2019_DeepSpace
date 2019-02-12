@@ -79,7 +79,7 @@ public class OI {
     public OI() {
         pilotA.whenPressed(new FollowPath(Paths.testPath, false));
         pilotB.whenPressed(new TurnToAngle(27, 5, Angle.RELATIVE));
-        pilotX.whenPressed(new FollowObject(Object.BAY));
+        pilotX.whenPressed(new FollowObject(Object.BAY, 15.0/12));
         pilotY.whenPressed(new DepositToBay());
         pilotLS.whenPressed(new ShiftGear());
         pilotBack.whenPressed(new KillAll());

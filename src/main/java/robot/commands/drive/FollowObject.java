@@ -10,7 +10,7 @@ import robot.utils.CSPMath;
 public class FollowObject extends Command {
 
     public enum Object {
-        CARGO, BAY
+        CARGO, BAY, BAY_3D
     }
 
     Drivetrain drivetrain = Robot.drivetrain;
@@ -26,10 +26,14 @@ public class FollowObject extends Command {
     final double ANGLE_TOLERANCE = 3.0;
     final double DIST_TOLERANCE = 0.5;
 
-    public FollowObject(Object object) {
+    double perpLength;
+    boolean closerThanTarget = false;
+
+    public FollowObject(Object object, double perpLength) {
         requires(Robot.drivetrain);
         requires(Robot.limelight);
         this.object = object;
+        this.perpLength = perpLength;
     }
 
     @Override
@@ -39,11 +43,13 @@ public class FollowObject extends Command {
             limelight.trackCargo();
         } else if(object == Object.BAY) {
             limelight.trackBay();
+        } else if(object == Object.BAY_3D){
+            limelight.trackBay3D();
         }
 
         // reset
         isFollowing = false;
-
+        closerThanTarget = perpLength > limelight.getDistance(limelight.getPipeline().getHeight());
     }
 
     @Override
@@ -63,7 +69,7 @@ public class FollowObject extends Command {
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
         distance = limelight.getDistance(limelight.getPipeline().getHeight());
-        distErr = distance - (15 / 12); // stop 2 ft away
+        distErr = distance - perpLength; // stop distanceToTarget away
         if(distErr < 0) distErr = 0;
 
         // distance p loop
@@ -90,9 +96,10 @@ public class FollowObject extends Command {
     protected boolean isFinished() {
         // end if dist and angle are within tolerance and it was following
         // or if any line followers sense a line
+        // or if the robot is already close to the target
         return ((Math.abs(angleErr) < ANGLE_TOLERANCE)
                 && (Math.abs(distErr) < DIST_TOLERANCE) && isFollowing)
-                || (leftSense || midSense || rightSense);
+                || (leftSense || midSense || rightSense) || closerThanTarget;
     }
 
     @Override

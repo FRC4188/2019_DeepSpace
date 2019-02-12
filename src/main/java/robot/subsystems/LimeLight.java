@@ -250,7 +250,7 @@ public class LimeLight extends Subsystem {
         } else {
             xOffset = 0.0;
         }
-        zOffset = camtranBuffer.get(0)[2];
+        zOffset = CSPMath.average(zOffsets);
         return new double[]{xOffset/12, zOffset/12};
     }
 

@@ -68,6 +68,7 @@ public class FollowPath extends Command {
         // create waypoints if going to perpendicular
         if(path == Path.TO_PERPENDICULAR) {
 
+            /*
             // get necessary info from camera
             double currentAngle = Math.toRadians(drivetrain.getGyroAngle());
             double turnAngle = Math.toRadians(limelight.solvePerpendicular()[0]);
@@ -81,11 +82,17 @@ public class FollowPath extends Command {
             SmartDashboard.putNumber("x drive", x);
             SmartDashboard.putNumber("y drive", y);
             SmartDashboard.putNumber("target angle", targetAngle);
+            */
 
+            final int PERP_LENGTH = 2;
+            double[] distances = limelight.getDistance3d();
+            double robotAngle = limelight.getRobotAngle();
             // create points
             points = new Waypoint[] {
-                new Waypoint(0, 0, currentAngle),
-                new Waypoint(x, y, targetAngle)
+                //new Waypoint(0, 0, currentAngle),
+                //new Waypoint(x, y, targetAngle)
+                new Waypoint(0, 0, Math.toRadians(robotAngle)),
+                new Waypoint(distances[1]-PERP_LENGTH, distances[0], 0)
             };
 
         }
