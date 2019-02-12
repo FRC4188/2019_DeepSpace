@@ -2,15 +2,8 @@ package robot;
 
 import robot.OI;
 import robot.subsystems.*;
-<<<<<<< HEAD
-import robot.subsystems.LimeLight.Pipeline;
-
-import java.util.ArrayList;
-
-=======
 import robot.utils.Logger;
 import badlog.lib.BadLog;
->>>>>>> master
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -47,12 +40,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-<<<<<<< HEAD
-        limelight.trackBay();
-        drivetrain.trackFieldPosition();
-=======
         logger.update();
->>>>>>> master
     }
 
     @Override
