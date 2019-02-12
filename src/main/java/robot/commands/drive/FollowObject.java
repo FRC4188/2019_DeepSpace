@@ -10,7 +10,7 @@ import robot.utils.CSPMath;
 public class FollowObject extends Command {
 
     public enum Object {
-        CARGO, BAY_CLOSE, BAY_HIGH
+        CARGO, BAY
     }
 
     Drivetrain drivetrain = Robot.drivetrain;
@@ -37,10 +37,8 @@ public class FollowObject extends Command {
 
         if(object == Object.CARGO) {
             limelight.trackCargo();
-        } else if(object == Object.BAY_CLOSE) {
-            limelight.trackRocketBayClose();
-        } else if(object == Object.BAY_HIGH) {
-            limelight.trackRocketBayHigh();
+        } else if(object == Object.BAY) {
+            limelight.trackBay();
         }
 
         // reset

@@ -2,11 +2,14 @@ package robot;
 
 import robot.OI;
 import robot.subsystems.*;
+import robot.subsystems.LimeLight.Pipeline;
+
+import java.util.ArrayList;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -32,8 +35,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        limelight.trackRocketBayClose();
-        SmartDashboard.putNumber("Robot angle", limelight.getRobotAngle());
+        limelight.trackBay();
         drivetrain.trackFieldPosition();
     }
 

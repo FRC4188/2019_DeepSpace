@@ -5,8 +5,12 @@ import robot.commands.vision.LimeLightDefault;
 import robot.utils.CSPMath;
 import robot.utils.PointFinder;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.networktables.NetworkTable;
+
+import java.util.ArrayList;
+
 import org.opencv.calib3d.*;
 import org.opencv.core.*;
 
@@ -24,8 +28,12 @@ public class LimeLight extends Subsystem {
     private Mat mCameraMatrix;
     private MatOfDouble mDistortionCoefficients;
 
-    // flipped status
+    // flipping stuff
     private boolean isFlipped = false;
+    private Servo flipServo;
+
+    // camtran data
+    ArrayList<double[]> camtranBuffer;
 
     // LED mode enum
     public enum LedMode {
@@ -56,9 +64,9 @@ public class LimeLight extends Subsystem {
     // pipeline enum 
     public enum Pipeline {
         OFF(0, 0.0), CARGO(1, 13.0/12), HATCH(2, 19.0/12),
-                BAY_CLOSE(3, 6.0/12), BAY_HIGH(4, 6.0/12),
+                BAY_CLOSE(3, 6.0/12), BAY_3D(4,6.0/12),
                 CARGO_FLIP(5, 13.0/12), HATCH_FLIP(6, 19.0/12),
-                BAY_CLOSE_FLIP(7, 6.0/12), BAY_HIGH_FLIP(8, 6.0/12);
+                BAY_CLOSE_FLIP(7, 6.0/12), BAY_3D_FLIP(4, 6.0 / 12);
 
         private final int value;
         private final double height;
@@ -82,6 +90,18 @@ public class LimeLight extends Subsystem {
         setDefaultCommand(new LimeLightDefault());
     }
 
+    @Override
+    public void periodic(){
+        if(currentPipeline == Pipeline.BAY_3D || currentPipeline == Pipeline.BAY_3D_FLIP){
+            double[] camtran = getCamtran();
+            if (camtran != null) {
+                camtranBuffer.add(camtran);
+                if (camtranBuffer.size() > 5)
+                    camtranBuffer.remove(0);
+            }
+        }
+    }
+
     /**
      * Constructor for Limelight.
      */
@@ -100,6 +120,9 @@ public class LimeLight extends Subsystem {
 
         mDistortionCoefficients = new MatOfDouble(2.9684613693070039e-01, -1.4380252254747885e+00,
                 -2.2098421479494509e-03, -3.3894563533907176e-03, 2.5344430354806740e+00);
+
+        flipServo = new Servo(0);
+        camtranBuffer = new ArrayList<>();
     }
 
     /**
@@ -148,11 +171,18 @@ public class LimeLight extends Subsystem {
         return limelightTable.getEntry("ty").getDouble(0.0);
     }
 
+    /**
+     * Returns the 3d camera data
+     */
+    public double[] getCamtran(){
+        return limelightTable.getEntry("camtran").getDoubleArray((double[])null);
+    }
+
     /** Returns distance in feet from object of height s (feet). 
      *  Uses s = r(theta). */
     public double getDistance(double objectHeight) {
         final double CAMERA_HEIGHT = 240; // pixels
-        final double CAMERA_FOV = Math.toRadians(41); // rads
+        final double CAMERA_FOV = Math.toRadians(49.7); // rads
         double boxHeight = limelightTable.getEntry("tvert").getDouble(0.0); // pixels
         if(boxHeight == 0) return 0;
         double percentHeight = boxHeight / CAMERA_HEIGHT;
@@ -167,7 +197,7 @@ public class LimeLight extends Subsystem {
     public double getDistance(double objectHeight, double boxHeight) {
         if(boxHeight == 0) return 0;
         final double CAMERA_HEIGHT = 240; // pixels
-        final double CAMERA_FOV = Math.toRadians(41); // rads
+        final double CAMERA_FOV = Math.toRadians(49.5); // rads
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
@@ -178,41 +208,50 @@ public class LimeLight extends Subsystem {
      * Returns the robot angle relative to the wall.
      */
     public double getRobotAngle(){
-        // get corner data
-        double[] cornX = limelightTable.getEntry("tcornx").getDoubleArray(new double[0]);
-        double[] cornY = limelightTable.getEntry("tcorny").getDoubleArray(new double[0]);
-        if (cornX.length != 4 || cornY.length != 4) {
-            System.out.println("[ERROR] Could not find 4 points from image");
+        ArrayList<Double> positives = new ArrayList<>();
+        ArrayList<Double> negatives = new ArrayList<>();
+        for(double[] camtran: camtranBuffer){
+            if(camtran[4] >= 0){
+                positives.add(camtran[4]);
+            } else {
+                negatives.add(camtran[4]);
+            }
+        }
+        if(positives.size() > negatives.size()){
+            return CSPMath.average(positives);
+        } else if(negatives.size() > positives.size()){
+            return CSPMath.average(negatives);
+        } else { 
             return 0.0;
         }
-        // find the corners
-        PointFinder pointFinder = new PointFinder(cornX, cornY);
-        MatOfPoint2f imagePoints = new MatOfPoint2f(pointFinder.getBottomRight(), pointFinder.getBottomLeft(),
-                pointFinder.getTopLeft(), pointFinder.getTopRight());
-        Mat rotationVector = new Mat();
-        Mat translationVector = new Mat();
-        Calib3d.solvePnP(mObjectPoints, imagePoints, mCameraMatrix, mDistortionCoefficients, rotationVector,
-                translationVector);
-        Mat rotationMatrix = new Mat();
-        Calib3d.Rodrigues(rotationVector, rotationMatrix);
-        
-        Mat projectionMatrix = new Mat(3, 4, CvType.CV_64F);
-        projectionMatrix.put(0, 0, rotationMatrix.get(0, 0)[0], rotationMatrix.get(0, 1)[0],
-                rotationMatrix.get(0, 2)[0], translationVector.get(0, 0)[0], rotationMatrix.get(1, 0)[0],
-                rotationMatrix.get(1, 1)[0], rotationMatrix.get(1, 2)[0], translationVector.get(1, 0)[0],
-                rotationMatrix.get(2, 0)[0], rotationMatrix.get(2, 1)[0], rotationMatrix.get(2, 2)[0],
-                translationVector.get(2, 0)[0]);
+    }
 
-        Mat cameraMatrix = new Mat();
-        Mat rotMatrix = new Mat();
-        Mat transVect = new Mat();
-        Mat rotMatrixX = new Mat();
-        Mat rotMatrixY = new Mat();
-        Mat rotMatrixZ = new Mat();
-        Mat eulerAngles = new Mat();
-        Calib3d.decomposeProjectionMatrix(projectionMatrix, cameraMatrix, rotMatrix, transVect, rotMatrixX, rotMatrixY,
-                rotMatrixZ, eulerAngles);
-        return eulerAngles.get(1, 0)[0]; 
+    /**
+     * Returns the distances using the 3d function in feet
+     */
+    public double[] getDistance3d(){
+        double zOffset;
+        double xOffset;
+        ArrayList<Double> positives = new ArrayList<>();
+        ArrayList<Double> negatives = new ArrayList<>();
+        ArrayList<Double> zOffsets = new ArrayList<>();
+        for (double[] camtran : camtranBuffer) {
+            if (camtran[0] >= 0) {
+                positives.add(camtran[0]);
+            } else {
+                negatives.add(camtran[0]);
+            }
+            zOffsets.add(camtran[2]);
+        }
+        if (positives.size() > negatives.size()) {
+            xOffset = CSPMath.average(positives);
+        } else if (negatives.size() > positives.size()) {
+            xOffset = CSPMath.average(negatives);
+        } else {
+            xOffset = 0.0;
+        }
+        zOffset = camtranBuffer.get(0)[2];
+        return new double[]{xOffset/12, zOffset/12};
     }
 
     /** Returns necessary distances and turns to get from current location to
@@ -223,59 +262,78 @@ public class LimeLight extends Subsystem {
     public double[] solvePerpendicular() {
 
         // length away we want to be from target once perpendicular (ft)
-        final double PERP_LENGTH = 4;
-
-        // estimate field relative target angle based off current heading
-        // currently works for all targets except two on end of ship
-        // NEEDS WORK
-        double targetAngle;
-        double gyroAngle = Robot.drivetrain.getGyroAngle();
-        if(CSPMath.isBetween(gyroAngle, 0, 39)) targetAngle = 28.75;
-        else if(CSPMath.isBetween(gyroAngle, 40, 140)) targetAngle = 90;
-        else if(CSPMath.isBetween(gyroAngle, 141, 180)) targetAngle = 151.25;
-        else if(CSPMath.isBetween(gyroAngle, -1, -39)) targetAngle = -28.75;
-        else if(CSPMath.isBetween(gyroAngle, -40, -140)) targetAngle = -90;
-        else if(CSPMath.isBetween(gyroAngle, -141, -180)) targetAngle = -151.25;
-        else targetAngle = 0;
-
+        final double PERP_LENGTH = 3.5;
         // get known side lengths and angles (feet and degrees)
         // all angles relative to target, not field
-        double robotAngle = Robot.drivetrain.getGyroAngle() - targetAngle;
+        double robotAngle = getRobotAngle();
         double limelightAngle = getHorizontalAngle();
-        double distToTarget = getDistance(getPipeline().getHeight());
-
-        // angle between line from camera to target and perpendicular line in radians
-        // found using parallel lines
-        double camToPerpAngle = Math.toRadians(robotAngle - limelightAngle);
-
-        // solve for distance to point perpendicular to target, PERP_LENGTH away
-        // uses law of cosines
-        double driveDist = Math.sqrt(Math.pow(PERP_LENGTH, 2) + Math.pow(distToTarget, 2)
-                - 2 * PERP_LENGTH * distToTarget * Math.cos(camToPerpAngle));
-
-        // solve for angle to turn to drive on straight line to point perpendicular to target
-        // uses law of sines, returns in degrees
-        double angleC = Math.toDegrees(Math.asin((PERP_LENGTH *
-                Math.sin(camToPerpAngle)) / driveDist));
-        double firstTurn = Robot.drivetrain.getGyroAngle() + limelightAngle + angleC;
-
-        // if already almost perpendicular (5 deg tolerance) then return 0, else return vals
-        if(Math.abs(camToPerpAngle) < Math.toRadians(5.0)) {
-            return (new double[] { 0, 0, 0 });
-        } else {
-            return (new double[] {
-                firstTurn,  // 0
-                driveDist,  // 1
-                targetAngle // 2
-            });
+        //double distToTarget = getDistance(getPipeline().getHeight());
+        double[] distances = getDistance3d();
+        double sideDistance = distances[0];
+        double forwardDistance = distances[1];
+        double newForwardDistance = forwardDistance - PERP_LENGTH;
+        
+        // if the distance to the target is less than PERP_LENGTH, return all 0
+        if (newForwardDistance < 0){
+            return new double[]{0.0, 0.0, 0.0};
+        }
+        // if the side difference is negligable, just turn towards the target;
+        if(Math.abs(sideDistance) < 1){
+            return new double[]{limelightAngle, newForwardDistance, 0.0};
         }
 
+        double firstTurn = Math.atan2(newForwardDistance, sideDistance) + robotAngle;
+        double driveDistance = Math.sqrt(sideDistance * sideDistance + newForwardDistance * newForwardDistance);
+        double secondTurn = 90 - Math.atan2(newForwardDistance, sideDistance);
+
+        return new double[]{firstTurn, driveDistance, secondTurn};
     }
 
     /**
      * Flips the LimeLight so it faces the other way
      */
     public void flipCamera(){
+        if(isFlipped){
+            // unflip
+            flipServo.setAngle(0.0);
+            switch (currentPipeline) {
+            case CARGO_FLIP:
+                setPipeline(Pipeline.CARGO);
+                break;
+            case HATCH_FLIP:
+                setPipeline(Pipeline.HATCH);
+                break;
+            case BAY_CLOSE_FLIP:
+                setPipeline(Pipeline.BAY_CLOSE);
+                break;
+            case BAY_3D_FLIP:
+                setPipeline(Pipeline.BAY_3D);
+                break;
+            default:
+                // do nothing
+                break;
+            }
+        } else{
+            // flip
+            flipServo.setAngle(360.0);
+            switch (currentPipeline) {
+            case CARGO:
+                setPipeline(Pipeline.CARGO_FLIP);
+                break;
+            case HATCH:
+                setPipeline(Pipeline.HATCH_FLIP);
+                break;
+            case BAY_CLOSE:
+                setPipeline(Pipeline.BAY_CLOSE_FLIP);
+                break;
+            case BAY_3D:
+                setPipeline(Pipeline.BAY_3D_FLIP);
+                break;
+            default:
+                // do nothing
+                break;
+            }
+        }
         isFlipped = !isFlipped;
     }
 
@@ -289,7 +347,7 @@ public class LimeLight extends Subsystem {
     /**
      * Start tracking the ship bays
      */
-    public void trackShipBay() {
+    public void trackBay() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
         if(isFlipped){
@@ -299,29 +357,13 @@ public class LimeLight extends Subsystem {
         }
     }
 
-    /**
-     * Start tracking the closest rocket bays (slightly higher up)
-     */
-    public void trackRocketBayClose() {
+    public void trackBay3D(){
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        if(isFlipped){
-            setPipeline(Pipeline.BAY_CLOSE_FLIP);
+        if (isFlipped) {
+            setPipeline(Pipeline.BAY_3D_FLIP);
         } else {
-            setPipeline(Pipeline.BAY_CLOSE);
-        }
-    }
-
-    /**
-     * Start tracking the hightest rocket bays (slightly higher up)
-     */
-    public void trackRocketBayHigh() {
-        setLightMode(LedMode.ON);
-        setCameraMode(CameraMode.VISION);
-        if(isFlipped){
-            setPipeline(Pipeline.BAY_HIGH_FLIP);
-        } else {
-            setPipeline(Pipeline.BAY_HIGH);
+            setPipeline(Pipeline.BAY_3D);
         }
     }
 

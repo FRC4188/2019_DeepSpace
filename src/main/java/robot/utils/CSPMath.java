@@ -1,12 +1,14 @@
 package robot.utils;
 
+import java.util.ArrayList;
+
 /** Contains various math related utilities. */
 public class CSPMath {
 
     /** Constrains value to specified bounds. */
     public static double constrain(double value, double min, double max) {
-        if(value > max) value = max;
-        else if(value < min) value = min;
+        if(Math.abs(value) > max) value = max;
+        else if(Math.abs(value) < min) value = min;
         return value;
     }
 
@@ -22,4 +24,12 @@ public class CSPMath {
         return (value >= min && value <= max);
     }
 
+    /** Returns the average of an arraylist of numbers */
+    public static double average(ArrayList<Double> nums){
+        double sum = 0.0;
+        for(Double num : nums){
+            sum += num;
+        }
+        return sum / nums.size();
+    }
 }
