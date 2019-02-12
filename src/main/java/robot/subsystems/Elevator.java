@@ -1,22 +1,24 @@
 package robot.subsystems;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import robot.commands.elevator.ManualElevator;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.revrobotics.CANEncoder;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Elevator extends Subsystem {
 
     // Device initialization
-    private TalonSRX elevatorMotor = new TalonSRX(0);
-    private TalonSRX elevatorSlave = new TalonSRX(0);
+    private CANSparkMax elevatorMotor = new CANSparkMax(11, MotorType.kBrushless);
+    private CANSparkMax elevatorSlave = new CANSparkMax(12, MotorType.kBrushless);
+    private CANEncoder elevatorEncoder = new CANEncoder(elevatorMotor);
 
     // Elevator constants
-    private final double TICKS_PER_REV = 4096; // talon units
-    private final double ENCODER_TO_DEGREES = 360 / TICKS_PER_REV; // degrees
+    private final double TICKS_PER_REV = 1; // neo
+    private final double SPOOL_DIAMETER = 0; //feet
+    private final double ENCODER_TO_FEET = (SPOOL_DIAMETER * Math.PI) / TICKS_PER_REV; // feet
     private final double RAMP_RATE = 0.2; // seconds
     public final double DELTA_T = 0.02; // seconds
 
@@ -28,9 +30,6 @@ public class Elevator extends Subsystem {
 
         // Slave control
         elevatorSlave.follow(elevatorMotor);
-
-        // Encoders
-        elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
 
         // Reset
         reset();
@@ -65,7 +64,7 @@ public class Elevator extends Subsystem {
 
     /** Sets shoulder motors to given percentage (-1.0, 1.0) */
     public void set(double percent) {
-        elevatorMotor.set(ControlMode.PercentOutput, percent);
+        elevatorMotor.set(percent);
     }
 
     /** Inverts the the elevator. */
@@ -75,35 +74,34 @@ public class Elevator extends Subsystem {
         elevatorSlave.setInverted(isInverted);
     }
 
-    /** Sets arm talons brake mode - Only mode that should be used. */
+    /** Sets sparks to brake mode - Only mode that should be used. */
     public void setBrake() {
-        elevatorMotor.setNeutralMode(NeutralMode.Brake);
-        elevatorSlave.setNeutralMode(NeutralMode.Brake);
+        elevatorMotor.setIdleMode(IdleMode.kBrake);
+        elevatorSlave.setIdleMode(IdleMode.kBrake);
     }
 
     /** Resets encoder values to 0 for both shoulder and wrist. */
     public void resetEncoders() {
-        elevatorMotor.setSelectedSensorPosition(0, 0, 10);
     }
 
-    /** Returns left encoder position in degrees. */
+    /** Returns elevator position in feet. */
     public double getPosition() {
-        return elevatorMotor.getSelectedSensorPosition() * ENCODER_TO_DEGREES;
+        return elevatorEncoder.getPosition() * ENCODER_TO_FEET;
     }
 
-    /** Returns elevator encoder position in native talon units. */
+    /** Returns elevator encoder position in native spark units (rotations). */
     public double getRawPosition() {
-        return elevatorMotor.getSelectedSensorPosition();
+        return elevatorEncoder.getPosition();
     }
 
-    /** Returns elevator encoder velocity in degrees per second. */
+    /** Returns elevator encoder velocity in feet per second. */
     public double getVelocity() {
-        return elevatorMotor.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
+        return elevatorEncoder.getVelocity() * ENCODER_TO_FEET / 60; // native is rpm
     }
 
     /** Returns elevator motor output as a percentage. */
     public double getOutput() {
-        return elevatorMotor.getMotorOutputPercent();
+        return elevatorMotor.get();
     }
 
     /** Returns elevator motor output current. */
@@ -111,10 +109,9 @@ public class Elevator extends Subsystem {
         return elevatorMotor.getOutputCurrent();
     }
 
-    /** Enables open and closed loop ramp rate. */
+    /** Enables ramp rate. */
     public void enableRampRate() {
-        elevatorMotor.configClosedloopRamp(RAMP_RATE);
-        elevatorMotor.configOpenloopRamp(RAMP_RATE);
+        elevatorMotor.setRampRate(RAMP_RATE);
     }
 
 }

@@ -21,6 +21,12 @@ public class CSPMath {
 
     /** Returns true if specified value is between the min and max, inclusive. */
     public static boolean isBetween(double value, double min, double max) {
+        // if out of order, swap
+        if(min > max) {
+            double tmp_min = min;
+            min = max;
+            max = tmp_min;
+        }
         return (value >= min && value <= max);
     }
 
