@@ -2,18 +2,17 @@ package robot.commands.climb;
 
 import robot.OI;
 import robot.Robot;
-import robot.subsystems.Arm;
 import robot.subsystems.Climber;
-import robot.subsystems.Elevator;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class ManualClimb extends Command {
 
     OI oi = Robot.oi;
     Climber climber = Robot.climber;
+    private double percent;
 
-    public ManualClimb() {
+    public ManualClimb(double percent) {
+        this.percent = percent;
         requires(climber);
     }
 
@@ -23,8 +22,7 @@ public class ManualClimb extends Command {
 
     @Override
     protected void execute() {
-        climber.set(1.0);
-        climber.set(-1.0);
+        climber.set(percent);
     }
 
     @Override
