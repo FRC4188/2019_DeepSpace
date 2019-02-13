@@ -6,6 +6,7 @@ import robot.subsystems.Elevator;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
+/** Manually controls elevator using copilot triggers. */
 public class ManualElevator extends Command {
 
     OI oi = Robot.oi;

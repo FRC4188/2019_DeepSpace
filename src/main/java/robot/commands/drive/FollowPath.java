@@ -39,7 +39,7 @@ public class FollowPath extends Command {
     EncoderFollower leftFollower, rightFollower;
     Path path;
 
-    final double kP = 0.1;
+    final double kP = 0.05;
     final double kI = 0;
     final double kD = 0;
     final double kV = 1.0 / drivetrain.MAX_VELOCITY;

@@ -6,6 +6,7 @@ import robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
+/** Manually controls drivetrain using pilot controller. */
 public class ManualDrive extends Command {
 
     OI oi = Robot.oi;

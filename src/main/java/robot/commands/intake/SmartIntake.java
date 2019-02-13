@@ -6,7 +6,7 @@ import robot.subsystems.Intake.IntakeState;
 import robot.subsystems.Intake.WristState;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Either sucks in or spits out object based on current orientation of wrist
+/** Either intakes or ejects object based on current orientation of wrist
  *  and whether or not the intake currently has an object. */
 public class SmartIntake extends Command {
 

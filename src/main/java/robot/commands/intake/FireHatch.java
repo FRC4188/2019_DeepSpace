@@ -2,18 +2,18 @@ package robot.commands.intake;
 
 import robot.Robot;
 import robot.subsystems.Intake;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Spins cargo intake to percent speed (-1.0, 1.0) in given direction. */
-public class SpinIntake extends Command {
+/** Fires hatch solenoid in given direction. kForward ejects hatch. */
+public class FireHatch extends Command {
 
     Intake intake = Robot.intake;
+    Value value;
 
-    double speed;
-
-    public SpinIntake(double speed) {
+    public FireHatch(Value value) {
         requires(intake);
-        this.speed = speed;
+        this.value = value;
     }
 
     @Override
@@ -22,8 +22,7 @@ public class SpinIntake extends Command {
 
     @Override
     protected void execute() {
-        intake.spinIntake(speed);
-        intake.setWristOpenLoop(speed);
+        intake.setHatchSolenoid(value);
     }
 
     @Override

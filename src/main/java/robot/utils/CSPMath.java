@@ -14,7 +14,7 @@ public class CSPMath {
      *  and returns value with original sign. */
     public static double constrainKeepSign(double value, double min, double max) {
         double sign = Math.signum(value);
-        return constrain(value, min, max) * sign;
+        return constrain(Math.abs(value), min, max) * sign;
     }
 
     /** Returns true if specified value is between the min and max, inclusive. */

@@ -4,6 +4,7 @@ import robot.OI;
 import robot.subsystems.*;
 import robot.utils.Logger;
 import badlog.lib.BadLog;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -29,18 +30,22 @@ public class Robot extends TimedRobot {
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
-        elevator = new Elevator();
+        //elevator = new Elevator();
         limelight = new LimeLight();
         oi = new OI();
 
         // start logger
-        logger.init();
+        //logger.init();
+
+        // camera
+        CameraServer.getInstance().startAutomaticCapture();
 
     }
 
     @Override
     public void robotPeriodic() {
-        logger.update();
+        //logger.update();
+        limelight.trackRocketBayClose();
     }
 
     @Override
@@ -48,7 +53,7 @@ public class Robot extends TimedRobot {
         drivetrain.reset();
         arm.reset();
         intake.reset();
-        elevator.reset();
+        //elevator.reset();
     }
 
     @Override

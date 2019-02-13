@@ -31,15 +31,17 @@ public class Drivetrain extends Subsystem {
     private DigitalInput lineSensorRight = new DigitalInput(2);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
-    // Drive constants
+    // Constants
     public final double MAX_VELOCITY = 9; // ft/s
     public final double MAX_ACCELERATION = 5; // ft/s^2
     public final double MAX_JERK = 190; // ft/s^3
     public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double TICKS_PER_REV = 1.0; // neo
-    public final double RAMP_RATE = 0.5; // seconds
-    public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
+    public final double LOW_GEAR_RATIO = 15.32;
+    public final double HIGH_GEAR_RATIO = 7.08;
+    public final double RAMP_RATE = 0.75; // seconds
+    public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV * LOW_GEAR_RATIO) * WHEEL_DIAMETER * Math.PI; // ft
     public final double DELTA_T = 0.02; // seconds
 
     // State vars
@@ -77,6 +79,12 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
         SmartDashboard.putNumber("Target angle", getTargetAngle());
+        SmartDashboard.putNumber("L1 temp", leftMotor.getMotorTemperature());
+        SmartDashboard.putNumber("L2 temp", leftSlave1.getMotorTemperature());
+        SmartDashboard.putNumber("L3 temp", leftSlave2.getMotorTemperature());
+        SmartDashboard.putNumber("R4 temp", rightMotor.getMotorTemperature());
+        SmartDashboard.putNumber("R5 temp", rightSlave1.getMotorTemperature());
+        SmartDashboard.putNumber("R6 temp", rightSlave2.getMotorTemperature());
     }
 
     /** Runs every loop. */
@@ -155,6 +163,8 @@ public class Drivetrain extends Subsystem {
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
     public void resetEncoders() {
+        leftEncoder.setPosition(0);
+        rightEncoder.setPosition(0);
     }
 
     /** Returns left encoder position in feet. */
@@ -299,8 +309,10 @@ public class Drivetrain extends Subsystem {
 
     /** Enables ramp rate. */
     public void enableRampRate() {
-        leftMotor.setRampRate(RAMP_RATE);
-        rightMotor.setRampRate(RAMP_RATE);
+        leftMotor.setOpenLoopRampRate(RAMP_RATE);
+        leftMotor.setClosedLoopRampRate(RAMP_RATE);
+        rightMotor.setOpenLoopRampRate(RAMP_RATE);
+        rightMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
     /** Sets gear shift solenoid to given value. */
