@@ -19,6 +19,7 @@ public class Robot extends TimedRobot {
     public static OI oi;
     public static Logger logger;
     public static Climber climber;
+    public static LED led;
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -33,8 +34,9 @@ public class Robot extends TimedRobot {
         //elevator = new Elevator();
         limelight = new LimeLight();
         climber = new Climber();
+        led = new LED();
         oi = new OI();
-
+        
         // start logger
         //logger.init();
 
