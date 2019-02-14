@@ -85,11 +85,11 @@ public class OI {
         pilotLS.whenPressed(new ShiftGear());
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());
-        
+
         //Climber Commands//
-        pilotLb.whenPressed(new ManualClimb(0.5));
+        pilotLb.whileHeld(new ManualClimb(0.5));
         pilotLb.whenReleased(new ManualClimb(0));
-        pilotRb.whenPressed(new ManualClimb(-0.5));
+        pilotRb.whileHeld(new ManualClimb(-0.5));
         pilotRb.whenReleased(new ManualClimb(0));
     }
 

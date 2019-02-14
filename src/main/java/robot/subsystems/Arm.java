@@ -32,7 +32,7 @@ public class Arm extends Subsystem {
     public Arm() {
 
         // Slave control
-        shoulderSlave.follow(shoulderMotor);
+        shoulderSlave.follow(shoulderMotor, true);
 
         // Reset
         reset();
@@ -68,8 +68,7 @@ public class Arm extends Subsystem {
     /** Sets shoulder motors to given percentage (-1.0, 1.0). */
     public void set(double percent) {
         // add dynamic feedforward to counteract gravity and linearize response
-        double output = percent + FEEDFORWARD * Math.cos(Math.toRadians(getPosition()));
-        output = CSPMath.constrainKeepSign(output, 0, 1.0);
+        double output = percent + FEEDFORWARD * Math.sin(Math.toRadians(getPosition()));
         shoulderMotor.set(output);
     }
 
@@ -117,7 +116,7 @@ public class Arm extends Subsystem {
 
     /** Enables open and closed loop ramp rate. */
     public void enableRampRate() {
-        shoulderMotor.setRampRate(RAMP_RATE);
+        shoulderMotor.setOpenLoopRampRate(RAMP_RATE);
     }
 
 }

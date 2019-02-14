@@ -13,7 +13,7 @@ public class ManualClimb extends Command {
 
     public ManualClimb(double percent) {
         this.percent = percent;
-        requires(climber);
+        //requires(climber);
     }
 
     @Override
@@ -32,6 +32,7 @@ public class ManualClimb extends Command {
 
     @Override
     protected void end() {
+        climber.set(0);
     }
 
     @Override

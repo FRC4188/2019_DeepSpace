@@ -9,7 +9,7 @@ public class Climber extends Subsystem {
     // Device initialization
     private WPI_TalonSRX climberLeft = new WPI_TalonSRX(41);
     private WPI_TalonSRX climberRight = new WPI_TalonSRX(42);
-    
+
     //private WPI_TalonSRX leftSlave = new WPI_TalonSRX(13);
     //private WPI_TalonSRX rightSlave = new WPI_TalonSRX(14);
 
@@ -21,11 +21,10 @@ public class Climber extends Subsystem {
 
     /** Constructs new Climber object and configures devices */
     public Climber() {
-        // Slave control
-        //leftSlave.follow(climberLeft);
-        //rightSlave.follow(climberRight);
+
         // Reset
         reset();
+
     }
 
     /** Defines default command that will run when object is created. */
@@ -35,6 +34,7 @@ public class Climber extends Subsystem {
 
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
+        System.out.println("42 out: " + climberRight.get());
     }
 
     /** Runs every loop. */
@@ -53,9 +53,8 @@ public class Climber extends Subsystem {
 
     /** Sets climber motors to given percentage (-1.0, 1.0) */
     public void set(double percent) {
-        climberLeft.set(0.5);
-        climberRight.set(0.5);
-
+        climberLeft.set(percent);
+        climberRight.set(percent);
     }
 
     /** Inverts the the climber. */
@@ -97,7 +96,6 @@ public class Climber extends Subsystem {
         climberRight.configClosedloopRamp(RAMP_RATE);
         //rightSlave.configClosedloopRamp(RAMP_RATE);
         //leftSlave.configClosedloopRamp(RAMP_RATE);
-
     }
 
 }

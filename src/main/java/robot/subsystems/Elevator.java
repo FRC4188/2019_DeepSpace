@@ -111,7 +111,7 @@ public class Elevator extends Subsystem {
 
     /** Enables ramp rate. */
     public void enableRampRate() {
-        elevatorMotor.setRampRate(RAMP_RATE);
+        elevatorMotor.setOpenLoopRampRate(RAMP_RATE);
     }
 
 }

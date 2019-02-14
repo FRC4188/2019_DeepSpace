@@ -31,17 +31,17 @@ public class Robot extends TimedRobot {
         intake = new Intake();
         elevator = new Elevator();
         limelight = new LimeLight();
-        oi = new OI();
         climber = new Climber();
+        oi = new OI();
 
         // start logger
-        logger.init();
+        //logger.init();
 
     }
 
     @Override
     public void robotPeriodic() {
-        logger.update();
+        //logger.update();
     }
 
     @Override

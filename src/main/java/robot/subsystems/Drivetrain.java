@@ -299,8 +299,8 @@ public class Drivetrain extends Subsystem {
 
     /** Enables ramp rate. */
     public void enableRampRate() {
-        leftMotor.setRampRate(RAMP_RATE);
-        rightMotor.setRampRate(RAMP_RATE);
+        leftMotor.setOpenLoopRampRate(RAMP_RATE);
+        rightMotor.setOpenLoopRampRate(RAMP_RATE);
     }
 
     /** Sets gear shift solenoid to given value. */
