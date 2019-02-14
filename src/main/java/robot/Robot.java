@@ -3,13 +3,11 @@ package robot;
 import robot.OI;
 import robot.subsystems.*;
 import robot.utils.Logger;
-import badlog.lib.BadLog;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -20,6 +18,7 @@ public class Robot extends TimedRobot {
     public static Elevator elevator;
     public static OI oi;
     public static Logger logger;
+    public static Climber climber;
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -33,6 +32,7 @@ public class Robot extends TimedRobot {
         intake = new Intake();
         //elevator = new Elevator();
         limelight = new LimeLight();
+        climber = new Climber();
         oi = new OI();
 
         // start logger
@@ -57,6 +57,7 @@ public class Robot extends TimedRobot {
         arm.reset();
         intake.reset();
         //elevator.reset();
+        climber.reset();
 
     }
 

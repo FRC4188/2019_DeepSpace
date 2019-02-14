@@ -1,5 +1,6 @@
 package robot;
 
+import robot.commands.climb.ManualClimb;
 import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
 import robot.commands.groups.DepositToBay;
@@ -103,6 +104,11 @@ public class OI {
         copilotY.whenReleased(new FireHatch(Value.kOff));
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
+
+        pilotLb.whileHeld(new ManualClimb(0.5));
+        pilotLb.whenReleased(new ManualClimb(0));
+        pilotRb.whileHeld(new ManualClimb(-0.5));
+        pilotRb.whenReleased(new ManualClimb(0));
 
     }
 
