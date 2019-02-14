@@ -83,29 +83,33 @@ void loop() {
 
 // this function is registered as an event, see setup() reeee black box code
 void receiveEvent(int howMany) {
+  Serial.println("Event");
   char set;
   char data;
   
   while (1 < Wire.available()){
     set = Wire.read() - '0';
-    //Serial.print(c);
+    //Serial.print("set: ");
+    //Serial.println(set);
   }
   data = Wire.read() - '0';
-  //Serial.println(c);
-  if(set == 0)
+  //Serial.print("data :");
+  //Serial.println(data);
+  if(set == '0' || set == 0){
     setColor(data);
-  else if (set == 1)  
+  }
+  else if (set == '1' || set == 1){
     setRoutine(data);
-  else if (set == 2)
+  }
+  else if (set == '2' || set == 2){
     lit = false;
+  }
 }
 
 void setColor(int color){
-  
-  if(lit && color != colorLast){
-    //Serial.priint("Setting color to ");
-    //Serial.println(data);
-    switch(color){
+    Serial.print("Setting color to ");
+    Serial.println(color);
+    switch((int)color){
       case 0:
         currentPalette = Green_p;
         currentColor = GREEN;
@@ -115,6 +119,7 @@ void setColor(int color){
         currentColor = BLUE;
         break;
       case 2:
+        Serial.print("Color set to yellow");
         currentPalette = Yellow_p;
         currentColor = YELLOW;
         break;  
@@ -127,16 +132,13 @@ void setColor(int color){
         currentColor = GREEN;
         break;  
     }  
-  }    
-  colorLast = color;
-  
+   
 }
 
 void setRoutine(int routine){
-  if(lit && routine != routineLast){
-   //Serial.priint("Setting routine to ");
-   //Serial.println(data);
-    switch(routine){
+   Serial.print("Setting routine to ");
+   Serial.println(routine);
+    switch((int)routine){
        case 0:
          currentRoutine = "snake";
          break;
@@ -147,8 +149,6 @@ void setRoutine(int routine){
          currentRoutine = "fade";
          break; 
     }   
-  }   
-  routineLast = routine;
 }
 
 void snakeFromPalette(uint8_t colorIndex){
