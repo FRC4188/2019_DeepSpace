@@ -2,10 +2,12 @@ package robot;
 
 import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
+import robot.commands.groups.DepositToBay;
 import robot.commands.arm.*;
 import robot.commands.intake.FireHatch;
 import robot.commands.intake.SpinIntake;
 import robot.utils.KillAll;
+import robot.utils.Paths;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -87,7 +89,7 @@ public class OI {
         pilotA.whenPressed(new ShoulderToAngle(90, 5));
         pilotB.whenPressed(new ShoulderToAngle(75, 5));
 
-        pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
+        pilotY.whenPressed(new DepositToBay());
 
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());

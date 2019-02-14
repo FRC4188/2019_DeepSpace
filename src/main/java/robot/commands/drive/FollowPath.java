@@ -39,7 +39,7 @@ public class FollowPath extends Command {
     EncoderFollower leftFollower, rightFollower;
     Path path;
 
-    final double kP = 0.05;
+    final double kP = 0.0005;
     final double kI = 0;
     final double kD = 0;
     final double kV = 1.0 / drivetrain.MAX_VELOCITY;
@@ -76,11 +76,8 @@ public class FollowPath extends Command {
             double y = driveDist * Math.sin(turnAngle);
             double targetAngle = Math.toRadians(limelight.solvePerpendicular()[2]);
 
-            SmartDashboard.putNumber("driveDist", driveDist);
-            SmartDashboard.putNumber("current angle", currentAngle);
-            SmartDashboard.putNumber("x drive", x);
-            SmartDashboard.putNumber("y drive", y);
-            SmartDashboard.putNumber("target angle", targetAngle);
+            SmartDashboard.putNumber("Path X", x);
+            SmartDashboard.putNumber("Path Y", y);
 
             // create points
             points = new Waypoint[] {
@@ -142,7 +139,7 @@ public class FollowPath extends Command {
         double gyroHeading = drivetrain.getGyroAngle();
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.8 * (1.0/80.0) * angleDifference;
+        double turn = 0.2 * (1.0/80.0) * angleDifference;
         System.out.println("angleDiff: " + angleDifference + " turn val: " + turn);
 
         // use output
