@@ -1,19 +1,19 @@
-package robot.commands.drive;
+package robot.commands.climb;
 
 import robot.OI;
 import robot.Robot;
-import robot.subsystems.Drivetrain;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
+import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Manually controls drivetrain using pilot controller. */
-public class ManualDrive extends Command {
+public class ManualClimb extends Command {
 
     OI oi = Robot.oi;
-    Drivetrain drivetrain = Robot.drivetrain;
+    Climber climber = Robot.climber;
+    private double percent;
 
-    public ManualDrive() {
-        requires(drivetrain);
+    public ManualClimb(double percent) {
+        this.percent = percent;
+        //requires(climber);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class ManualDrive extends Command {
 
     @Override
     protected void execute() {
-        drivetrain.arcade(oi.getPilotY(Hand.kLeft), oi.getPilotX(Hand.kRight), 1.0);
+        climber.set(percent);
     }
 
     @Override
@@ -32,6 +32,7 @@ public class ManualDrive extends Command {
 
     @Override
     protected void end() {
+        climber.set(0);
     }
 
     @Override

@@ -22,7 +22,7 @@ public class FollowObject extends Command {
     Object object;
 
     final double TURN_kP = 0.01;
-    final double DIST_kP = 0.15;
+    final double DIST_kP = 0.09;
     final double ANGLE_TOLERANCE = 3.0;
     final double DIST_TOLERANCE = 0.5;
 
@@ -65,7 +65,7 @@ public class FollowObject extends Command {
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
         distance = limelight.getDistance(limelight.getPipeline().getHeight());
-        distErr = distance - (15 / 12); // stop 2 ft away
+        distErr = distance - (36 / 12); // stop 3 ft away
         if(distErr < 0) distErr = 0;
 
         // distance p loop
@@ -94,7 +94,8 @@ public class FollowObject extends Command {
         // or if any line followers sense a line
         return ((Math.abs(angleErr) < ANGLE_TOLERANCE)
                 && (Math.abs(distErr) < DIST_TOLERANCE) && isFollowing)
-                || (leftSense || midSense || rightSense);
+                || (distance > initialDist);
+                //|| (leftSense || midSense || rightSense);
     }
 
     @Override

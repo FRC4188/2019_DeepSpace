@@ -2,17 +2,17 @@ package robot.subsystems;
 
 import robot.commands.drive.ManualDrive;
 import robot.utils.CSPMath;
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import jaci.pathfinder.Pathfinder;
 
 public class Drivetrain extends Subsystem {
 
@@ -25,21 +25,23 @@ public class Drivetrain extends Subsystem {
     private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
     private CANEncoder leftEncoder = new CANEncoder(leftMotor);
     private CANEncoder rightEncoder = new CANEncoder(rightMotor);
-    private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+    private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
     private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(1);
     private DigitalInput lineSensorRight = new DigitalInput(2);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
-    // Drive constants
+    // Constants
     public final double MAX_VELOCITY = 9; // ft/s
     public final double MAX_ACCELERATION = 5; // ft/s^2
     public final double MAX_JERK = 190; // ft/s^3
     public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double TICKS_PER_REV = 1.0; // neo
-    public final double RAMP_RATE = 0.5; // seconds
-    public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
+    public final double LOW_GEAR_RATIO = 15.32;
+    public final double HIGH_GEAR_RATIO = 7.08;
+    public final double RAMP_RATE = 0.75; // seconds
+    public final double ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * LOW_GEAR_RATIO); // ft
     public final double DELTA_T = 0.02; // seconds
 
     // State vars
@@ -155,6 +157,8 @@ public class Drivetrain extends Subsystem {
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
     public void resetEncoders() {
+        leftEncoder.setPosition(0);
+        rightEncoder.setPosition(0);
     }
 
     /** Returns left encoder position in feet. */
@@ -174,12 +178,12 @@ public class Drivetrain extends Subsystem {
 
     /** Returns left encoder position in native Spark units (revolutions) */
     public double getRawLeftPosition() {
-        return leftEncoder.getPosition();
+        return leftEncoder.getPosition() / LOW_GEAR_RATIO;
     }
 
     /** Returns left encoder position in native Spark units (revolutions) */
     public double getRawRightPosition() {
-        return rightEncoder.getPosition();
+        return rightEncoder.getPosition() / LOW_GEAR_RATIO;
     }
 
     /** Returns left encoder velocity in feet per second. */
@@ -214,22 +218,21 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return Pathfinder.boundHalfDegrees(gyro.getAngle());
+        return ahrs.getYaw();
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        return gyro.getRate();
+        return ahrs.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
-        gyro.reset();
+        ahrs.reset();
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
     public void calibrateGyro() {
-        gyro.calibrate();
     }
 
     /** Returns whether or not left photo sensor is reflecting. */
@@ -299,8 +302,10 @@ public class Drivetrain extends Subsystem {
 
     /** Enables ramp rate. */
     public void enableRampRate() {
-        leftMotor.setRampRate(RAMP_RATE);
-        rightMotor.setRampRate(RAMP_RATE);
+        leftMotor.setOpenLoopRampRate(RAMP_RATE);
+        leftMotor.setClosedLoopRampRate(RAMP_RATE);
+        rightMotor.setOpenLoopRampRate(RAMP_RATE);
+        rightMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
     /** Sets gear shift solenoid to given value. */

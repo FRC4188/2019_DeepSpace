@@ -22,7 +22,7 @@ public class ManualWrist extends Command {
 
     @Override
     protected void execute() {
-        intake.setWrist(oi.getCopilotY(Hand.kRight));
+        intake.setWristOpenLoop(oi.getCopilotY(Hand.kRight));
     }
 
     @Override
