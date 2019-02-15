@@ -25,6 +25,8 @@ const TProgmemPalette16 Yellow_p PROGMEM = { CRGB::Yellow};
 const CRGB YELLOW = CRGB::Yellow;
 const TProgmemPalette16 Red_p PROGMEM = { CRGB::Red};
 const CRGB RED = CRGB::Red;
+const TProgmemPalette16 White_p PROGMEM = { CRGB::White};
+const CRGB WHITE = CRGB::White;
 
 const TProgmemPalette16 greenBlue_p PROGMEM = {CRGB::Yellow, CRGB::Blue};
 // Avaliable palettes include RainbowColors_p, RainbowStripeColors_p,
@@ -34,7 +36,6 @@ boolean lit = true;
 static uint8_t startIndex = 0;
 
 boolean raising = false;
-int lastExtream;
 const int MAX = 255;
 const int MIN = 0;
 
@@ -50,9 +51,10 @@ void setup() {
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(BRIGHTNESS);
     
-  currentPalette = Green_p;
+  currentPalette = White_p;
+  currentColor = WHITE;
   currentBlending = LINEARBLEND;
-  currentRoutine = "snake";
+  currentRoutine = "fade";
   
   Wire.begin(8);// address #8
   Wire.onReceive(receiveEvent);
@@ -62,18 +64,25 @@ void setup() {
 void loop() {
   //delay(100);
   FastLED.setBrightness(currentBrightness);
+  //Serial.println("Update");
   
   if(lit){
     if(currentRoutine == "snake"){
+      currentBrightness = 255;
       startIndex = startIndex + 1;//Motion Speed
       snakeFromPalette(startIndex);
     } 
-    else if(currentRoutine == "solid"){
-      fill_solid(currentPalette, NUM_LEDS, currentColor);
+    if(currentRoutine == "solid"){
+      currentBrightness = 255;
+      for(int i = 0; i < NUM_LEDS; i++){
+        leds[i] = ColorFromPalette( currentPalette, 0, currentBrightness, currentBlending);
+      }
     }
-    else if(currentRoutine == "fade"){
-      fill_solid(currentPalette, NUM_LEDS, currentColor);
-      //fadeFromPalette();
+    if(currentRoutine == "fade"){
+      fadeFromPalette();
+      for(int i = 0; i < NUM_LEDS; i++){
+        leds[i] = ColorFromPalette( currentPalette, 0, currentBrightness, currentBlending);
+      }
     }
 
   }  
@@ -166,17 +175,19 @@ void snakeFromPalette(uint8_t colorIndex){
 
 void fadeFromPalette(){
 
-  if(BRIGHTNESS == MAX){
+//Serial.println(BRIGHTNESS
+
+  if(currentBrightness >= MAX){
     raising = false;
   }
-  else if(BRIGHTNESS == MIN){
+  else if(currentBrightness <= MIN){
     raising = true;
   }
   
   if(raising){
     currentBrightness++;
-  }else
+  }else{
     currentBrightness--;
-  
+  }
 }
 
