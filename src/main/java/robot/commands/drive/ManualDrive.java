@@ -2,6 +2,7 @@ package robot.commands.drive;
 
 import robot.OI;
 import robot.Robot;
+import robot.OI.Controller;
 import robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
@@ -22,7 +23,8 @@ public class ManualDrive extends Command {
 
     @Override
     protected void execute() {
-        drivetrain.arcade(oi.getPilotY(Hand.kLeft), oi.getPilotX(Hand.kRight), 1.0);
+        drivetrain.arcade(oi.getPilotY(Hand.kLeft), oi.getPilotX(Hand.kRight),
+                oi.getPilotButton(Controller.LB));
     }
 
     @Override

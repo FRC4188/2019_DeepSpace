@@ -23,7 +23,6 @@ public class SpinIntake extends Command {
     @Override
     protected void execute() {
         intake.spinIntake(speed);
-        intake.setWristOpenLoop(speed);
     }
 
     @Override

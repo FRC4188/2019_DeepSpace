@@ -17,10 +17,10 @@ public class DepositToBay extends CommandGroup {
         System.out.println("depositing to bay");
 
         // drive to perpendicular
-        //addSequential(new FollowPath(Path.TO_PERPENDICULAR, false));
+        addSequential(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         // now use vision and line followers to line up
-        addSequential(new FollowObject(Object.BAY_HIGH));
+        //addSequential(new FollowObject(Object.BAY_HIGH));
 
     }
 

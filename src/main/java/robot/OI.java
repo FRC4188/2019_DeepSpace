@@ -1,14 +1,14 @@
 package robot;
 
 import robot.commands.climb.ManualClimb;
+import robot.commands.climb.ManualClimb.Climbers;
 import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
-import robot.commands.groups.DepositToBay;
+import robot.commands.drive.FollowObject.Object;
 import robot.commands.arm.*;
 import robot.commands.intake.FireHatch;
 import robot.commands.intake.SpinIntake;
 import robot.utils.KillAll;
-import robot.utils.Paths;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -87,17 +87,17 @@ public class OI {
         pilotRS.whenPressed(new ShiftGear(Value.kReverse));
         pilotRS.whenPressed(new ShiftGear(Value.kOff));
 
-        pilotA.whenPressed(new ShoulderToAngle(90, 5));
-        pilotB.whenPressed(new ShoulderToAngle(75, 5));
+        // do not bind pilot A
 
-        pilotY.whenPressed(new DepositToBay());
+        pilotX.whenPressed(new FollowObject(Object.BAY_CLOSE));
+        pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());
 
-        copilotA.whileHeld(new SpinIntake(0.5));
+        copilotA.whileHeld(new SpinIntake(1.0));
         copilotA.whenReleased(new SpinIntake(0));
-        copilotB.whileHeld(new SpinIntake(-0.5));
+        copilotB.whileHeld(new SpinIntake(-1.0));
         copilotB.whenReleased(new SpinIntake(0));
 
         copilotY.whenPressed(new FireHatch(Value.kForward));
@@ -105,10 +105,12 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
-        pilotLb.whileHeld(new ManualClimb(0.5));
-        pilotLb.whenReleased(new ManualClimb(0));
-        pilotRb.whileHeld(new ManualClimb(-0.5));
-        pilotRb.whenReleased(new ManualClimb(0));
+        copilotLS.whenPressed(new ShoulderToAngle(70, 3));
+
+        pilotLb.whileHeld(new ManualClimb(0.5, Climbers.FRONT));
+        pilotLb.whenReleased(new ManualClimb(0, Climbers.FRONT));
+        pilotRb.whileHeld(new ManualClimb(-0.5, Climbers.FRONT));
+        pilotRb.whenReleased(new ManualClimb(0, Climbers.FRONT));
 
     }
 

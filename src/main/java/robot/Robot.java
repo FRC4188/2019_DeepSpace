@@ -31,12 +31,12 @@ public class Robot extends TimedRobot {
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
-        //elevator = new Elevator();
+        elevator = new Elevator();
         limelight = new LimeLight();
         climber = new Climber();
         led = new LED();
         oi = new OI();
-        
+
         // start logger
         //logger.init();
 
@@ -58,7 +58,7 @@ public class Robot extends TimedRobot {
         drivetrain.reset();
         arm.reset();
         intake.reset();
-        //elevator.reset();
+        elevator.reset();
         climber.reset();
 
     }

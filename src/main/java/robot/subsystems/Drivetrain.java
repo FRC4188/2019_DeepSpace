@@ -4,6 +4,7 @@ import robot.commands.drive.ManualDrive;
 import robot.utils.CSPMath;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -25,6 +26,8 @@ public class Drivetrain extends Subsystem {
     private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
     private CANEncoder leftEncoder = new CANEncoder(leftMotor);
     private CANEncoder rightEncoder = new CANEncoder(rightMotor);
+    private CANPIDController leftPidC = leftMotor.getPIDController();
+    private CANPIDController rightPidC = rightMotor.getPIDController();
     private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
     private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(1);
@@ -35,6 +38,13 @@ public class Drivetrain extends Subsystem {
     public final double MAX_VELOCITY = 9; // ft/s
     public final double MAX_ACCELERATION = 5; // ft/s^2
     public final double MAX_JERK = 190; // ft/s^3
+    public final double kP = 5e-5;
+    public final double kI = 1e-6;
+    public final double kD = 0;
+    public final double kF = 0;
+    public final double kI_ZONE = 0;
+    public final int    SLOT_ID = 0;
+    public final double MAX_OUT = 1.0;
     public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double TICKS_PER_REV = 1.0; // neo
@@ -58,6 +68,7 @@ public class Drivetrain extends Subsystem {
         rightSlave2.follow(rightMotor);
 
         // Reset
+        controllerInit();
         reset();
         calibrateGyro();
 
@@ -98,6 +109,26 @@ public class Drivetrain extends Subsystem {
         leftInverted = true;
         rightInverted = false;
         setInverted(false);
+    }
+
+    /** Configures gains for Spark closed loop controller. */
+    private void controllerInit() {
+        leftPidC.setP(kP);
+        leftPidC.setI(kI);
+        leftPidC.setD(kD);
+        leftPidC.setIZone(kI_ZONE);
+        leftPidC.setFF(kF);
+        leftPidC.setOutputRange(-MAX_OUT, MAX_OUT);
+        leftPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
+        leftPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
+        rightPidC.setP(kP);
+        rightPidC.setI(kI);
+        rightPidC.setD(kD);
+        rightPidC.setIZone(kI_ZONE);
+        rightPidC.setFF(kF);
+        rightPidC.setOutputRange(-MAX_OUT, MAX_OUT);
+        rightPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
+        rightPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
     /** Sets left motors to given percentage (-1.0 - 1.0). */
@@ -314,11 +345,14 @@ public class Drivetrain extends Subsystem {
     }
 
     /** Controls drivetrain with arcade model, with positive xSpeed going forward
-     *  and positive zTurn turning right. Output multiplied by throttle. */
-    public void arcade(double xSpeed, double zTurn, double throttle) {
+     *  and positive zTurn turning right. zTurn is reduced as xSpeed is, so if xSpeed
+     *  is zero it will become impossible to turn. To overcome this, quickTurn must be true. */
+    public void arcade(double xSpeed, double zTurn, boolean quickTurn) {
 
         double MAX_INPUT = 1.0;
         double turnRatio;
+        if(!quickTurn) zTurn *= Math.abs(xSpeed);
+        else zTurn *= 0.5;
         double leftInput = xSpeed + zTurn;
         double rightInput = xSpeed - zTurn;
 
@@ -347,8 +381,8 @@ public class Drivetrain extends Subsystem {
         }
 
         // command motor output
-        setLeft(leftInput * throttle);
-        setRight(rightInput * throttle);
+        setLeft(leftInput);
+        setRight(rightInput);
 
     }
 

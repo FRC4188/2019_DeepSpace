@@ -7,20 +7,23 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 public class Climber extends Subsystem {
 
     // Device initialization
-    private WPI_TalonSRX climberLeft = new WPI_TalonSRX(41);
-    private WPI_TalonSRX climberRight = new WPI_TalonSRX(42);
+    private WPI_TalonSRX climberFront = new WPI_TalonSRX(41);
+    private WPI_TalonSRX climberFrontSlave = new WPI_TalonSRX(42);
+    private WPI_TalonSRX climberRear = new WPI_TalonSRX(43);
+    private WPI_TalonSRX climberRearSlave = new WPI_TalonSRX(44);
 
-    //private WPI_TalonSRX leftSlave = new WPI_TalonSRX(13);
-    //private WPI_TalonSRX rightSlave = new WPI_TalonSRX(14);
-
-    // Climber constants
+    // Constants
     private final double RAMP_RATE = 0.2; // seconds
 
     // State variables
-    private boolean climberInverted;
+    private boolean frontInverted, rearInverted;
 
     /** Constructs new Climber object and configures devices */
     public Climber() {
+
+        // Slave control
+        climberFrontSlave.follow(climberFront);
+        climberRearSlave.follow(climberRear);
 
         // Reset
         reset();
@@ -34,7 +37,6 @@ public class Climber extends Subsystem {
 
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
-        System.out.println("42 out: " + climberRight.get());
     }
 
     /** Runs every loop. */
@@ -47,55 +49,79 @@ public class Climber extends Subsystem {
     public void reset() {
         enableRampRate();
         setBrake();
-        climberInverted = false;
+        frontInverted = false;
+        rearInverted = false;
         setInverted(false);
     }
 
-    /** Sets climber motors to given percentage (-1.0, 1.0) */
-    public void set(double percent) {
-        climberLeft.set(percent);
-        climberRight.set(percent);
+    /** Sets front climber motors to given percentage (-1.0, 1.0) */
+    public void setFront(double percent) {
+        climberFront.set(percent);
+    }
+
+    /** Sets rear climber motors to given percentage (-1.0, 1.0) */
+    public void setRear(double percent) {
+        climberRear.set(percent);
     }
 
     /** Inverts the the climber. */
     public void setInverted(boolean isInverted) {
-        if(climberInverted) isInverted = !isInverted;
-        climberLeft.setInverted(isInverted);
-        climberRight.setInverted(isInverted);
-        //leftSlave.setInverted(isInverted);
-        //rightSlave.setInverted(isInverted);
+        setFrontInverted(isInverted);
+        setRearInverted(isInverted);
+    }
+
+    /** Inverts front climber talons. */
+    public void setFrontInverted(boolean isInverted) {
+        if(frontInverted) isInverted = !isInverted;
+        climberFront.setInverted(isInverted);
+        climberFrontSlave.setInverted(isInverted);
+    }
+
+    /** Inverts rear climber talons. */
+    public void setRearInverted(boolean isInverted) {
+        if(rearInverted) isInverted = !isInverted;
+        climberRear.setInverted(isInverted);
+        climberRearSlave.setInverted(isInverted);
     }
 
     /** Sets Talons to brake mode - Only mode that should be used. */
     public void setBrake() {
-        climberLeft.setNeutralMode(NeutralMode.Brake);
-        climberRight.setNeutralMode(NeutralMode.Brake);
-        //leftSlave.setNeutralMode(NeutralMode.Brake);
-        //rightSlave.setNeutralMode(NeutralMode.Brake);
+        climberFront.setNeutralMode(NeutralMode.Brake);
+        climberFrontSlave.setNeutralMode(NeutralMode.Brake);
+        climberRear.setNeutralMode(NeutralMode.Brake);
+        climberRearSlave.setNeutralMode(NeutralMode.Brake);
     }
 
-    /** Returns climber motor output as a percentage. */
-    public double getLeftOutput() {
-        return climberLeft.get();
-    }
-    public double getRightOutput() {
-        return climberRight.get();
+    /** Returns front climber motor output as a percentage. */
+    public double getFrontOutput() {
+        return climberFront.get();
     }
 
-    /** Returns climber motor output current. */
-    public double getLeftCurrent() {
-        return climberLeft.getOutputCurrent();
+    /** Returns rear climber motor output as a percentage. */
+    public double getRearOutput() {
+        return climberRear.get();
     }
-    public double getRightCurrent() {
-        return climberRight.getOutputCurrent();
+
+    /** Returns front climber motor output current. */
+    public double getFrontCurrent() {
+        return climberFront.getOutputCurrent();
+    }
+
+    /** Returns rear climber motor output current. */
+    public double getRearCurrent() {
+        return climberRear.getOutputCurrent();
     }
 
     /** Enables ramp rate. */
     public void enableRampRate() {
-        climberLeft.configClosedloopRamp(RAMP_RATE);
-        climberRight.configClosedloopRamp(RAMP_RATE);
-        //rightSlave.configClosedloopRamp(RAMP_RATE);
-        //leftSlave.configClosedloopRamp(RAMP_RATE);
+        climberFront.configOpenloopRamp(RAMP_RATE);
+        climberFrontSlave.configOpenloopRamp(RAMP_RATE);
+        climberRear.configOpenloopRamp(RAMP_RATE);
+        climberRearSlave.configOpenloopRamp(RAMP_RATE);
+        climberFront.configClosedloopRamp(RAMP_RATE);
+        climberFrontSlave.configClosedloopRamp(RAMP_RATE);
+        climberRear.configClosedloopRamp(RAMP_RATE);
+        climberRearSlave.configClosedloopRamp(RAMP_RATE);
     }
 
 }

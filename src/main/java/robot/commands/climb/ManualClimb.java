@@ -7,13 +7,17 @@ import edu.wpi.first.wpilibj.command.Command;
 
 public class ManualClimb extends Command {
 
+    public enum Climbers { FRONT, REAR, ALL }
+
     OI oi = Robot.oi;
     Climber climber = Robot.climber;
-    private double percent;
 
-    public ManualClimb(double percent) {
+    private double percent;
+    Climbers whichClimbers;
+
+    public ManualClimb(double percent, Climbers whichClimbers) {
         this.percent = percent;
-        //requires(climber);
+        this.whichClimbers = whichClimbers;
     }
 
     @Override
@@ -22,7 +26,14 @@ public class ManualClimb extends Command {
 
     @Override
     protected void execute() {
-        climber.set(percent);
+        if(whichClimbers == Climbers.FRONT) {
+            climber.setFront(percent);
+        } else if(whichClimbers == Climbers.REAR) {
+            climber.setRear(percent);
+        } else if(whichClimbers == Climbers.ALL) {
+            climber.setFront(percent);
+            climber.setRear(percent);
+        }
     }
 
     @Override
@@ -32,7 +43,6 @@ public class ManualClimb extends Command {
 
     @Override
     protected void end() {
-        climber.set(0);
     }
 
     @Override

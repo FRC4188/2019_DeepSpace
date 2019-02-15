@@ -12,7 +12,6 @@ public class FireHatch extends Command {
     Value value;
 
     public FireHatch(Value value) {
-        requires(intake);
         this.value = value;
     }
 

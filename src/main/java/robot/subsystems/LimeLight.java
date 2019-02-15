@@ -4,6 +4,7 @@ import robot.Robot;
 import robot.commands.vision.LimeLightUseAsCamera;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 
 /** Limelight vision camera. Used to detect reflective tape. */
@@ -180,6 +181,9 @@ public class LimeLight extends Subsystem {
         double angleC = Math.toDegrees(Math.asin((PERP_LENGTH *
                 Math.sin(camToPerpAngle)) / driveDist));
         double firstTurn = Robot.drivetrain.getGyroAngle() + limelightAngle + angleC;
+
+        SmartDashboard.putNumber("first turn", firstTurn);
+        SmartDashboard.putNumber("drive dist", driveDist);
 
         // if already almost perpendicular (5 deg tolerance) then return 0, else return vals
         if(Math.abs(camToPerpAngle) < Math.toRadians(5.0)) {
