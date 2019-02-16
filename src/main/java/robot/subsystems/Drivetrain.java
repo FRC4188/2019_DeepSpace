@@ -393,7 +393,10 @@ public class Drivetrain extends Subsystem {
         setRight(rightSpeed * throttle);
     }
 
-    public double getTemperatures(int index){
+    /**
+    * Returns temperature of motor based off CAN ID
+    */
+    public double getMotorTemperature(int index){
 
         CANSparkMax[] sparks = new CANSparkMax[]{
             leftMotor,

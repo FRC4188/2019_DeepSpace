@@ -167,7 +167,10 @@ public class Arm extends Subsystem {
         shoulderMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
-    public double getTemperatures(int index) {
+    /**
+    * Returns temperature of motor based off CAN ID
+    */
+    public double getMotorTemperature(int index) {
 
         CANSparkMax[] sparks = new CANSparkMax[]{
             shoulderMotor,
