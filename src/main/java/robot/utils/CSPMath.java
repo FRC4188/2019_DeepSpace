@@ -28,4 +28,9 @@ public class CSPMath {
         return (value >= min && value <= max);
     }
 
+    /** Converts from celsius to fahrenheit */
+    public static double cToF(double temp) {
+        return (temp * (9/5)) + 32;
+    }
+
 }

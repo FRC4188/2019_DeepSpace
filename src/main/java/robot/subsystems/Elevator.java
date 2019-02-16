@@ -150,4 +150,18 @@ public class Elevator extends Subsystem {
         elevatorMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
+    /**
+    * Returns temperature of motor based off CAN ID
+    */
+    public double getMotorTemperature(int index) {
+        
+        CANSparkMax[] sparks = new CANSparkMax[]{
+            elevatorMotor,
+            elevatorSlave
+        };
+
+        index -= 11;
+        return sparks[index].getMotorTemperature();
+    }
+
 }
