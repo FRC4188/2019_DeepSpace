@@ -28,6 +28,7 @@ public class Robot extends TimedRobot {
     public void robotInit() {
 
         // initialize subsystems
+        logger = new Logger();
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
@@ -37,9 +38,6 @@ public class Robot extends TimedRobot {
         led = new LED();
         oi = new OI();
 
-        // start logger
-        //logger.init();
-
         // start camera stream
         CameraServer.getInstance().startAutomaticCapture();
 
@@ -47,7 +45,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        //logger.update();
+        logger.update();
         limelight.trackRocketBayClose();
     }
 
