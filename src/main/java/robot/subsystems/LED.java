@@ -21,7 +21,7 @@ public class LED extends Subsystem {
 
     public static final int SNAKE = 0;
     public static final int SOLID = 1;
-    //public static final int FADE = 2;
+    public static final int FADE = 2;
 
     public static I2C Wire = new I2C(Port.kOnboard, 8);
 

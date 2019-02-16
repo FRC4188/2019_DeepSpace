@@ -150,4 +150,15 @@ public class Elevator extends Subsystem {
         elevatorMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
+    public double getTemperatures(int index) {
+        
+        CANSparkMax[] sparks = new CANSparkMax[]{
+            elevatorMotor,
+            elevatorSlave
+        };
+
+        index -= 11;
+        return sparks[index].getMotorTemperature();
+    }
+
 }

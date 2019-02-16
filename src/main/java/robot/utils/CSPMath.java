@@ -28,4 +28,8 @@ public class CSPMath {
         return (value >= min && value <= max);
     }
 
+    public static double cToF(double temp) {
+        return (temp * (9/5)) + 32;
+    }
+
 }
