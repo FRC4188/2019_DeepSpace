@@ -28,6 +28,7 @@ public class LED extends Subsystem {
 
   public static I2C Wire = new I2C(Port.kOnboard, 8);
 
+  /** Sets color of LEDs GREEN, BLUE, YELLOW, RED, | RAINBOW*/
   public void setColor(int color) {
     String command = Integer.toString(color);
     char[] commandC = command.toCharArray();
@@ -42,6 +43,7 @@ public class LED extends Subsystem {
     Wire.transaction(commandB, commandB.length, inC, 0);
   }
 
+  //Sets routine of LEDs SNAKE, SOLID, | FADE*/
   public void setRoutine(int routine) {
     String command = Integer.toString(routine);
     char[] commandC = command.toCharArray();
@@ -56,6 +58,7 @@ public class LED extends Subsystem {
     Wire.transaction(commandB, commandB.length, inC, 0);
   }
 
+  /** Turns off LEDs */
   public void off(){
     char[] commandC = new char[] {'2'};
     byte[] commandB = new byte[commandC.length+1];
