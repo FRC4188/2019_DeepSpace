@@ -188,7 +188,7 @@ public class LimeLight extends Subsystem {
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r * 0.95; // fudge boy
+        return r; // fudge boy
     }
 
     /**
@@ -197,11 +197,11 @@ public class LimeLight extends Subsystem {
     public double getDistance(double objectHeight, double boxHeight) {
         if(boxHeight == 0) return 0;
         final double CAMERA_HEIGHT = 240; // pixels
-        final double CAMERA_FOV = Math.toRadians(49.5); // rads
+        final double CAMERA_FOV = Math.toRadians(49.7); // rads
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r * 0.95; // fudge lad
+        return r; // fudge lad
     }
 
     /**
