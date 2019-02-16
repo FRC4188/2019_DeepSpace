@@ -2,10 +2,10 @@ package robot.subsystems;
 
 import robot.commands.drive.ManualDrive;
 import robot.utils.CSPMath;
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -17,18 +17,14 @@ import jaci.pathfinder.Pathfinder;
 public class Drivetrain extends Subsystem {
 
     // Device initialization
-    private CANSparkMax leftMotor = new CANSparkMax(1, MotorType.kBrushless);
-    private CANSparkMax leftSlave1 = new CANSparkMax(2, MotorType.kBrushless);
-    private CANSparkMax leftSlave2 = new CANSparkMax(3, MotorType.kBrushless);
-    private CANSparkMax rightMotor = new CANSparkMax(4, MotorType.kBrushless);
-    private CANSparkMax rightSlave1 = new CANSparkMax(5, MotorType.kBrushless);
-    private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
-    private CANEncoder leftEncoder = new CANEncoder(leftMotor);
-    private CANEncoder rightEncoder = new CANEncoder(rightMotor);
+    private WPI_TalonSRX left = new WPI_TalonSRX(6);
+    private WPI_TalonSRX leftSlave1 = new WPI_TalonSRX(5);
+    private WPI_TalonSRX right = new WPI_TalonSRX(7);
+    private WPI_TalonSRX rightSlave1 = new WPI_TalonSRX(8);
     private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
-    private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
-    private DigitalInput lineSensorMid = new DigitalInput(1);
-    private DigitalInput lineSensorRight = new DigitalInput(2);
+    private DigitalInput lineSensorLeft = new DigitalInput(1); // yellow wire up
+    private DigitalInput lineSensorMid = new DigitalInput(2);
+    private DigitalInput lineSensorRight = new DigitalInput(3);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Drive constants
@@ -37,8 +33,8 @@ public class Drivetrain extends Subsystem {
     public final double MAX_JERK = 190; // ft/s^3
     public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
-    public final double TICKS_PER_REV = 1.0; // neo
-    public final double RAMP_RATE = 0.5; // seconds
+    public final double TICKS_PER_REV = 4096; // talon units
+    public final double RAMP_RATE = 0.05; // seconds
     public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
     public final double DELTA_T = 0.02; // seconds
 
@@ -50,13 +46,23 @@ public class Drivetrain extends Subsystem {
     public Drivetrain() {
 
         // Slave control
-        leftSlave1.follow(leftMotor);
-        leftSlave2.follow(leftMotor);
-        rightSlave1.follow(rightMotor);
-        rightSlave2.follow(rightMotor);
+        leftSlave1.follow(left);
+        rightSlave1.follow(right);
 
-        // Reset
-        reset();
+        // Encoders
+        left.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+        right.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+        resetEncoders();
+
+        // Drive config
+        enableRampRate();
+        setBrake();
+        leftInverted = true;
+        rightInverted = false;
+        setInverted(false);
+
+        // Gyro
+        resetGyro();
         calibrateGyro();
 
     }
@@ -91,21 +97,16 @@ public class Drivetrain extends Subsystem {
         resetEncoders();
         resetGyro();
         resetFieldPos();
-        enableRampRate();
-        setBrake();
-        leftInverted = true;
-        rightInverted = false;
-        setInverted(false);
     }
 
     /** Sets left motors to given percentage (-1.0 - 1.0). */
     public void setLeft(double percent) {
-        leftMotor.set(percent);
+        left.set(ControlMode.PercentOutput, percent);
     }
 
     /** Sets right motors to given percentage (-1.0 - 1.0). */
     public void setRight(double percent) {
-        rightMotor.set(percent);
+        right.set(ControlMode.PercentOutput, percent);
     }
 
     /** Inverts drivetrain. True inverts each side from the
@@ -119,52 +120,48 @@ public class Drivetrain extends Subsystem {
      *  from the current state set in the Drivetrain constructor. */
     public void setLeftInverted(boolean isInverted) {
         if(leftInverted) isInverted = !isInverted;
-        leftMotor.setInverted(isInverted);
+        left.setInverted(isInverted);
         leftSlave1.setInverted(isInverted);
-        leftSlave2.setInverted(isInverted);
     }
 
     /** Inverts the right side of the drivetrain. True inverts it
      *  from the current state set in the Drivetrain constructor. */
     public void setRightInverted(boolean isInverted) {
         if(rightInverted) isInverted = !isInverted;
-        rightMotor.setInverted(isInverted);
+        right.setInverted(isInverted);
         rightSlave1.setInverted(isInverted);
-        rightSlave2.setInverted(isInverted);
     }
 
-    /** Sets drivetrain to brake mode. */
+    /** Sets drive talons to brake mode. */
     public void setBrake() {
-        leftMotor.setIdleMode(IdleMode.kBrake);
-        leftSlave1.setIdleMode(IdleMode.kBrake);
-        leftSlave2.setIdleMode(IdleMode.kBrake);
-        rightMotor.setIdleMode(IdleMode.kBrake);
-        rightSlave1.setIdleMode(IdleMode.kBrake);
-        rightSlave2.setIdleMode(IdleMode.kBrake);
+        left.setNeutralMode(NeutralMode.Brake);
+        leftSlave1.setNeutralMode(NeutralMode.Brake);
+        right.setNeutralMode(NeutralMode.Brake);
+        rightSlave1.setNeutralMode(NeutralMode.Brake);
     }
 
-    /** Sets drivetrain to coast mode. */
+    /** Sets drive talons to coast mode. */
     public void setCoast() {
-        leftMotor.setIdleMode(IdleMode.kCoast);
-        leftSlave1.setIdleMode(IdleMode.kCoast);
-        leftSlave2.setIdleMode(IdleMode.kCoast);
-        rightMotor.setIdleMode(IdleMode.kCoast);
-        rightSlave1.setIdleMode(IdleMode.kCoast);
-        rightSlave2.setIdleMode(IdleMode.kCoast);
+        left.setNeutralMode(NeutralMode.Coast);
+        leftSlave1.setNeutralMode(NeutralMode.Coast);
+        right.setNeutralMode(NeutralMode.Coast);
+        rightSlave1.setNeutralMode(NeutralMode.Coast);
     }
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
     public void resetEncoders() {
+        left.setSelectedSensorPosition(0, 0, 10);
+        right.setSelectedSensorPosition(0, 0, 10);
     }
 
     /** Returns left encoder position in feet. */
     public double getLeftPosition() {
-        return leftEncoder.getPosition() * ENCODER_TO_FEET;
+        return left.getSelectedSensorPosition() * ENCODER_TO_FEET;
     }
 
     /** Returns right encoder position in feet. */
     public double getRightPosition() {
-        return rightEncoder.getPosition() * ENCODER_TO_FEET;
+        return right.getSelectedSensorPosition() * ENCODER_TO_FEET;
     }
 
     /** Returns encoder position in feet as average of left and right encoders. */
@@ -172,24 +169,24 @@ public class Drivetrain extends Subsystem {
         return (getLeftPosition() + getRightPosition()) / 2;
     }
 
-    /** Returns left encoder position in native Spark units (revolutions) */
+    /** Returns left encoder position in native talon units */
     public double getRawLeftPosition() {
-        return leftEncoder.getPosition();
+        return left.getSelectedSensorPosition();
     }
 
-    /** Returns left encoder position in native Spark units (revolutions) */
+    /** Returns right encoder position in native talon units. */
     public double getRawRightPosition() {
-        return rightEncoder.getPosition();
+        return right.getSelectedSensorPosition();
     }
 
     /** Returns left encoder velocity in feet per second. */
     public double getLeftVelocity() {
-        return leftEncoder.getVelocity() * ENCODER_TO_FEET / 60.0; // native is rpm
+        return left.getSelectedSensorVelocity() * ENCODER_TO_FEET * 10; // native talon is per 100ms
     }
 
     /** Returns right encoder velocity in feet per second. */
     public double getRightVelocity() {
-        return rightEncoder.getVelocity() * ENCODER_TO_FEET / 60.0; // native is rpm
+        return right.getSelectedSensorVelocity() * ENCODER_TO_FEET * 10; // native talon is per 100ms
     }
 
     /** Returns average robot velocity in feet per second. */
@@ -199,17 +196,17 @@ public class Drivetrain extends Subsystem {
 
     /** Returns the left motor output as a percentage. */
     public double getLeftOutput() {
-        return leftMotor.get();
+        return left.getMotorOutputPercent();
     }
 
         /** Returns the right motor output as a percentage. */
     public double getRightOutput() {
-        return rightMotor.get();
+        return right.getMotorOutputPercent();
     }
 
     /** Returns average motor output current. */
     public double getMotorCurrent() {
-        return (leftMotor.getOutputCurrent() + rightMotor.getOutputCurrent()) / 2;
+        return (left.getOutputCurrent() + right.getOutputCurrent()) / 2;
     }
 
     /** Returns gyro angle in degrees. */
@@ -297,10 +294,12 @@ public class Drivetrain extends Subsystem {
 
     }
 
-    /** Enables ramp rate. */
+    /** Enables open and closed loop ramp rate */
     public void enableRampRate() {
-        leftMotor.setRampRate(RAMP_RATE);
-        rightMotor.setRampRate(RAMP_RATE);
+        left.configClosedloopRamp(RAMP_RATE);
+        left.configOpenloopRamp(RAMP_RATE);
+        right.configOpenloopRamp(RAMP_RATE);
+        right.configClosedloopRamp(RAMP_RATE);
     }
 
     /** Sets gear shift solenoid to given value. */
@@ -342,16 +341,16 @@ public class Drivetrain extends Subsystem {
         }
 
         // command motor output
-        setLeft(leftInput * throttle);
-        setRight(rightInput * throttle);
+        left.set(ControlMode.PercentOutput, leftInput * throttle);
+        right.set(ControlMode.PercentOutput, rightInput * throttle);
 
     }
 
     /** Controls drivetrain with tank model, individually moving left and
      *  right sides. Output multiplied by throttle. */
     public void tank(double leftSpeed, double rightSpeed, double throttle) {
-        setLeft(leftSpeed * throttle);
-        setRight(rightSpeed * throttle);
+        left.set(ControlMode.PercentOutput, leftSpeed * throttle);
+        right.set(ControlMode.PercentOutput, rightSpeed * throttle);
     }
 
 }

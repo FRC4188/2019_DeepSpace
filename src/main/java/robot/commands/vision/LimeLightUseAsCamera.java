@@ -1,27 +1,21 @@
-package robot.commands.arm;
+package robot.commands.vision;
 
-import robot.OI;
-import robot.Robot;
-import robot.subsystems.Arm;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
+import robot.Robot;
 
-public class ManualArm extends Command {
+public class LimeLightUseAsCamera extends Command {
 
-    OI oi = Robot.oi;
-    Arm arm = Robot.arm;
-
-    public ManualArm() {
-        requires(arm);
+    public LimeLightUseAsCamera() {
+        requires(Robot.limelight);
     }
 
     @Override
     protected void initialize() {
+        Robot.limelight.useAsCamera();
     }
 
     @Override
     protected void execute() {
-        arm.set(oi.getCopilotY(Hand.kLeft));
     }
 
     @Override
@@ -36,5 +30,5 @@ public class ManualArm extends Command {
     @Override
     protected void interrupted() {
     }
-
+    
 }
