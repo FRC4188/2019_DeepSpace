@@ -13,10 +13,11 @@
 CRGB leds[NUM_LEDS];
 CRGBPalette16 currentPalette;
 CRGB currentColor;
-String currentRoutine;
+int currentRoutine;
 TBlendType currentBlending;
 uint8_t currentBrightness = BRIGHTNESS;
 
+//Colors
 const TProgmemPalette16 Green_p PROGMEM = { CRGB::Green};
 const CRGB GREEN = CRGB::Green;
 const TProgmemPalette16 Blue_p PROGMEM = { CRGB::Blue};
@@ -31,6 +32,11 @@ const CRGB WHITE = CRGB::White;
 const TProgmemPalette16 greenBlue_p PROGMEM = {CRGB::Yellow, CRGB::Blue};
 // Avaliable palettes include RainbowColors_p, RainbowStripeColors_p,
 // OceanColors_p, CloudColors_p, LavaColors_p, ForestColors_p, and PartyColors_p.
+
+//Routines 
+const int SNAKE = 0;
+const int SOLID = 1;
+const int FADE = 2;
 
 boolean lit = true;
 static uint8_t startIndex = 0;
@@ -51,10 +57,10 @@ void setup() {
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(BRIGHTNESS);
     
-  currentPalette = White_p;
-  currentColor = WHITE;
+  currentPalette = Green_p;
+  currentColor = GREEN;
   currentBlending = LINEARBLEND;
-  currentRoutine = "fade";
+  currentRoutine = SNAKE;
   
   Wire.begin(8);// address #8
   Wire.onReceive(receiveEvent);
@@ -65,20 +71,23 @@ void loop() {
   //delay(100);
   FastLED.setBrightness(currentBrightness);
   //Serial.println("Update");
+  if(currentPalette == RainbowColors_p || currentPalette == RainbowStripeColors_p || currentPalette == ForestColors_p){
+    currentRoutine = "snake";
+  }
   
   if(lit){
-    if(currentRoutine == "snake"){
+    if(currentRoutine == SNAKE){
       currentBrightness = 255;
       startIndex = startIndex + 1;//Motion Speed
       snakeFromPalette(startIndex);
     } 
-    if(currentRoutine == "solid"){
+    if(currentRoutine == SOLID){
       currentBrightness = 255;
       for(int i = 0; i < NUM_LEDS; i++){
         leds[i] = ColorFromPalette( currentPalette, 0, currentBrightness, currentBlending);
       }
     }
-    if(currentRoutine == "fade"){
+    if(currentRoutine == FADE){
       fadeFromPalette();
       for(int i = 0; i < NUM_LEDS; i++){
         leds[i] = ColorFromPalette( currentPalette, 0, currentBrightness, currentBlending);
@@ -128,7 +137,6 @@ void setColor(int color){
         currentColor = BLUE;
         break;
       case 2:
-        Serial.print("Color set to yellow");
         currentPalette = Yellow_p;
         currentColor = YELLOW;
         break;  
@@ -138,8 +146,17 @@ void setColor(int color){
         break;  
       case 4:
         currentPalette = RainbowColors_p;
-        currentColor = GREEN;
-        break;  
+        currentRoutine = SNAKE;
+        break; 
+      case 5:
+        currentPalette = RainbowStripeColors_p;
+        currentRoutine = SNAKE;
+        break; 
+      case 6:
+        currentPalette = ForestColors_p;
+        currentRoutine = SNAKE;
+        break;
+
     }  
    
 }
@@ -149,13 +166,13 @@ void setRoutine(int routine){
    Serial.println(routine);
     switch((int)routine){
        case 0:
-         currentRoutine = "snake";
+         currentRoutine = SNAKE;
          break;
        case 1:
-         currentRoutine = "solid";
+         currentRoutine = SOLID;
          break;
        case 2:
-         currentRoutine = "fade";
+         currentRoutine = FADE;
          break; 
     }   
 }
