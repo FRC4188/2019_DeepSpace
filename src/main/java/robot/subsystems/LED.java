@@ -16,10 +16,6 @@ import edu.wpi.first.wpilibj.I2C.Port;
  */
 public class LED extends Subsystem {
 
-  //private static String command;
-  //private static char[] commandC;
-  //private static byte[] commandB;
-
   public static final int GREEN = 0;
   public static final int BLUE = 1;
   public static final int YELLOW = 2;
@@ -28,7 +24,7 @@ public class LED extends Subsystem {
 
   public static final int SNAKE = 0;
   public static final int SOLID = 1;
-  //public static final int FADE = 2;
+  public static final int FADE = 2;
 
   public static I2C Wire = new I2C(Port.kOnboard, 8);
 
