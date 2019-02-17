@@ -1,6 +1,7 @@
 package robot.commands.drive;
 
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import robot.Robot;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
@@ -21,19 +22,33 @@ public class FollowObject extends Command {
     boolean isFollowing, leftSense, midSense, rightSense = false;
     Object object;
 
-    final double TURN_kP = 0.01;
+    final double TURN_kP = 0.005;
     final double DIST_kP = 0.15;
-    final double ANGLE_TOLERANCE = 3.0;
+    final double ANGLE_TOLERANCE = 2.5;
     final double DIST_TOLERANCE = 0.5;
 
     double perpLength;
     boolean closerThanTarget = false;
+    double driftPower;
 
     public FollowObject(Object object, double perpLength) {
         requires(Robot.drivetrain);
         requires(Robot.limelight);
         this.object = object;
         this.perpLength = perpLength;
+        driftPower = 0.0;
+    }
+
+    public FollowObject(Object object, double perpLength, boolean drift){
+        requires(Robot.drivetrain);
+        requires(Robot.limelight);
+        this.object = object;
+        this.perpLength = perpLength;
+        if(drift){ 
+            driftPower = 0.6;
+        } else {
+            driftPower = 0.0;
+        }
     }
 
     @Override
@@ -50,6 +65,8 @@ public class FollowObject extends Command {
         // reset
         isFollowing = false;
         closerThanTarget = perpLength > limelight.getDistance(limelight.getPipeline().getHeight());
+        SmartDashboard.putNumber("supposed distance", limelight.getDistance(limelight.getPipeline().getHeight()));
+        SmartDashboard.putBoolean("closerthantarget", closerThanTarget);
     }
 
     @Override
@@ -74,7 +91,7 @@ public class FollowObject extends Command {
 
         // distance p loop
         double xSpeed = DIST_kP * distErr;
-        xSpeed = CSPMath.constrainKeepSign(xSpeed, 0.0, 1.0);
+        xSpeed = CSPMath.constrainKeepSign(xSpeed, driftPower, 1.0);
 
         // angle p loop, turns less as distance shrinks
         angleErr = angleSetpoint - drivetrain.getGyroAngle();
@@ -99,7 +116,8 @@ public class FollowObject extends Command {
         // or if the robot is already close to the target
         return ((Math.abs(angleErr) < ANGLE_TOLERANCE)
                 && (Math.abs(distErr) < DIST_TOLERANCE) && isFollowing)
-                || (leftSense || midSense || rightSense) || closerThanTarget;
+                //|| (leftSense || midSense || rightSense) 
+                || closerThanTarget;
     }
 
     @Override

@@ -7,6 +7,7 @@ import robot.utils.PointFinder;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ public class LimeLight extends Subsystem {
 
     @Override
     public void periodic(){
+        SmartDashboard.putNumber("limelightDistance", getDistance(currentPipeline.getHeight()));
         if(currentPipeline == Pipeline.BAY_3D || currentPipeline == Pipeline.BAY_3D_FLIP){
             double[] camtran = getCamtran();
             if (camtran != null) {
@@ -181,7 +183,7 @@ public class LimeLight extends Subsystem {
     /** Returns distance in feet from object of height s (feet). 
      *  Uses s = r(theta). */
     public double getDistance(double objectHeight) {
-        final double CAMERA_HEIGHT = 240; // pixels
+        final double CAMERA_HEIGHT = 720; // pixels
         final double CAMERA_FOV = Math.toRadians(49.7); // rads
         double boxHeight = limelightTable.getEntry("tvert").getDouble(0.0); // pixels
         if(boxHeight == 0) return 0;
@@ -196,7 +198,7 @@ public class LimeLight extends Subsystem {
      */
     public double getDistance(double objectHeight, double boxHeight) {
         if(boxHeight == 0) return 0;
-        final double CAMERA_HEIGHT = 240; // pixels
+        final double CAMERA_HEIGHT = 720; // pixels
         final double CAMERA_FOV = Math.toRadians(49.7); // rads
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
@@ -217,6 +219,16 @@ public class LimeLight extends Subsystem {
                 negatives.add(camtran[4]);
             }
         }
+        double[] pos = new double[positives.size()];
+        double[] neg = new double[negatives.size()];
+        for(int i=0;i<positives.size();++i){
+            pos[i] = positives.get(i);
+        }
+        for (int i = 0; i < negatives.size(); ++i) {
+            neg[i] = negatives.get(i);
+        }
+        SmartDashboard.putNumberArray("AnglePositive", pos);
+        SmartDashboard.putNumberArray("AngleNegative", neg);
         if(positives.size() > negatives.size()){
             return CSPMath.average(positives);
         } else if(negatives.size() > positives.size()){
@@ -250,7 +262,22 @@ public class LimeLight extends Subsystem {
         } else {
             xOffset = 0.0;
         }
-        zOffset = CSPMath.average(zOffsets);
+        double[] pos = new double[positives.size()];
+        double[] neg = new double[negatives.size()];
+        double[] zed = new double[zOffsets.size()];
+        for (int i = 0; i < positives.size(); ++i) {
+            pos[i] = positives.get(i);
+        }
+        for (int i = 0; i < negatives.size(); ++i) {
+            neg[i] = negatives.get(i);
+        }
+        for(int i=0;i<zOffsets.size();++i){
+            zed[i] = zOffsets.get(i);
+        }
+        SmartDashboard.putNumberArray("Xpositive", pos);
+        SmartDashboard.putNumberArray("Xnegative", neg);
+        SmartDashboard.putNumberArray("Zoff", zed);
+        zOffset = Math.abs(CSPMath.average(zOffsets));
         return new double[]{xOffset/12, zOffset/12};
     }
 
@@ -399,6 +426,6 @@ public class LimeLight extends Subsystem {
     public void useAsCamera() {
         setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.CAMERA);
-        setPipeline(Pipeline.BAY_CLOSE);
+        setPipeline(Pipeline.OFF);
     }
 }

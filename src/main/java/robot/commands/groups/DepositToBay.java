@@ -15,14 +15,14 @@ public class DepositToBay extends CommandGroup {
     public DepositToBay() {
 
         // drive close to baycommand
-        addSequential(new FollowObject(Object.BAY_3D, 3.5));
+        addSequential(new FollowObject(Object.BAY_3D, 5.2, false));
 
         // drive to perpendicular
         addSequential(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         // now use vision and line followers to line up
-        addSequential(new FollowObject(Object.BAY, 15.0/12));
-        addSequential(new FollowLine());
+        //addSequential(new FollowObject(Object.BAY, 15.0/12));
+        //addSequential(new FollowLine());
 
     }
 
