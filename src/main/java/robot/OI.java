@@ -4,6 +4,8 @@ import robot.commands.drive.*;
 import robot.commands.drive.FollowObject.Object;
 import robot.commands.drive.TurnToAngle.Angle;
 import robot.commands.groups.DepositToBay;
+import robot.commands.vision.Track;
+import robot.subsystems.LimeLight.Pipeline;
 import robot.utils.KillAll;
 import robot.utils.Paths;
 import edu.wpi.first.wpilibj.Joystick;
@@ -77,9 +79,9 @@ public class OI {
 
     /** Constructs new OI object and assigns commands. */
     public OI() {
-        pilotA.whenPressed(new FollowPath(Paths.testPath, false));
-        pilotB.whenPressed(new TurnToAngle(27, 5, Angle.RELATIVE));
-        pilotX.whenPressed(new FollowObject(Object.BAY, 15.0/12));
+        pilotA.whenPressed(new Track(Pipeline.BAY_3D));
+        pilotB.whenPressed(new Track(Pipeline.BAY_CLOSE));
+        pilotX.whenPressed(new Track(Pipeline.CARGO));
         pilotY.whenPressed(new DepositToBay());
         pilotLS.whenPressed(new ShiftGear());
         pilotBack.whenPressed(new KillAll());

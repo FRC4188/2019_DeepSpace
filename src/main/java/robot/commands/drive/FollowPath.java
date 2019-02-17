@@ -41,9 +41,11 @@ public class FollowPath extends Command {
 
     final double kP = 0.1;
     final double kI = 0;
-    final double kD = 0;
+    final double kD = 0.0;
     final double kV = 1.0 / drivetrain.MAX_VELOCITY;
     final double kA = 0;
+
+    double initialGyroAngle;
 
     /** Follows path from given waypoints. isReversed causes the path
      * to be followed in reverse. */
@@ -84,16 +86,30 @@ public class FollowPath extends Command {
             SmartDashboard.putNumber("target angle", targetAngle);
             */
 
-            final int PERP_LENGTH = 2;
+            final double PERP_LENGTH = 2.75;
             double[] distances = limelight.getDistance3d();
             double robotAngle = limelight.getRobotAngle();
+            SmartDashboard.putNumber("robot angle", robotAngle);
+            // trust me
+            double X = distances[0];
+            double Y = distances[1];
+            double diagSqr = X*X+Y*Y;
+            double relAngleRad = Math.toRadians(limelight.getHorizontalAngle());
+            double relAngleTan = Math.tan(relAngleRad);
+            double horizontalDistance = (1-PERP_LENGTH*(X/relAngleTan + Y)/diagSqr) * Math.sqrt(diagSqr) * Math.sin(relAngleRad);
+            double forwardDistance = -horizontalDistance * (2*X*relAngleTan + diagSqr - 2*Y)/(2*X - (diagSqr - 2*Y) * relAngleTan);
+            SmartDashboard.putNumber("forward distance", forwardDistance);
+            SmartDashboard.putNumber("side distance", horizontalDistance);
+            
             // create points
             points = new Waypoint[] {
                 //new Waypoint(0, 0, currentAngle),
                 //new Waypoint(x, y, targetAngle)
-                new Waypoint(0, 0, Math.toRadians(robotAngle)),
-                new Waypoint(distances[1]-PERP_LENGTH, distances[0], 0)
+                new Waypoint(0, 0, 0),
+                new Waypoint(horizontalDistance, forwardDistance, Math.toRadians(robotAngle))
             };
+
+            this.initialGyroAngle = drivetrain.getGyroAngle();
 
         }
 
@@ -146,7 +162,7 @@ public class FollowPath extends Command {
         double r = rightFollower.calculate((int) drivetrain.getRawRightPosition());
 
         // turn control loop (kP from 254 presentation)
-        double gyroHeading = drivetrain.getGyroAngle();
+        double gyroHeading = drivetrain.getGyroAngle() - initialGyroAngle;
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
         double turn = 0.8 * (1.0/80.0) * angleDifference;
