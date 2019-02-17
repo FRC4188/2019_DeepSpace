@@ -5,30 +5,24 @@ import robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Toggles gear shift solenoid. */
+/** Sets gear shift to given value. kForward is high gear. */
 public class ShiftGear extends Command {
 
     Drivetrain drivetrain = Robot.drivetrain;
-    boolean lastState;
+    Value value;
 
-    public ShiftGear() {
+    public ShiftGear(Value value) {
         requires(Robot.drivetrain);
+        this.value = value;
     }
 
     @Override
     protected void initialize() {
-        lastState = !lastState;
     }
 
     @Override
     protected void execute() {
-        if(lastState) {
-            drivetrain.shiftGear(Value.kForward);
-            System.out.println("Gearshift set to forward");
-        } else {
-            drivetrain.shiftGear(Value.kReverse);
-            System.out.println("Gearshift set to reverse");
-        }
+        drivetrain.shiftGear(value);
     }
 
     @Override
@@ -43,5 +37,5 @@ public class ShiftGear extends Command {
     @Override
     protected void interrupted() {
     }
-    
+
 }

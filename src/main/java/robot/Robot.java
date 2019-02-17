@@ -3,7 +3,7 @@ package robot;
 import robot.OI;
 import robot.subsystems.*;
 import robot.utils.Logger;
-import badlog.lib.BadLog;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
@@ -18,6 +18,8 @@ public class Robot extends TimedRobot {
     public static Elevator elevator;
     public static OI oi;
     public static Logger logger;
+    public static Climber climber;
+    public static LED led;
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -26,15 +28,18 @@ public class Robot extends TimedRobot {
     public void robotInit() {
 
         // initialize subsystems
+        logger = new Logger();
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
         elevator = new Elevator();
         limelight = new LimeLight();
+        climber = new Climber();
+        led = new LED();
         oi = new OI();
 
-        // start logger
-        logger.init();
+        // start camera stream
+        CameraServer.getInstance().startAutomaticCapture();
 
     }
 
@@ -45,10 +50,14 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
+
+        // reset subsystems
         drivetrain.reset();
         arm.reset();
         intake.reset();
         elevator.reset();
+        climber.reset();
+
     }
 
     @Override

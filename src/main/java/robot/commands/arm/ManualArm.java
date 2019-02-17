@@ -6,6 +6,7 @@ import robot.subsystems.Arm;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
+/** Manually controls arm using left copilot Y. */
 public class ManualArm extends Command {
 
     OI oi = Robot.oi;

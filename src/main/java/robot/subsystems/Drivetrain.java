@@ -2,17 +2,18 @@ package robot.subsystems;
 
 import robot.commands.drive.ManualDrive;
 import robot.utils.CSPMath;
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import jaci.pathfinder.Pathfinder;
 
 public class Drivetrain extends Subsystem {
 
@@ -25,21 +26,32 @@ public class Drivetrain extends Subsystem {
     private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
     private CANEncoder leftEncoder = new CANEncoder(leftMotor);
     private CANEncoder rightEncoder = new CANEncoder(rightMotor);
-    private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+    private CANPIDController leftPidC = leftMotor.getPIDController();
+    private CANPIDController rightPidC = rightMotor.getPIDController();
+    private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
     private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(1);
     private DigitalInput lineSensorRight = new DigitalInput(2);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
-    // Drive constants
+    // Constants
     public final double MAX_VELOCITY = 9; // ft/s
     public final double MAX_ACCELERATION = 5; // ft/s^2
     public final double MAX_JERK = 190; // ft/s^3
+    public final double kP = 5e-5;
+    public final double kI = 1e-6;
+    public final double kD = 0;
+    public final double kF = 0;
+    public final double kI_ZONE = 0;
+    public final int    SLOT_ID = 0;
+    public final double MAX_OUT = 1.0;
     public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double TICKS_PER_REV = 1.0; // neo
-    public final double RAMP_RATE = 0.5; // seconds
-    public final double ENCODER_TO_FEET = (1 / TICKS_PER_REV) * WHEEL_DIAMETER * Math.PI; // ft
+    public final double LOW_GEAR_RATIO = 15.32;
+    public final double HIGH_GEAR_RATIO = 7.08;
+    public final double RAMP_RATE = 0.75; // seconds
+    public final double ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * LOW_GEAR_RATIO); // ft
     public final double DELTA_T = 0.02; // seconds
 
     // State vars
@@ -56,6 +68,7 @@ public class Drivetrain extends Subsystem {
         rightSlave2.follow(rightMotor);
 
         // Reset
+        controllerInit();
         reset();
         calibrateGyro();
 
@@ -96,6 +109,26 @@ public class Drivetrain extends Subsystem {
         leftInverted = true;
         rightInverted = false;
         setInverted(false);
+    }
+
+    /** Configures gains for Spark closed loop controller. */
+    private void controllerInit() {
+        leftPidC.setP(kP);
+        leftPidC.setI(kI);
+        leftPidC.setD(kD);
+        leftPidC.setIZone(kI_ZONE);
+        leftPidC.setFF(kF);
+        leftPidC.setOutputRange(-MAX_OUT, MAX_OUT);
+        leftPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
+        leftPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
+        rightPidC.setP(kP);
+        rightPidC.setI(kI);
+        rightPidC.setD(kD);
+        rightPidC.setIZone(kI_ZONE);
+        rightPidC.setFF(kF);
+        rightPidC.setOutputRange(-MAX_OUT, MAX_OUT);
+        rightPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
+        rightPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
     /** Sets left motors to given percentage (-1.0 - 1.0). */
@@ -155,6 +188,8 @@ public class Drivetrain extends Subsystem {
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
     public void resetEncoders() {
+        leftEncoder.setPosition(0);
+        rightEncoder.setPosition(0);
     }
 
     /** Returns left encoder position in feet. */
@@ -174,12 +209,12 @@ public class Drivetrain extends Subsystem {
 
     /** Returns left encoder position in native Spark units (revolutions) */
     public double getRawLeftPosition() {
-        return leftEncoder.getPosition();
+        return leftEncoder.getPosition() / LOW_GEAR_RATIO;
     }
 
     /** Returns left encoder position in native Spark units (revolutions) */
     public double getRawRightPosition() {
-        return rightEncoder.getPosition();
+        return rightEncoder.getPosition() / LOW_GEAR_RATIO;
     }
 
     /** Returns left encoder velocity in feet per second. */
@@ -214,22 +249,21 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return Pathfinder.boundHalfDegrees(gyro.getAngle());
+        return ahrs.getYaw();
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        return gyro.getRate();
+        return ahrs.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
-        gyro.reset();
+        ahrs.reset();
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
     public void calibrateGyro() {
-        gyro.calibrate();
     }
 
     /** Returns whether or not left photo sensor is reflecting. */
@@ -299,8 +333,10 @@ public class Drivetrain extends Subsystem {
 
     /** Enables ramp rate. */
     public void enableRampRate() {
-        leftMotor.setRampRate(RAMP_RATE);
-        rightMotor.setRampRate(RAMP_RATE);
+        leftMotor.setOpenLoopRampRate(RAMP_RATE);
+        leftMotor.setClosedLoopRampRate(RAMP_RATE);
+        rightMotor.setOpenLoopRampRate(RAMP_RATE);
+        rightMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
     /** Sets gear shift solenoid to given value. */
@@ -309,11 +345,14 @@ public class Drivetrain extends Subsystem {
     }
 
     /** Controls drivetrain with arcade model, with positive xSpeed going forward
-     *  and positive zTurn turning right. Output multiplied by throttle. */
-    public void arcade(double xSpeed, double zTurn, double throttle) {
+     *  and positive zTurn turning right. zTurn is reduced as xSpeed is, so if xSpeed
+     *  is zero it will become impossible to turn. To overcome this, quickTurn must be true. */
+    public void arcade(double xSpeed, double zTurn, boolean quickTurn) {
 
         double MAX_INPUT = 1.0;
         double turnRatio;
+        if(!quickTurn) zTurn *= Math.abs(xSpeed);
+        else zTurn *= 0.5;
         double leftInput = xSpeed + zTurn;
         double rightInput = xSpeed - zTurn;
 
@@ -342,8 +381,8 @@ public class Drivetrain extends Subsystem {
         }
 
         // command motor output
-        setLeft(leftInput * throttle);
-        setRight(rightInput * throttle);
+        setLeft(leftInput);
+        setRight(rightInput);
 
     }
 
@@ -352,6 +391,24 @@ public class Drivetrain extends Subsystem {
     public void tank(double leftSpeed, double rightSpeed, double throttle) {
         setLeft(leftSpeed * throttle);
         setRight(rightSpeed * throttle);
+    }
+
+    /**
+    * Returns temperature of motor based off CAN ID
+    */
+    public double getMotorTemperature(int index){
+
+        CANSparkMax[] sparks = new CANSparkMax[]{
+            leftMotor,
+            leftSlave1,
+            leftSlave2,
+            rightMotor,
+            rightSlave1,
+            rightSlave2
+        };
+
+        index -= 1;
+        return sparks[index].getMotorTemperature();
     }
 
 }

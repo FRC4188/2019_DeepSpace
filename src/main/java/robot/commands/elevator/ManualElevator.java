@@ -6,6 +6,7 @@ import robot.subsystems.Elevator;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
+/** Manually controls elevator using copilot triggers (left up, right down). */
 public class ManualElevator extends Command {
 
     OI oi = Robot.oi;
@@ -17,21 +18,15 @@ public class ManualElevator extends Command {
 
     @Override
     protected void initialize() {
-        double output = oi.getCopilotTrigger(Hand.kLeft);
-        if (output > 0){
-            elevator.set(output);
-        } else {
-            output = oi.getCopilotTrigger(Hand.kRight);
-            if (output < 0){
-                elevator.set(output);
-            } else{
-                elevator.set(0);
-            }
-        }
     }
 
     @Override
     protected void execute() {
+        double leftTrigger = oi.getCopilotTrigger(Hand.kLeft);
+        double rightTrigger = oi.getCopilotTrigger(Hand.kRight);
+        if (leftTrigger > 0) elevator.set(-leftTrigger);
+        else if(rightTrigger > 0) elevator.set(rightTrigger);
+        else elevator.set(0);
     }
 
     @Override

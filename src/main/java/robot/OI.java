@@ -1,15 +1,17 @@
 package robot;
 
+import robot.commands.climb.ManualClimb;
+import robot.commands.climb.ManualClimb.Climbers;
 import robot.commands.drive.*;
+import robot.commands.drive.FollowPath.Path;
 import robot.commands.drive.FollowObject.Object;
-import robot.commands.drive.TurnToAngle.Angle;
-import robot.commands.groups.DepositToBay;
-import robot.commands.vision.Track;
-import robot.subsystems.LimeLight.Pipeline;
+import robot.commands.arm.*;
+import robot.commands.intake.FireHatch;
+import robot.commands.intake.SpinIntake;
 import robot.utils.KillAll;
-import robot.utils.Paths;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
@@ -79,21 +81,46 @@ public class OI {
 
     /** Constructs new OI object and assigns commands. */
     public OI() {
-        pilotA.whenPressed(new Track(Pipeline.BAY_3D));
-        pilotB.whenPressed(new Track(Pipeline.BAY_CLOSE));
-        pilotX.whenPressed(new Track(Pipeline.CARGO));
-        pilotY.whenPressed(new DepositToBay());
-        pilotLS.whenPressed(new ShiftGear());
+
+        pilotLS.whenPressed(new ShiftGear(Value.kForward));
+        pilotLS.whenReleased(new ShiftGear(Value.kOff));
+        pilotRS.whenPressed(new ShiftGear(Value.kReverse));
+        pilotRS.whenPressed(new ShiftGear(Value.kOff));
+
+        // do not bind pilot A
+
+        pilotX.whenPressed(new FollowObject(Object.BAY, 2.5));
+        pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
+
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());
+
+        copilotA.whileHeld(new SpinIntake(1.0));
+        copilotA.whenReleased(new SpinIntake(0));
+        copilotB.whileHeld(new SpinIntake(-1.0));
+        copilotB.whenReleased(new SpinIntake(0));
+
+        copilotY.whenPressed(new FireHatch(Value.kForward));
+        copilotY.whenReleased(new FireHatch(Value.kOff));
+        copilotX.whenPressed(new FireHatch(Value.kReverse));
+        copilotX.whenReleased(new FireHatch(Value.kOff));
+
+        copilotLS.whenPressed(new ShoulderToAngle(70, 3));
+
+        pilotLb.whileHeld(new ManualClimb(0.5, Climbers.FRONT));
+        pilotLb.whenReleased(new ManualClimb(0, Climbers.FRONT));
+        pilotRb.whileHeld(new ManualClimb(-0.5, Climbers.FRONT));
+        pilotRb.whenReleased(new ManualClimb(0, Climbers.FRONT));
+
     }
 
     // options to scale joystick input
     private enum JoystickSens {
-        LINEAR, // most sensitive
+        LINEAR,
         SQUARED,
         CUBED,
-        TESSERACTED // least sensitive
+        TESSERACTED,
+        SINE
     }
 
     /** Returns value scaled to proper sensitivity based on current JoystickSens. */
@@ -102,6 +129,7 @@ public class OI {
         else if(sens == JoystickSens.SQUARED) return Math.signum(val) * Math.pow(val, 2);
         else if(sens == JoystickSens.CUBED) return Math.pow(val, 3);
         else if(sens == JoystickSens.TESSERACTED) return Math.signum(val) * Math.pow(val, 4);
+        else if(sens == JoystickSens.SINE) return Math.sin(val * (Math.PI / 2));
         else return val;
     }
 
@@ -114,7 +142,7 @@ public class OI {
     /** Returns x axis of Joystick on pilot controller. */
     public double getPilotX(Hand hand) {
         if(Math.abs(pilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return scaleJoystick(pilot.getX(hand), JoystickSens.SQUARED);
+        else return scaleJoystick(pilot.getX(hand), JoystickSens.SINE);
     }
 
     /** Returns trigger axis on pilot controller. */
@@ -133,7 +161,7 @@ public class OI {
         if(Math.abs(copilot.getX(hand)) < Controller.DEADBAND) return 0;
         else return scaleJoystick(copilot.getX(hand), JoystickSens.SQUARED);
     }
-    
+
     /** Returns trigger axis on pilot controller. */
     public double getCopilotTrigger(Hand hand) {
         return copilot.getTriggerAxis(hand);

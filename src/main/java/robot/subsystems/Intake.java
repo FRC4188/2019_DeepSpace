@@ -16,15 +16,24 @@ public class Intake extends Subsystem {
     // Device init
     private WPI_TalonSRX wristMotor = new WPI_TalonSRX(31);
     private WPI_TalonSRX intakeMotor = new WPI_TalonSRX(32);
-    private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(0, 1);
+    private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(2, 3);
     private DigitalInput frontCargoSensor = new DigitalInput(4);
     private DigitalInput rearCargoSensor = new DigitalInput(5);
 
-    // Manipulation constants
+    // Constants
     private final double TICKS_PER_REV = 4096; // talon units
-    private final double ENCODER_TO_DEGREES = 360 / TICKS_PER_REV; // degrees
-    private final double RAMP_RATE = 0.05; // seconds
-    public final double DELTA_T = 0.02; // seconds
+    private final double ENCODER_TO_DEGREES = 360.0 / TICKS_PER_REV; // degrees
+    private final double RAMP_RATE = 0.2; // seconds
+    private final double MAX_OUT = 0.5; // percent out
+    private final int    MAX_VELOCITY = 1000; // talon units per 100ms
+    private final int    MAX_ACCELERATION = 0; // talon units per 100ms per sec
+    private final double kP = 0.125;
+    private final double kI = 0;
+    private final double kD = 0;
+    private final double kF = 1023 / MAX_VELOCITY; // 1023 is full output
+    private final int    kI_ZONE = 0;
+    private final int    SLOT_ID = 0;
+    public final double  DELTA_T = 0.02; // seconds
 
     // State enums
     public enum WristState { CARGO, HATCH }
@@ -39,9 +48,10 @@ public class Intake extends Subsystem {
     public Intake(){
 
         // Encoders
-        wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+        wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 10);
 
         // Reset
+        controllerInit();
         reset();
 
     }
@@ -77,14 +87,41 @@ public class Intake extends Subsystem {
         setIntakeState(IntakeState.FULL);
     }
 
+    /** Configures gains for SRX closed loop controller. */
+    private void controllerInit() {
+        wristMotor.config_kP(SLOT_ID, kP);
+        wristMotor.config_kI(SLOT_ID, kI);
+        wristMotor.config_kD(SLOT_ID, kD);
+        wristMotor.config_kF(SLOT_ID, kF);
+        wristMotor.config_IntegralZone(SLOT_ID, kI_ZONE);
+        wristMotor.configMotionCruiseVelocity(MAX_VELOCITY);
+        wristMotor.configMotionAcceleration(MAX_ACCELERATION);
+        wristMotor.configPeakOutputForward(MAX_OUT);
+        wristMotor.configPeakOutputReverse(-MAX_OUT);
+    }
+
     /** Sets intake motors to given percentage (-1.0, 1.0) */
     public void spinIntake(double percent) {
         intakeMotor.set(ControlMode.PercentOutput, percent);
     }
 
-    /** Sets intake wrist motors to given percentage (-1.0, 1.0) */
+    /** Sets intake wrist motors to given percentage (-1.0, 1.0) using velocity controller. */
     public void setWrist(double percent) {
+        //double output = percent * MAX_VELOCITY;
+        //wristMotor.set(ControlMode.Velocity, output);
+    }
+
+    /** Sets intake wrist motors to given percentage (-1.0, 1.0) */
+    public void setWristOpenLoop(double percent) {
         wristMotor.set(ControlMode.PercentOutput, percent);
+    }
+
+    /** Sets wrist to given angle in degrees. */
+    public void wristToAngle(double angleInDegrees, double toleranceInDegrees) {
+        double targetPos = angleInDegrees / ENCODER_TO_DEGREES;
+        int tolerance = (int) (toleranceInDegrees / ENCODER_TO_DEGREES);
+        wristMotor.configAllowableClosedloopError(SLOT_ID, tolerance);
+        wristMotor.set(ControlMode.MotionMagic, targetPos);
     }
 
     /** Fires hatch cylinders inward. */
@@ -99,6 +136,10 @@ public class Intake extends Subsystem {
 
     public void hatchSolenoidOff() {
         hatchSolenoid.set(Value.kOff);
+    }
+
+    public void setHatchSolenoid(Value value) {
+        hatchSolenoid.set(value);
     }
 
     /** Inverts intake. */
@@ -142,12 +183,12 @@ public class Intake extends Subsystem {
     }
 
     /** Returns intake wrist encoder position in native talon units. */
-    public double getRawIntakeWristPosition() {
+    public double getRawWristPosition() {
         return wristMotor.getSelectedSensorPosition();
     }
 
     /** Returns intake wrist encoder velocity in degrees per second. */
-    public double getIntakeWristVelocity() {
+    public double getWristVelocity() {
         return wristMotor.getSelectedSensorVelocity() * ENCODER_TO_DEGREES * 10; // native talon is per 100ms
     }
 

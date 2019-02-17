@@ -38,4 +38,9 @@ public class CSPMath {
         }
         return sum / nums.size();
     }
+    /** Converts from celsius to fahrenheit */
+    public static double cToF(double temp) {
+        return (temp * (9/5)) + 32;
+    }
+
 }

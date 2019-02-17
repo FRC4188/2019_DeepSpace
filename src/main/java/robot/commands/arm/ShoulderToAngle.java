@@ -9,9 +9,9 @@ public class ShoulderToAngle extends Command {
 
     Arm arm = Robot.arm;
 
-    final double kP = 0.1;
+    final double kP = 0.01;
     final double kI = 0;
-    final double kD = 0;
+    final double kD = 0.005;
 
     double lastError, integral = 0;
     double angle, tolerance;
@@ -36,7 +36,7 @@ public class ShoulderToAngle extends Command {
         double derivative = (error - lastError) / arm.DELTA_T;
         double output = kP * error + kI * integral + kD * derivative;
         lastError = error;
-        arm.set(output);
+        arm.setOpenLoop(output);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ShoulderToAngle extends Command {
 
     @Override
     protected void end() {
-        arm.set(0);
+        arm.setOpenLoop(0);
     }
 
     @Override

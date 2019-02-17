@@ -1,19 +1,18 @@
 package robot.commands.intake;
 
-import robot.OI;
 import robot.Robot;
 import robot.subsystems.Intake;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Moves intake wrist using y val of right copilot stick. */
-public class ManualWrist extends Command {
+/** Fires hatch solenoid in given direction. kForward ejects hatch. */
+public class FireHatch extends Command {
 
-    OI oi = Robot.oi;
     Intake intake = Robot.intake;
+    Value value;
 
-    public ManualWrist() {
-        requires(intake);
+    public FireHatch(Value value) {
+        this.value = value;
     }
 
     @Override
@@ -22,12 +21,12 @@ public class ManualWrist extends Command {
 
     @Override
     protected void execute() {
-        intake.setWristOpenLoop(oi.getCopilotY(Hand.kRight));
+        intake.setHatchSolenoid(value);
     }
 
     @Override
     protected boolean isFinished() {
-        return false;
+        return true;
     }
 
     @Override
