@@ -13,10 +13,11 @@
 CRGB leds[NUM_LEDS];
 CRGBPalette16 currentPalette;
 CRGB currentColor;
-String currentRoutine;
+int currentRoutine;
 TBlendType currentBlending;
 uint8_t currentBrightness = BRIGHTNESS;
 
+//Colors
 const TProgmemPalette16 Green_p PROGMEM = { CRGB::Green};
 const CRGB GREEN = CRGB::Green;
 const TProgmemPalette16 Blue_p PROGMEM = { CRGB::Blue};
@@ -25,16 +26,22 @@ const TProgmemPalette16 Yellow_p PROGMEM = { CRGB::Yellow};
 const CRGB YELLOW = CRGB::Yellow;
 const TProgmemPalette16 Red_p PROGMEM = { CRGB::Red};
 const CRGB RED = CRGB::Red;
+const TProgmemPalette16 White_p PROGMEM = { CRGB::White};
+const CRGB WHITE = CRGB::White;
 
 const TProgmemPalette16 greenBlue_p PROGMEM = {CRGB::Yellow, CRGB::Blue};
 // Avaliable palettes include RainbowColors_p, RainbowStripeColors_p,
 // OceanColors_p, CloudColors_p, LavaColors_p, ForestColors_p, and PartyColors_p.
 
+//Routines 
+const int SNAKE = 0;
+const int SOLID = 1;
+const int FADE = 2;
+
 boolean lit = true;
 static uint8_t startIndex = 0;
 
 boolean raising = false;
-int lastExtream;
 const int MAX = 255;
 const int MIN = 0;
 
@@ -51,8 +58,9 @@ void setup() {
   FastLED.setBrightness(BRIGHTNESS);
     
   currentPalette = Green_p;
+  currentColor = GREEN;
   currentBlending = LINEARBLEND;
-  currentRoutine = "snake";
+  currentRoutine = SNAKE;
   
   Wire.begin(8);// address #8
   Wire.onReceive(receiveEvent);
@@ -62,18 +70,28 @@ void setup() {
 void loop() {
   //delay(100);
   FastLED.setBrightness(currentBrightness);
+  //Serial.println("Update");
+  if(currentPalette == RainbowColors_p || currentPalette == RainbowStripeColors_p || currentPalette == ForestColors_p){
+    currentRoutine = "snake";
+  }
   
   if(lit){
-    if(currentRoutine == "snake"){
+    if(currentRoutine == SNAKE){
+      currentBrightness = 255;
       startIndex = startIndex + 1;//Motion Speed
       snakeFromPalette(startIndex);
     } 
-    else if(currentRoutine == "solid"){
-      fill_solid(currentPalette, NUM_LEDS, currentColor);
+    if(currentRoutine == SOLID){
+      currentBrightness = 255;
+      for(int i = 0; i < NUM_LEDS; i++){
+        leds[i] = ColorFromPalette( currentPalette, 0, currentBrightness, currentBlending);
+      }
     }
-    else if(currentRoutine == "fade"){
-      fill_solid(currentPalette, NUM_LEDS, currentColor);
-      //fadeFromPalette();
+    if(currentRoutine == FADE){
+      fadeFromPalette();
+      for(int i = 0; i < NUM_LEDS; i++){
+        leds[i] = ColorFromPalette( currentPalette, 0, currentBrightness, currentBlending);
+      }
     }
 
   }  
@@ -83,29 +101,33 @@ void loop() {
 
 // this function is registered as an event, see setup() reeee black box code
 void receiveEvent(int howMany) {
+  Serial.println("Event");
   char set;
   char data;
   
   while (1 < Wire.available()){
     set = Wire.read() - '0';
-    //Serial.print(c);
+    //Serial.print("set: ");
+    //Serial.println(set);
   }
   data = Wire.read() - '0';
-  //Serial.println(c);
-  if(set == 0)
+  //Serial.print("data :");
+  //Serial.println(data);
+  if(set == '0' || set == 0){
     setColor(data);
-  else if (set == 1)  
+  }
+  else if (set == '1' || set == 1){
     setRoutine(data);
-  else if (set == 2)
+  }
+  else if (set == '2' || set == 2){
     lit = false;
+  }
 }
 
 void setColor(int color){
-  
-  if(lit && color != colorLast){
-    //Serial.priint("Setting color to ");
-    //Serial.println(data);
-    switch(color){
+    Serial.print("Setting color to ");
+    Serial.println(color);
+    switch((int)color){
       case 0:
         currentPalette = Green_p;
         currentColor = GREEN;
@@ -124,31 +146,35 @@ void setColor(int color){
         break;  
       case 4:
         currentPalette = RainbowColors_p;
-        currentColor = GREEN;
-        break;  
+        currentRoutine = SNAKE;
+        break; 
+      case 5:
+        currentPalette = RainbowStripeColors_p;
+        currentRoutine = SNAKE;
+        break; 
+      case 6:
+        currentPalette = ForestColors_p;
+        currentRoutine = SNAKE;
+        break;
+
     }  
-  }    
-  colorLast = color;
-  
+   
 }
 
 void setRoutine(int routine){
-  if(lit && routine != routineLast){
-   //Serial.priint("Setting routine to ");
-   //Serial.println(data);
-    switch(routine){
+   Serial.print("Setting routine to ");
+   Serial.println(routine);
+    switch((int)routine){
        case 0:
-         currentRoutine = "snake";
+         currentRoutine = SNAKE;
          break;
        case 1:
-         currentRoutine = "solid";
+         currentRoutine = SOLID;
          break;
        case 2:
-         currentRoutine = "fade";
+         currentRoutine = FADE;
          break; 
     }   
-  }   
-  routineLast = routine;
 }
 
 void snakeFromPalette(uint8_t colorIndex){
@@ -166,17 +192,19 @@ void snakeFromPalette(uint8_t colorIndex){
 
 void fadeFromPalette(){
 
-  if(BRIGHTNESS == MAX){
+//Serial.println(BRIGHTNESS
+
+  if(currentBrightness >= MAX){
     raising = false;
   }
-  else if(BRIGHTNESS == MIN){
+  else if(currentBrightness <= MIN){
     raising = true;
   }
   
   if(raising){
     currentBrightness++;
-  }else
+  }else{
     currentBrightness--;
-  
+  }
 }
 

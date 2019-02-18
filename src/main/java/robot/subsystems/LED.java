@@ -9,21 +9,17 @@ import edu.wpi.first.wpilibj.I2C.Port;
  */
 public class LED extends Subsystem {
 
-    private static String command;
-    private static char[] commandC;
-    private static byte[] commandB;
+  public static final int GREEN = 0;
+  public static final int BLUE = 1;
+  public static final int YELLOW = 2;
+  public static final int RED = 3;
+  public static final int RAINBOW = 4;
+  public static final int RAINBOW_STRIPE = 5;
+  public static final int FOREST = 6;
 
-    public static final int GREEN = 0;
-    public static final int BLUE = 1;
-    public static final int YELLOW = 2;
-    public static final int RED = 3;
-    public static final int RAINBOW = 4;
-
-    public static final int SNAKE = 0;
-    public static final int SOLID = 1;
-    public static final int FADE = 2;
-
-    public static I2C Wire = new I2C(Port.kOnboard, 8);
+  public static final int SNAKE = 0;
+  public static final int SOLID = 1;
+  public static final int FADE = 2;
 
     public void setColor(int color) {
         command = Integer.toString(color);
@@ -31,12 +27,16 @@ public class LED extends Subsystem {
         commandB = new byte[commandC.length+1];
         byte[] inC = new byte[0];
 
-        commandB[0] = 0; // First int of sent data 0 so color is changed
-        for(int i = 0; i < commandC.length; i++){
-            commandB[i+1] = (byte)commandC[i];
-        }
+  /** Sets color of LEDs GREEN, BLUE, YELLOW, RED, RAINBOW, RAINBOW_STRIPE, | FOREST  */
+  public void setColor(int color) {
+    String command = Integer.toString(color);
+    char[] commandC = command.toCharArray();
+    byte[] commandB = new byte[commandC.length+1];
+    byte[] inC = new byte[0];
 
-        Wire.transaction(commandB, commandB.length, inC, 0);
+    commandB[0] = (byte)'0'; // First int of sent data 0 so color is changed
+    for(int i = 0; i < commandC.length; i++){
+      commandB[i+1] = (byte)commandC[i];
     }
 
     public void setRoutine(int routine) {
@@ -45,12 +45,16 @@ public class LED extends Subsystem {
         commandB = new byte[commandC.length+1];
         byte[] inC = new byte[0];
 
-        commandB[0] = 1; // First int of sent data 1 so routine is changed
-        for(int i = 0; i < commandC.length; i++){
-          commandB[i+1] = (byte)commandC[i];
-        }
+  /** Sets routine of LEDs SNAKE, SOLID, | FADE*/
+  public void setRoutine(int routine) {
+    String command = Integer.toString(routine);
+    char[] commandC = command.toCharArray();
+    byte[] commandB = new byte[commandC.length+1];
+    byte[] inC = new byte[0];
 
-        Wire.transaction(commandB, commandB.length, inC, 0);
+    commandB[0] = (byte)'1'; // First int of sent data 1 so routine is changed
+    for(int i = 0; i < commandC.length; i++){
+      commandB[i+1] = (byte)commandC[i];
     }
 
     public void off(){
@@ -58,10 +62,11 @@ public class LED extends Subsystem {
         commandB = new byte[commandC.length+1];
         byte[] inC = new byte[0];
 
-        for(int i = 0; i < commandC.length; i++){
-            commandB[i] = (byte)commandC[i];
-        }
-
+  /** Turns off LEDs */
+  public void off(){
+    char[] commandC = new char[] {'2'};
+    byte[] commandB = new byte[commandC.length+1];
+    byte[] inC = new byte[0];
         Wire.transaction(commandB, commandB.length, inC, 0);
     }
 
