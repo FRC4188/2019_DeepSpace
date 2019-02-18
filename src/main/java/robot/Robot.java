@@ -5,11 +5,9 @@ import robot.subsystems.*;
 import robot.utils.*;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -30,6 +28,7 @@ public class Robot extends TimedRobot {
     public void robotInit() {
 
         // initialize subsystems
+        logger = new Logger();
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
@@ -39,9 +38,6 @@ public class Robot extends TimedRobot {
         led = new LED();
         oi = new OI();
 
-        // start logger
-        //logger.init();
-
         // start camera stream
         CameraServer.getInstance().startAutomaticCapture();
 
@@ -49,8 +45,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        //logger.update();
-        //limelight.trackRocketBayClose();
+        logger.update();
     }
 
     @Override
