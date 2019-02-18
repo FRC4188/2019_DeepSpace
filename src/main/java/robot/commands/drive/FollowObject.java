@@ -29,6 +29,7 @@ public class FollowObject extends Command {
     public FollowObject(Object object) {
         requires(Robot.drivetrain);
         requires(Robot.limelight);
+        setName("FollowObject: " + object.toString());
         this.object = object;
     }
 
@@ -79,7 +80,7 @@ public class FollowObject extends Command {
                 CSPMath.constrainKeepSign(turnOutput, 0.15, 1.0) : 0;
 
         // command motor output
-        drivetrain.arcade(xSpeed, zTurn, false);
+        drivetrain.arcade(xSpeed, zTurn);
 
         // debugging
         if(!(Math.abs(angleErr) < ANGLE_TOLERANCE)) System.out.println("turning" + angleErr);

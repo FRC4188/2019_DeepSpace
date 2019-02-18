@@ -21,7 +21,7 @@ public class Arm extends Subsystem {
     // Constants
     private final double TICKS_PER_REV = 1.0; // neo
     private final double GEAR_RATIO = 48.0;
-    private final double INITIAL_ANGLE = 25; // degrees
+    private final double INITIAL_ANGLE = 90; // degrees, 0 when arm is parallel with ground at front of bot
     private final double ENCODER_TO_DEGREES = 360.0 / (TICKS_PER_REV * GEAR_RATIO); // degrees
     private final double RAMP_RATE = 0.5; // seconds
     private final double FLAT_RATE = 0.035; // percent out
@@ -61,6 +61,7 @@ public class Arm extends Subsystem {
     private void updateShufleboard() {
         SmartDashboard.putNumber("Shoulder pos", getPosition());
         SmartDashboard.putNumber("Shoulder raw vel", getRawVelocity());
+        SmartDashboard.putNumber("Shoulder raw pos", getRawPosition());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
     }
@@ -90,6 +91,7 @@ public class Arm extends Subsystem {
         pidC.setOutputRange(-MAX_OUT, MAX_OUT);
         pidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         pidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
+        pidC.setSmartMotionMinOutputVelocity(0, SLOT_ID);
     }
 
     /** Sets shoulder motors to given percentage using velocity controller. */
@@ -98,13 +100,15 @@ public class Arm extends Subsystem {
         pidC.setReference(setpoint, ControlType.kVelocity);
     }
 
-    /** Sets shoulder motors to given percentage (-1.0, 1.0). */
-    public void setOpenLoop(double percent) {
-        double output = percent + FLAT_RATE * Math.sin(Math.toRadians(getPosition()));
+    /** Sets shoulder motors to given percentage (-1.0, 1.0). If flat rate
+     *  is true, will apply voltage based on angle to counteract gravity. */
+    public void setOpenLoop(double percent, boolean flatRate) {
+        double output = (flatRate) ? percent + FLAT_RATE *
+                Math.sin(Math.toRadians(getPosition())) : percent;
         shoulderMotor.set(output);
     }
 
-    /** Drives shoulder motor to given angle in degrees. */
+    /** Drives shoulder motor to given angle in degrees (off the positive x axis). */
     public void shoulderToAngle(double angle, double tolerance) {
         // convert from degrees to rotations (Spark units)
         angle /= ENCODER_TO_DEGREES;
@@ -122,18 +126,18 @@ public class Arm extends Subsystem {
     /** Sets shoulder to brake mode - Only mode that should be used. */
     public void setBrake() {
         shoulderMotor.setIdleMode(IdleMode.kBrake);
-        //shoulderSlave.setIdleMode(IdleMode.kBrake);
+        shoulderSlave.setIdleMode(IdleMode.kBrake);
     }
 
     /** Resets shoulder encoder value to 0. */
     public void resetEncoders() {
-        shoulderEncoder.setPosition(0);
-        shoulderMotor.setEncPosition(0);
+        double init = INITIAL_ANGLE / ENCODER_TO_DEGREES;
+        shoulderEncoder.setPosition(init);
     }
 
     /** Returns left encoder position in degrees. */
     public double getPosition() {
-        return (shoulderEncoder.getPosition() * ENCODER_TO_DEGREES) + INITIAL_ANGLE;
+        return (shoulderEncoder.getPosition() * ENCODER_TO_DEGREES);
     }
 
     /** Returns shoulder encoder position in native Spark units (revolutions). */
@@ -143,7 +147,7 @@ public class Arm extends Subsystem {
 
     /** Returns shoulder encoder velocity in degrees per second. */
     public double getVelocity() {
-        return shoulderEncoder.getVelocity() * ENCODER_TO_DEGREES / 60; // native is rpm
+        return shoulderEncoder.getVelocity() * ENCODER_TO_DEGREES / 60.0; // native is rpm
     }
 
     /** Returns shoulder encoder velocity in native Spark units (rpm). */

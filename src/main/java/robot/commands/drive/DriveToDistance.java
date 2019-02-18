@@ -23,6 +23,7 @@ public class DriveToDistance extends Command {
 
     public DriveToDistance(double distance, double tolerance, Distance type) {
         requires(drivetrain);
+        setName("DriveToDistance " + type.toString()  + ":" + distance);
         this.distanceParam = distance;
         this.tolerance = tolerance;
         this.type = type;

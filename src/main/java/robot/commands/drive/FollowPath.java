@@ -56,6 +56,7 @@ public class FollowPath extends Command {
 
     public FollowPath(Path path, boolean isReversed) {
         requires(drivetrain);
+        setName("FollowPath: " + path.toString());
         this.isReversed = isReversed;
         this.path = path;
         if(path == Path.TO_PERPENDICULAR) this.fromFile = false;

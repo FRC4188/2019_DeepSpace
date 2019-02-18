@@ -20,17 +20,18 @@ public class Elevator extends Subsystem {
 
     // Constants
     private final double TICKS_PER_REV = 1; // neo
-    private final double SPOOL_DIAMETER = 0; //feet
-    private final double ENCODER_TO_FEET = (SPOOL_DIAMETER * Math.PI) / TICKS_PER_REV; // feet
+    private final double SPOOL_DIAMETER = (2 / 12); //feet
+    private final double GEAR_RATIO = 2.84;
+    private final double ENCODER_TO_FEET = (SPOOL_DIAMETER * Math.PI) / (TICKS_PER_REV * GEAR_RATIO); // feet
     private final double RAMP_RATE = 0.2; // seconds
     private final double MAX_OUT = 0.5; // percent out
-    private final double kP = 0;
-    private final double kI = 0;
+    private final double kP = 5e-5;
+    private final double kI = 1e-6;
     private final double kI_ZONE = 0;
     private final double kD = 0;
     private final double kF = 0;
-    private final double MAX_VELOCITY = 0; // rpm
-    private final double MAX_ACCELERATION = 0;
+    private final double MAX_VELOCITY = 1500; // rpm
+    private final double MAX_ACCELERATION = 1000;
     private final int    SLOT_ID = 0;
     public final double  DELTA_T = 0.02; // seconds
 
@@ -41,7 +42,7 @@ public class Elevator extends Subsystem {
     public Elevator() {
 
         // Slave control
-        elevatorSlave.follow(elevatorMotor);
+        elevatorSlave.follow(elevatorMotor, true);
 
         // Reset
         controllerInit();
@@ -58,6 +59,9 @@ public class Elevator extends Subsystem {
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Elevator Position", getPosition());
+        SmartDashboard.putNumber("Elevator raw velocity", getRawVelocity());
+        SmartDashboard.putNumber("E11 temp", elevatorMotor.getMotorTemperature());
+        SmartDashboard.putNumber("E12 temp", elevatorSlave.getMotorTemperature());
     }
 
     /** Runs every loop. */
@@ -87,8 +91,14 @@ public class Elevator extends Subsystem {
         pidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
-    /** Sets elevator motors to given percentage (-1.0, 1.0) */
+    /** Sets elevator motors to given percentage using velocity controller. */
     public void set(double percent) {
+        double setpoint = percent * MAX_VELOCITY;
+        pidC.setReference(setpoint, ControlType.kVelocity);
+    }
+
+    /** Sets elevator motors to given percentage (-1.0, 1.0). */
+    public void setOpenLoop(double percent) {
         elevatorMotor.set(percent);
     }
 
@@ -105,7 +115,6 @@ public class Elevator extends Subsystem {
     public void setInverted(boolean isInverted) {
         if(elevatorInverted) isInverted = !isInverted;
         elevatorMotor.setInverted(isInverted);
-        elevatorSlave.setInverted(isInverted);
     }
 
     /** Sets sparks to brake mode - Only mode that should be used. */
@@ -131,7 +140,12 @@ public class Elevator extends Subsystem {
 
     /** Returns elevator encoder velocity in feet per second. */
     public double getVelocity() {
-        return elevatorEncoder.getVelocity() * ENCODER_TO_FEET / 60; // native is rpm
+        return elevatorEncoder.getVelocity() * ENCODER_TO_FEET / 60.0; // native is rpm
+    }
+
+    /** Returns elevator encoder velocity in native spark units (rpm). */
+    public double getRawVelocity() {
+        return elevatorEncoder.getVelocity();
     }
 
     /** Returns elevator motor output as a percentage. */
