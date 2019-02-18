@@ -4,6 +4,7 @@ import robot.commands.drive.ManualDrive;
 import robot.utils.CSPMath;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -25,6 +26,8 @@ public class Drivetrain extends Subsystem {
     private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
     private CANEncoder leftEncoder = new CANEncoder(leftMotor);
     private CANEncoder rightEncoder = new CANEncoder(rightMotor);
+    private CANPIDController leftPidC = leftMotor.getPIDController();
+    private CANPIDController rightPidC = rightMotor.getPIDController();
     private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
     private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(1);
@@ -35,13 +38,21 @@ public class Drivetrain extends Subsystem {
     public final double MAX_VELOCITY = 9; // ft/s
     public final double MAX_ACCELERATION = 5; // ft/s^2
     public final double MAX_JERK = 190; // ft/s^3
+    public final double kP = 5e-5;
+    public final double kI = 1e-6;
+    public final double kD = 0;
+    public final double kF = 0;
+    public final double kI_ZONE = 0;
+    public final int    SLOT_ID = 0;
+    public final double MAX_OUT = 1.0;
     public final double WHEELBASE_WIDTH = 2; // ft
     public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double TICKS_PER_REV = 1.0; // neo
     public final double LOW_GEAR_RATIO = 15.32;
     public final double HIGH_GEAR_RATIO = 7.08;
+    private double      currentGearRatio = HIGH_GEAR_RATIO;
     public final double RAMP_RATE = 0.75; // seconds
-    public final double ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * LOW_GEAR_RATIO); // ft
+    public double       ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
     public final double DELTA_T = 0.02; // seconds
 
     // State vars
@@ -58,6 +69,7 @@ public class Drivetrain extends Subsystem {
         rightSlave2.follow(rightMotor);
 
         // Reset
+        controllerInit();
         reset();
         calibrateGyro();
 
@@ -79,6 +91,12 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
         SmartDashboard.putNumber("Target angle", getTargetAngle());
+        SmartDashboard.putNumber("L1 temp", leftMotor.getMotorTemperature());
+        SmartDashboard.putNumber("L2 temp", leftSlave1.getMotorTemperature());
+        SmartDashboard.putNumber("L3 temp", leftSlave2.getMotorTemperature());
+        SmartDashboard.putNumber("R4 temp", rightMotor.getMotorTemperature());
+        SmartDashboard.putNumber("R5 temp", rightSlave1.getMotorTemperature());
+        SmartDashboard.putNumber("R6 temp", rightSlave2.getMotorTemperature());
     }
 
     /** Runs every loop. */
@@ -98,6 +116,26 @@ public class Drivetrain extends Subsystem {
         leftInverted = true;
         rightInverted = false;
         setInverted(false);
+    }
+
+    /** Configures gains for Spark closed loop controller. */
+    private void controllerInit() {
+        leftPidC.setP(kP);
+        leftPidC.setI(kI);
+        leftPidC.setD(kD);
+        leftPidC.setIZone(kI_ZONE);
+        leftPidC.setFF(kF);
+        leftPidC.setOutputRange(-MAX_OUT, MAX_OUT);
+        leftPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
+        leftPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
+        rightPidC.setP(kP);
+        rightPidC.setI(kI);
+        rightPidC.setD(kD);
+        rightPidC.setIZone(kI_ZONE);
+        rightPidC.setFF(kF);
+        rightPidC.setOutputRange(-MAX_OUT, MAX_OUT);
+        rightPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
+        rightPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
     /** Sets left motors to given percentage (-1.0 - 1.0). */
@@ -308,17 +346,35 @@ public class Drivetrain extends Subsystem {
         rightMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
-    /** Sets gear shift solenoid to given value. */
-    public void shiftGear(Value value) {
-        gearShift.set(value);
+    /** Shifts drivetrain to low gear. */
+    public void setLowGear() {
+        gearShift.set(Value.kForward);
+        currentGearRatio = LOW_GEAR_RATIO;
+    }
+
+    /** Shifts drivetrain to high gear. */
+    public void setHighGear() {
+        gearShift.set(Value.kReverse);
+        currentGearRatio = LOW_GEAR_RATIO;
+    }
+
+    /** Turns gear shift solenoid off. */
+    public void setGearShiftOff() {
+        gearShift.set(Value.kOff);
     }
 
     /** Controls drivetrain with arcade model, with positive xSpeed going forward
-     *  and positive zTurn turning right. Output multiplied by throttle. */
-    public void arcade(double xSpeed, double zTurn, double throttle) {
+     *  and positive zTurn turning right. */
+    public void arcade(double xSpeed, double zTurn) {
 
-        double MAX_INPUT = 1.0;
+        final double kQUICKSTOP = 1.5;
+        final double MAX_INPUT = 1.0;
         double turnRatio;
+        double quickStop = 0;
+
+        quickStop += -kQUICKSTOP * zTurn * DELTA_T;
+        if(zTurn == 0) zTurn = quickStop;
+
         double leftInput = xSpeed + zTurn;
         double rightInput = xSpeed - zTurn;
 
@@ -347,8 +403,8 @@ public class Drivetrain extends Subsystem {
         }
 
         // command motor output
-        setLeft(leftInput * throttle);
-        setRight(rightInput * throttle);
+        setLeft(leftInput);
+        setRight(rightInput);
 
     }
 
@@ -357,6 +413,24 @@ public class Drivetrain extends Subsystem {
     public void tank(double leftSpeed, double rightSpeed, double throttle) {
         setLeft(leftSpeed * throttle);
         setRight(rightSpeed * throttle);
+    }
+
+    /**
+    * Returns temperature of motor based off CAN ID
+    */
+    public double getMotorTemperature(int index){
+
+        CANSparkMax[] sparks = new CANSparkMax[]{
+            leftMotor,
+            leftSlave1,
+            leftSlave2,
+            rightMotor,
+            rightSlave1,
+            rightSlave2
+        };
+
+        index -= 1;
+        return sparks[index].getMotorTemperature();
     }
 
 }

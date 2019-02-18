@@ -8,40 +8,31 @@ import edu.wpi.first.wpilibj.command.Command;
 public class WristToAngle extends Command {
 
     Intake intake = Robot.intake;
-
-    final double kP = 0.1;
-    final double kI = 0;
-    final double kD = 0;
-
-    double lastError, integral = 0;
-    double angle, tolerance;
+    double angle, tolerance, counter;
 
     public WristToAngle(double angle, double tolerance) {
         requires(intake);
+        setName("WristToAngle: " + angle);
         this.angle = angle;
         this.tolerance = tolerance;
     }
 
     @Override
     protected void initialize() {
-        lastError = 0;
-        integral = 0;
+        counter = 0;
     }
 
     @Override
     protected void execute() {
-        double input = intake.getWristPosition();
-        double error = angle - input;
-        integral += error * intake.DELTA_T;
-        double derivative = (error - lastError) / intake.DELTA_T;
-        double intakeWristOutput = kP * error + kI * integral + kD * derivative;
-        lastError = error;
-        intake.setWrist(intakeWristOutput);
+        intake.wristToAngle(angle, tolerance);
+        double error = angle - intake.getWristPosition();
+        if(Math.abs(error) < tolerance) counter ++;
+        else counter = 0;
     }
 
     @Override
     protected boolean isFinished() {
-        return (Math.abs(lastError) < tolerance);
+        return counter > 5;
     }
 
     @Override

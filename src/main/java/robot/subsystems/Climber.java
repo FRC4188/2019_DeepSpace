@@ -1,19 +1,20 @@
 package robot.subsystems;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import robot.commands.climb.ManualClimb;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class Climber extends Subsystem {
 
     // Device initialization
-    private WPI_TalonSRX climberLeft = new WPI_TalonSRX(41);
-    private WPI_TalonSRX climberRight = new WPI_TalonSRX(42);
+    private WPI_TalonSRX leftClimberMotor = new WPI_TalonSRX(41);
+    private WPI_TalonSRX rightClimberMotor= new WPI_TalonSRX(42);
+    private DigitalInput leftMagnetSwitch = new DigitalInput(6);
+    private DigitalInput rightMagnetSwitch = new DigitalInput(7);
 
-    //private WPI_TalonSRX leftSlave = new WPI_TalonSRX(13);
-    //private WPI_TalonSRX rightSlave = new WPI_TalonSRX(14);
-
-    // Climber constants
+    // Constants
     private final double RAMP_RATE = 0.2; // seconds
 
     // State variables
@@ -21,20 +22,17 @@ public class Climber extends Subsystem {
 
     /** Constructs new Climber object and configures devices */
     public Climber() {
-
-        // Reset
         reset();
-
     }
 
     /** Defines default command that will run when object is created. */
     @Override
     public void initDefaultCommand() {
+        setDefaultCommand(new ManualClimb());
     }
 
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
-        System.out.println("42 out: " + climberRight.get());
     }
 
     /** Runs every loop. */
@@ -53,49 +51,39 @@ public class Climber extends Subsystem {
 
     /** Sets climber motors to given percentage (-1.0, 1.0) */
     public void set(double percent) {
-        climberLeft.set(percent);
-        climberRight.set(percent);
+        leftClimberMotor.set(percent);
+        rightClimberMotor.set(percent);
     }
 
     /** Inverts the the climber. */
     public void setInverted(boolean isInverted) {
         if(climberInverted) isInverted = !isInverted;
-        climberLeft.setInverted(isInverted);
-        climberRight.setInverted(isInverted);
-        //leftSlave.setInverted(isInverted);
-        //rightSlave.setInverted(isInverted);
+        leftClimberMotor.setInverted(!isInverted);
+        rightClimberMotor.setInverted(isInverted);
     }
 
     /** Sets Talons to brake mode - Only mode that should be used. */
     public void setBrake() {
-        climberLeft.setNeutralMode(NeutralMode.Brake);
-        climberRight.setNeutralMode(NeutralMode.Brake);
-        //leftSlave.setNeutralMode(NeutralMode.Brake);
-        //rightSlave.setNeutralMode(NeutralMode.Brake);
+        leftClimberMotor.setNeutralMode(NeutralMode.Brake);
+        rightClimberMotor.setNeutralMode(NeutralMode.Brake);
     }
 
-    /** Returns climber motor output as a percentage. */
-    public double getLeftOutput() {
-        return climberLeft.get();
-    }
-    public double getRightOutput() {
-        return climberRight.get();
+    /** Returns state of left climber magnetic limit switch. */
+    public boolean getLeftMagnetSwitch() {
+        return leftMagnetSwitch.get();
     }
 
-    /** Returns climber motor output current. */
-    public double getLeftCurrent() {
-        return climberLeft.getOutputCurrent();
-    }
-    public double getRightCurrent() {
-        return climberRight.getOutputCurrent();
+    /** Returns state of right climber magnetic limit switch. */
+    public boolean getRightMagnetSwitch() {
+        return rightMagnetSwitch.get();
     }
 
     /** Enables ramp rate. */
     public void enableRampRate() {
-        climberLeft.configClosedloopRamp(RAMP_RATE);
-        climberRight.configClosedloopRamp(RAMP_RATE);
-        //rightSlave.configClosedloopRamp(RAMP_RATE);
-        //leftSlave.configClosedloopRamp(RAMP_RATE);
+        leftClimberMotor.configOpenloopRamp(RAMP_RATE);
+        rightClimberMotor.configOpenloopRamp(RAMP_RATE);
+        leftClimberMotor.configClosedloopRamp(RAMP_RATE);
+        rightClimberMotor.configClosedloopRamp(RAMP_RATE);
     }
 
 }

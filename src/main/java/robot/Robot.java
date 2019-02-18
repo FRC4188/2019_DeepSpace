@@ -2,7 +2,7 @@ package robot;
 
 import robot.OI;
 import robot.subsystems.*;
-import robot.utils.Logger;
+import robot.utils.*;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -28,17 +28,15 @@ public class Robot extends TimedRobot {
     public void robotInit() {
 
         // initialize subsystems
+        logger = new Logger();
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
-        //elevator = new Elevator();
+        elevator = new Elevator();
         limelight = new LimeLight();
         climber = new Climber();
         led = new LED();
         oi = new OI();
-        
-        // start logger
-        //logger.init();
 
         // start camera stream
         CameraServer.getInstance().startAutomaticCapture();
@@ -47,8 +45,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
-        //logger.update();
-        //limelight.trackRocketBayClose();
+        logger.update();
     }
 
     @Override
@@ -58,7 +55,7 @@ public class Robot extends TimedRobot {
         drivetrain.reset();
         arm.reset();
         intake.reset();
-        //elevator.reset();
+        elevator.reset();
         climber.reset();
 
     }

@@ -39,7 +39,7 @@ public class FollowPath extends Command {
     EncoderFollower leftFollower, rightFollower;
     Path path;
 
-    final double kP = 0.0005;
+    final double kP = 0.00005;
     final double kI = 0;
     final double kD = 0;
     final double kV = 1.0 / drivetrain.MAX_VELOCITY;
@@ -56,6 +56,7 @@ public class FollowPath extends Command {
 
     public FollowPath(Path path, boolean isReversed) {
         requires(drivetrain);
+        setName("FollowPath: " + path.toString());
         this.isReversed = isReversed;
         this.path = path;
         if(path == Path.TO_PERPENDICULAR) this.fromFile = false;
@@ -139,7 +140,7 @@ public class FollowPath extends Command {
         double gyroHeading = drivetrain.getGyroAngle();
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.2 * (1.0/80.0) * angleDifference;
+        double turn = 0.4 * (1.0/80.0) * angleDifference;
         System.out.println("angleDiff: " + angleDifference + " turn val: " + turn);
 
         // use output

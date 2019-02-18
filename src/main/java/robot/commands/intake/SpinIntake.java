@@ -4,7 +4,8 @@ import robot.Robot;
 import robot.subsystems.Intake;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Spins cargo intake to percent speed (-1.0, 1.0) in given direction. */
+/** Spins cargo intake to percent speed (-1.0, 1.0) in given direction.
+ *  Positive value sucks ball in. */
 public class SpinIntake extends Command {
 
     Intake intake = Robot.intake;
@@ -13,6 +14,7 @@ public class SpinIntake extends Command {
 
     public SpinIntake(double speed) {
         requires(intake);
+        setName("SpinIntake: " + speed);
         this.speed = speed;
     }
 
@@ -23,7 +25,6 @@ public class SpinIntake extends Command {
     @Override
     protected void execute() {
         intake.spinIntake(speed);
-        intake.setWristOpenLoop(speed);
     }
 
     @Override

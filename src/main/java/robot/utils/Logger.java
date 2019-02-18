@@ -11,6 +11,12 @@ public class Logger {
 
     // Initiates a new BadLog object
     private static BadLog log;
+
+    public Logger() {
+        log = BadLog.init(getLogDir());
+        createTopics();
+        finishInit();
+    }
     
     /** Closes the log file in order to be able to write to it */
     private void finishInit() {
@@ -35,14 +41,6 @@ public class Logger {
     private void createTopics() {
         BadLog.createTopic("Match Time", "s", () -> DriverStation.getInstance().getMatchTime());
         BadLog.createTopic("Voltage", "V", () -> RobotController.getBatteryVoltage());
-    }
-
-    /** Initiates a new badlog file and creates a new .bag file using the
-     *  given directory */
-    public void init() {
-        log = BadLog.init(getLogDir());
-        createTopics();
-        finishInit();
     }
 
     /** Pushes updates to the log file - Should be updated periodically */

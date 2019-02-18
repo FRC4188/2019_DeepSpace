@@ -5,15 +5,17 @@ import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
+/** Runs climber motors at a given speed. Direction defined by
+ *  pilot Dpad (up to retract, down to extend.)*/
 public class ManualClimb extends Command {
 
     OI oi = Robot.oi;
     Climber climber = Robot.climber;
-    private double percent;
 
-    public ManualClimb(double percent) {
-        this.percent = percent;
-        //requires(climber);
+    final double SPEED = 0.7;
+
+    public ManualClimb() {
+        requires(climber);
     }
 
     @Override
@@ -22,7 +24,10 @@ public class ManualClimb extends Command {
 
     @Override
     protected void execute() {
-        climber.set(percent);
+        double pilotDpad = oi.getPilotDpad();
+        if(pilotDpad == -1.0) climber.set(0);
+        else if(pilotDpad == 0) climber.set(SPEED);
+        else if(pilotDpad == 180) climber.set(-SPEED);
     }
 
     @Override
@@ -32,7 +37,6 @@ public class ManualClimb extends Command {
 
     @Override
     protected void end() {
-        climber.set(0);
     }
 
     @Override

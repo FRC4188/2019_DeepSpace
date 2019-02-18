@@ -12,7 +12,7 @@ public class FireHatch extends Command {
     Value value;
 
     public FireHatch(Value value) {
-        requires(intake);
+        setName("FireHatch: " + value.toString());
         this.value = value;
     }
 

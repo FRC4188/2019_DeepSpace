@@ -21,7 +21,7 @@ public class FollowObject extends Command {
     boolean isFollowing, leftSense, midSense, rightSense = false;
     Object object;
 
-    final double TURN_kP = 0.01;
+    final double TURN_kP = 0.007;
     final double DIST_kP = 0.09;
     final double ANGLE_TOLERANCE = 3.0;
     final double DIST_TOLERANCE = 0.5;
@@ -29,6 +29,7 @@ public class FollowObject extends Command {
     public FollowObject(Object object) {
         requires(Robot.drivetrain);
         requires(Robot.limelight);
+        setName("FollowObject: " + object.toString());
         this.object = object;
     }
 
@@ -65,7 +66,7 @@ public class FollowObject extends Command {
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
         distance = limelight.getDistance(limelight.getPipeline().getHeight());
-        distErr = distance - (36 / 12); // stop 3 ft away
+        distErr = distance - 4.5; // stop 5.5 ft away
         if(distErr < 0) distErr = 0;
 
         // distance p loop
@@ -74,13 +75,12 @@ public class FollowObject extends Command {
 
         // angle p loop, turns less as distance shrinks
         angleErr = angleSetpoint - drivetrain.getGyroAngle();
-        //double distReducer = distance / initialDist;
         double turnOutput = TURN_kP * angleErr;
         double zTurn = (Math.abs(angleErr) > ANGLE_TOLERANCE) ?
                 CSPMath.constrainKeepSign(turnOutput, 0.15, 1.0) : 0;
 
         // command motor output
-        drivetrain.arcade(xSpeed, zTurn, 1.0);
+        drivetrain.arcade(xSpeed, zTurn);
 
         // debugging
         if(!(Math.abs(angleErr) < ANGLE_TOLERANCE)) System.out.println("turning" + angleErr);
