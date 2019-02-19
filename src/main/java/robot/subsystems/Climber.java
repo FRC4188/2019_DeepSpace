@@ -18,7 +18,7 @@ public class Climber extends Subsystem {
     private final double RAMP_RATE = 0.2; // seconds
 
     // State variables
-    private boolean climberInverted, leftCanExtend, rightCanExtend;
+    private boolean climberInverted;
 
     /** Constructs new Climber object and configures devices */
     public Climber() {
@@ -39,7 +39,6 @@ public class Climber extends Subsystem {
     @Override
     public void periodic() {
         updateShufleboard();
-        handleLimits();
     }
 
     /** Resets necessary devices. */
@@ -48,27 +47,18 @@ public class Climber extends Subsystem {
         setBrake();
         climberInverted = false;
         setInverted(false);
-        leftCanExtend = true;
-        rightCanExtend = true;
     }
 
-    /** Sets climber motors to given percentage (-1.0, 1.0). 
+    /** Sets left climber motor to given percentage (-1.0, 1.0). 
      *  Positive percent extends climbers. */
-    public void set(double percent) {
+    public void setLeft(double percent) {
+        leftClimberMotor.set(percent);
+    }
 
-        double leftPercent = percent;
-        double rightPercent = percent;
-
-        // ensure that cannot extend past limits
-        if(leftCanExtend && percent < 0) leftPercent = 0;
-        if(rightCanExtend && percent < 0) rightPercent = 0;
-        if(!leftCanExtend && percent > 0) leftPercent = 0;
-        if(!rightCanExtend && percent > 0) rightPercent = 0;
-
-        // command motor output
-        leftClimberMotor.set(leftPercent);
-        rightClimberMotor.set(rightPercent);
-
+    /** Sets left climber motor to given percentage (-1.0, 1.0). 
+     *  Positive percent extends climbers. */
+    public void setRight(double percent) {
+        rightClimberMotor.set(percent);
     }
 
     /** Inverts the the climber. */
@@ -92,12 +82,6 @@ public class Climber extends Subsystem {
     /** Returns state of right climber magnetic limit switch. */
     public boolean getRightMagnetSwitch() {
         return rightMagnetSwitch.get();
-    }
-
-    /** Searches for limit switches and alters subsystem state accordingly. */
-    private void handleLimits() {
-        if(getLeftMagnetSwitch()) leftCanExtend = !leftCanExtend;
-        if(getRightMagnetSwitch()) rightCanExtend = !rightCanExtend;
     }
 
     /** Enables ramp rate. */

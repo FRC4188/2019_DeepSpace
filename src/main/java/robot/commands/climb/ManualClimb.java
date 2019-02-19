@@ -13,6 +13,9 @@ public class ManualClimb extends Command {
     Climber climber = Robot.climber;
 
     final double SPEED = 0.7;
+    boolean leftCanExtend, rightCanExtend, leftCanRetract, rightCanRetract;
+    boolean lastLeftSwitch, lastRightSwitch;
+    double lastLeftSpeed, lastRightSpeed;
 
     public ManualClimb() {
         requires(climber);
@@ -20,14 +23,53 @@ public class ManualClimb extends Command {
 
     @Override
     protected void initialize() {
+        leftCanExtend = rightCanExtend = true;
+        leftCanRetract = rightCanRetract = false;
+        lastLeftSwitch = lastRightSwitch = true;
+        lastLeftSpeed = lastRightSpeed = 0;
     }
 
     @Override
     protected void execute() {
+
+        // handle limit switches
+        boolean leftSwitch = climber.getLeftMagnetSwitch();
+        boolean rightSwitch = climber.getRightMagnetSwitch();
+        if(lastLeftSwitch) {
+            if(!leftSwitch) {
+                if(lastLeftSpeed > 0) leftCanExtend = !leftCanExtend;
+                if(lastLeftSpeed < 0) leftCanRetract = !leftCanRetract;
+            }
+        }
+        if(lastRightSwitch) {
+            if(!rightSwitch) {
+                if(lastRightSpeed > 0) leftCanExtend = !leftCanExtend;
+                if(lastRightSpeed < 0) leftCanRetract = !leftCanRetract;
+            }
+        }
+
+        // direction based on Dpad
         double pilotDpad = oi.getPilotDpad();
-        if(pilotDpad == -1.0) climber.set(0);
-        else if(pilotDpad == 0) climber.set(SPEED);
-        else if(pilotDpad == 180) climber.set(-SPEED);
+        double leftPercent = 0;
+        double rightPercent = 0;
+        if(pilotDpad == 0) {
+            if(leftCanExtend) leftPercent = SPEED;
+            if(rightCanExtend) rightPercent = SPEED;
+        } else if(pilotDpad == 180) {
+            if(leftCanRetract) leftPercent = -SPEED;
+            if(rightCanRetract) rightPercent = -SPEED;
+        }
+
+        // command motor output
+        climber.setLeft(leftPercent);
+        climber.setRight(rightPercent);
+
+        // save values for next loop
+        lastLeftSpeed = leftPercent;
+        lastRightSpeed = rightPercent;
+        lastLeftSwitch = leftSwitch;
+        lastRightSwitch = rightSwitch;
+
     }
 
     @Override
