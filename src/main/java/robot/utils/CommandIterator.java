@@ -21,7 +21,7 @@ public class CommandIterator {
     private boolean lastIncrementer, lastDecrementer, firstPress = false;
     private String smartDashKey;
 
-    /** Constructs new CommandIncrementer object to increment counter when incrementer is true, decrement
+    /** Constructs new CommandIterator object to increment counter when incrementer is true, decrement
      *  counter when decrementer is true, and msBetweenClicks to wait for subsequent increments or decrements. */
     public CommandIterator(Trigger incrementer, Trigger decrementer, int msBetweenClicks, String smartDashKey) {
         this.incrementer = incrementer;
@@ -30,7 +30,7 @@ public class CommandIterator {
         this.smartDashKey = smartDashKey;
     }
 
-    /** Assigns a given command to be run when counter reaches a given positive value. */
+    /** Assigns a given command to be run when counter reaches a given value. */
     public void runCmdWhenValue(Command command, int val) {
         if(valuesList.isEmpty()) minCounter = val;
         commandsList.add(command);
@@ -56,10 +56,8 @@ public class CommandIterator {
         Notifier notif = new Notifier(() -> {
 
             if(RobotState.isDisabled()) {
-
                 counter = initialCounter;
                 firstPress = false;
-
             } else {
 
                 // get trigger vals

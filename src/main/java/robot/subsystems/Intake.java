@@ -17,8 +17,8 @@ public class Intake extends Subsystem {
     private WPI_TalonSRX wristMotor = new WPI_TalonSRX(31);
     private WPI_TalonSRX intakeMotor = new WPI_TalonSRX(32);
     private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(2, 3);
-    private DigitalInput frontCargoSensor = new DigitalInput(4);
-    private DigitalInput rearCargoSensor = new DigitalInput(5);
+    private DigitalInput frontCargoSensor = new DigitalInput(3);
+    private DigitalInput rearCargoSensor = new DigitalInput(4);
 
     // Constants
     private final double TICKS_PER_REV = 4096; // talon units
