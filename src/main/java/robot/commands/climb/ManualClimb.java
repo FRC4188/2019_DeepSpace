@@ -5,20 +5,21 @@ import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Runs climber motors at a given speed. Direction defined by
- *  pilot Dpad (up to retract, down to extend.)*/
+/** Runs climber motors at a given percent.
+ *  Positive percent extends. */
 public class ManualClimb extends Command {
 
     OI oi = Robot.oi;
     Climber climber = Robot.climber;
 
-    final double SPEED = 0.7;
+    double percent;
     boolean leftCanExtend, rightCanExtend, leftCanRetract, rightCanRetract;
     boolean lastLeftSwitch, lastRightSwitch;
     double lastLeftSpeed, lastRightSpeed;
 
-    public ManualClimb() {
+    public ManualClimb(double percent) {
         requires(climber);
+        this.percent = percent;
     }
 
     @Override
@@ -48,16 +49,14 @@ public class ManualClimb extends Command {
             }
         }
 
-        // direction based on Dpad
-        double pilotDpad = oi.getPilotDpad();
         double leftPercent = 0;
         double rightPercent = 0;
-        if(pilotDpad == 0) {
-            if(leftCanExtend) leftPercent = SPEED;
-            if(rightCanExtend) rightPercent = SPEED;
-        } else if(pilotDpad == 180) {
-            if(leftCanRetract) leftPercent = -SPEED;
-            if(rightCanRetract) rightPercent = -SPEED;
+        if(percent > 0) {
+            if(leftCanExtend) leftPercent = percent;
+            if(rightCanExtend) rightPercent = percent;
+        } else if(percent < 0) {
+            if(leftCanRetract) leftPercent = percent;
+            if(rightCanRetract) rightPercent = percent;
         }
 
         // command motor output
@@ -65,8 +64,8 @@ public class ManualClimb extends Command {
         climber.setRight(rightPercent);
 
         // save values for next loop
-        lastLeftSpeed = leftPercent;
-        lastRightSpeed = rightPercent;
+        if(leftPercent != 0) lastLeftSpeed = leftPercent;
+        if(rightPercent != 0) lastRightSpeed = rightPercent;
         lastLeftSwitch = leftSwitch;
         lastRightSwitch = rightSwitch;
 
