@@ -34,6 +34,8 @@ public class Elevator extends Subsystem {
     private final double MAX_ACCELERATION = 1000;
     private final int    SLOT_ID = 0;
     public final double  DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
+
 
     // State vars
     private boolean elevatorInverted;
@@ -164,16 +166,12 @@ public class Elevator extends Subsystem {
         elevatorMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
-    /**
-    * Returns temperature of motor based off CAN ID
-    */
+    /** Returns temperature of motor based off CAN ID. */
     public double getMotorTemperature(int index) {
-        
         CANSparkMax[] sparks = new CANSparkMax[]{
             elevatorMotor,
             elevatorSlave
         };
-
         index -= 11;
         return sparks[index].getMotorTemperature();
     }

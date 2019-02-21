@@ -22,7 +22,8 @@ public class ManualArm extends Command {
 
     @Override
     protected void execute() {
-        arm.set(oi.getCopilotY(Hand.kLeft));
+        double brownoutVar = Robot.brownoutProtection.getBrownoutVar();
+        arm.set(oi.getCopilotY(Hand.kLeft) * brownoutVar);
     }
 
     @Override

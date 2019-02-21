@@ -54,6 +54,8 @@ public class Drivetrain extends Subsystem {
     public final double RAMP_RATE = 0.75; // seconds
     public double       ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
     public final double DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
+
 
     // State vars
     private double fieldPosX, fieldPosY = 0;
@@ -415,11 +417,8 @@ public class Drivetrain extends Subsystem {
         setRight(rightSpeed * throttle);
     }
 
-    /**
-    * Returns temperature of motor based off CAN ID
-    */
+    /** Returns temperature of motor based off CAN ID. */
     public double getMotorTemperature(int index){
-
         CANSparkMax[] sparks = new CANSparkMax[]{
             leftMotor,
             leftSlave1,
@@ -428,7 +427,6 @@ public class Drivetrain extends Subsystem {
             rightSlave1,
             rightSlave2
         };
-
         index -= 1;
         return sparks[index].getMotorTemperature();
     }

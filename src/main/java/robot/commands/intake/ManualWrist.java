@@ -12,7 +12,6 @@ public class ManualWrist extends Command {
 
     OI oi = Robot.oi;
     Intake intake = Robot.intake;
-
     double lastDir;
 
     public ManualWrist() {
@@ -27,13 +26,14 @@ public class ManualWrist extends Command {
     protected void execute() {
         double percent = oi.getCopilotY(Hand.kRight);
         double wristPos = intake.getWristPosition();
+        double brownoutVar = Robot.brownoutProtection.getBrownoutVar();
         if(!CSPMath.isBetween(wristPos, -360, 360)) {
             if(Math.signum(percent) == lastDir) percent = 0;
             else percent = oi.getCopilotY(Hand.kRight);
         } else {
             if(Math.abs(percent) > 0) lastDir = Math.signum(percent);
         }
-        intake.setWristOpenLoop(percent);
+        intake.setWristOpenLoop(percent * brownoutVar);
     }
 
     @Override

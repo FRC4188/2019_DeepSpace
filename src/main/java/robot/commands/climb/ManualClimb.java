@@ -16,6 +16,8 @@ public class ManualClimb extends Command {
     boolean leftCanExtend, rightCanExtend, leftCanRetract, rightCanRetract;
     boolean lastLeftSwitch, lastRightSwitch;
     double lastLeftSpeed, lastRightSpeed;
+    public double brownoutVariable;
+
 
     public ManualClimb(double percent) {
         requires(climber);

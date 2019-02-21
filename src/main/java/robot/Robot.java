@@ -19,6 +19,7 @@ public class Robot extends TimedRobot {
     public static LimeLight limelight;
     public static LED led;
     public static Logger logger;
+    public static BrownoutProtection brownoutProtection;
     public static TemperatureManager tempManager;
     public static OI oi;
 
@@ -37,6 +38,7 @@ public class Robot extends TimedRobot {
         limelight = new LimeLight();
         led = new LED();
         logger = new Logger();
+        brownoutProtection = new BrownoutProtection();
         tempManager = new TemperatureManager();
         oi = new OI();
 
@@ -49,6 +51,7 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         // services
         logger.update();
+        brownoutProtection.run();
         tempManager.run();
     }
 

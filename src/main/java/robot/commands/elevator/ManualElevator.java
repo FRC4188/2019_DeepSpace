@@ -11,6 +11,7 @@ public class ManualElevator extends Command {
 
     OI oi = Robot.oi;
     Elevator elevator = Robot.elevator;
+    public double brownoutVariable;
 
     public ManualElevator() {
         requires(elevator);
@@ -24,8 +25,9 @@ public class ManualElevator extends Command {
     protected void execute() {
         double leftTrigger = oi.getCopilotTrigger(Hand.kLeft);
         double rightTrigger = oi.getCopilotTrigger(Hand.kRight);
-        if (leftTrigger > 0) elevator.set(-leftTrigger);
-        else if(rightTrigger > 0) elevator.set(rightTrigger);
+        double brownoutVar = Robot.brownoutProtection.getBrownoutVar();
+        if (leftTrigger > 0) elevator.set(-leftTrigger * brownoutVar);
+        else if(rightTrigger > 0) elevator.set(rightTrigger * brownoutVar);
         else elevator.set(0);
     }
 

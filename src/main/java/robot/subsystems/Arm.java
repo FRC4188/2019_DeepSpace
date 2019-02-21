@@ -35,6 +35,7 @@ public class Arm extends Subsystem {
     private final int    SLOT_ID = 0;
     public final double  MAX_OUT = 1.0; // percent out
     public final double  DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
 
     // State vars
     private boolean shoulderInverted;
@@ -171,16 +172,12 @@ public class Arm extends Subsystem {
         shoulderMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
-    /**
-    * Returns temperature of motor based off CAN ID
-    */
+    /** Returns temperature of motor based off CAN ID. */
     public double getMotorTemperature(int index) {
-
         CANSparkMax[] sparks = new CANSparkMax[]{
             shoulderMotor,
             shoulderSlave,
         };
-
         index -= 21;
         return sparks[index].getMotorTemperature();
     }

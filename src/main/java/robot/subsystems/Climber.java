@@ -16,6 +16,8 @@ public class Climber extends Subsystem {
 
     // Constants
     private final double RAMP_RATE = 0.2; // seconds
+    public static double brownoutVariable;
+
 
     // State variables
     private boolean climberInverted;
