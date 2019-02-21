@@ -93,12 +93,5 @@ public class Climber extends Subsystem {
         leftClimberMotor.configClosedloopRamp(RAMP_RATE);
         rightClimberMotor.configClosedloopRamp(RAMP_RATE);
     }
-    public static void conservePower(boolean isTrue) {
-        if (isTrue) {
-            brownoutVariable = .7;
-        } else {
-            brownoutVariable = 1.0;
-        }	
-    } 
 
 }

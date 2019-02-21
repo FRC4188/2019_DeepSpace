@@ -20,6 +20,7 @@ public class Robot extends TimedRobot {
     public static Logger logger;
     public static Climber climber;
     public static LED led;
+    public static BrownoutProtection brownoutProtection;
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -37,6 +38,7 @@ public class Robot extends TimedRobot {
         climber = new Climber();
         led = new LED();
         oi = new OI();
+        brownoutProtection = new BrownoutProtection();
 
         // start camera stream
         CameraServer.getInstance().startAutomaticCapture();
@@ -46,6 +48,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         logger.update();
+        brownoutProtection.run();
     }
 
     @Override
@@ -88,7 +91,6 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
-        Brownout.isBrownout();
     }
 
     @Override

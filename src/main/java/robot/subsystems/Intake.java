@@ -263,11 +263,5 @@ public class Intake extends Subsystem {
     public boolean getRearCargoSensor() {
         return rearCargoSensor.get();
     }
-    public static void conservePower(boolean isTrue) {
-        if (isTrue) {
-            brownoutVariable = .7;
-        } else {
-            brownoutVariable = 1.0;
-        }	
-    } 
+
 }

@@ -63,8 +63,8 @@ public class ManualClimb extends Command {
         }
 
         // command motor output
-        climber.setLeft(leftPercent * brownoutVariable);
-        climber.setRight(rightPercent * brownoutVariable);
+        climber.setLeft(leftPercent);
+        climber.setRight(rightPercent);
 
         // save values for next loop
         lastLeftSpeed = leftPercent;
