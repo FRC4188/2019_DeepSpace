@@ -14,12 +14,13 @@ public class Robot extends TimedRobot {
     public static Drivetrain drivetrain;
     public static Arm arm;
     public static Intake intake;
-    public static LimeLight limelight;
     public static Elevator elevator;
-    public static OI oi;
-    public static Logger logger;
     public static Climber climber;
+    public static LimeLight limelight;
     public static LED led;
+    public static Logger logger;
+    public static TemperatureManager tempManager;
+    public static OI oi;
 
     Command autonomousCommand;
     SendableChooser<Command> chooser = new SendableChooser<>();
@@ -28,14 +29,15 @@ public class Robot extends TimedRobot {
     public void robotInit() {
 
         // initialize subsystems
-        logger = new Logger();
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
         elevator = new Elevator();
-        limelight = new LimeLight();
         climber = new Climber();
+        limelight = new LimeLight();
         led = new LED();
+        logger = new Logger();
+        tempManager = new TemperatureManager();
         oi = new OI();
 
         // start camera stream
@@ -45,19 +47,19 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        // services
         logger.update();
+        tempManager.run();
     }
 
     @Override
     public void disabledInit() {
-
         // reset subsystems
         drivetrain.reset();
         arm.reset();
         intake.reset();
         elevator.reset();
         climber.reset();
-
     }
 
     @Override
