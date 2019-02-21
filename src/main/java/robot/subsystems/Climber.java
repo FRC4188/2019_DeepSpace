@@ -30,7 +30,6 @@ public class Climber extends Subsystem {
     /** Defines default command that will run when object is created. */
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new ManualClimb());
     }
 
     /** Prints necessary info to the dashboard. */

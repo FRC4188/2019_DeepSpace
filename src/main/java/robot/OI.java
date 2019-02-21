@@ -8,12 +8,14 @@ import robot.commands.groups.ToHeight.Height;
 import robot.commands.drive.FollowObject.Object;
 import robot.commands.intake.*;
 import robot.commands.arm.*;
+import robot.commands.climb.*;
 import robot.utils.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import edu.wpi.first.wpilibj.buttons.POVButton;
 import edu.wpi.first.wpilibj.buttons.Trigger;
 
 public class OI {
@@ -30,6 +32,15 @@ public class OI {
         public final static int START = 8;
         public final static int LS = 9;
         public final static int RS = 10;
+        public final static int DPAD_OFF = -1;
+        public final static int DPAD_NORTH = 0;
+        public final static int DPAD_NE = 45;
+        public final static int DPAD_EAST = 90;
+        public final static int DPAD_SE = 135;
+        public final static int DPAD_SOUTH = 180;
+        public final static int DPAD_SW = 225;
+        public final static int DPAD_WEST = 270;
+        public final static int DPAD_NW = 315;
         public final static double DEADBAND = 0.08;
     }
 
@@ -60,6 +71,10 @@ public class OI {
     private JoystickButton pilotStart = new JoystickButton(pilot, Controller.START);
     private JoystickButton pilotLS = new JoystickButton(pilot, Controller.LS);
     private JoystickButton pilotRS = new JoystickButton(pilot, Controller.RS);
+    private POVButton pilotDpadNorth = new POVButton(pilot, Controller.DPAD_NORTH);
+    private POVButton pilotDpadEast = new POVButton(pilot, Controller.DPAD_EAST);
+    private POVButton pilotDpadSouth = new POVButton(pilot, Controller.DPAD_SOUTH);
+    private POVButton pilotDpadWest = new POVButton(pilot, Controller.DPAD_WEST);
 
     private JoystickButton copilotA = new JoystickButton(copilot, Controller.A);
     private JoystickButton copilotB = new JoystickButton(copilot, Controller.B);
@@ -71,6 +86,10 @@ public class OI {
     private JoystickButton copilotStart = new JoystickButton(copilot, Controller.START);
     private JoystickButton copilotLS = new JoystickButton(copilot, Controller.LS);
     private JoystickButton copilotRS = new JoystickButton(copilot, Controller.RS);
+    private POVButton copilotDpadNorth = new POVButton(copilot, Controller.DPAD_NORTH);
+    private POVButton copilotDpadEast = new POVButton(copilot, Controller.DPAD_EAST);
+    private POVButton copilotDpadSouth = new POVButton(copilot, Controller.DPAD_SOUTH);
+    private POVButton copilotDpadWest = new POVButton(copilot, Controller.DPAD_WEST);
 
     private JoystickButton rbGround = new JoystickButton(rocketBox, RocketBox.GROUND);
     private JoystickButton rbCargoLow = new JoystickButton(rocketBox, RocketBox.CARGO_LOW);
@@ -98,6 +117,11 @@ public class OI {
         pilotX.whenPressed(new FollowObject(Object.BAY_CLOSE));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
+        pilotDpadNorth.whileHeld(new ManualClimb(1.0));
+        pilotDpadNorth.whenReleased(new ManualClimb(0));
+        pilotDpadSouth.whileHeld(new ManualClimb(-1.0));
+        pilotDpadSouth.whenReleased(new ManualClimb(0));
+
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());
 
@@ -111,8 +135,6 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
-        copilotStart.whenPressed(new WristToAngle(50, 2));
-
         hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_LOW), 1);
         hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_MID), 2);
         hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_HIGH), 3);
@@ -122,7 +144,6 @@ public class OI {
         cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_MID), 2);
         cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_HIGH), 3);
         cargoIterator.start();
-
 
     }
 
