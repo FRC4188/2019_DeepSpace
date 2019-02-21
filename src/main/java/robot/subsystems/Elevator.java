@@ -34,6 +34,8 @@ public class Elevator extends Subsystem {
     private final double MAX_ACCELERATION = 1000;
     private final int    SLOT_ID = 0;
     public final double  DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
+
 
     // State vars
     private boolean elevatorInverted;
@@ -177,5 +179,11 @@ public class Elevator extends Subsystem {
         index -= 11;
         return sparks[index].getMotorTemperature();
     }
-
+    public static void conservePower(boolean isTrue) {
+        if (isTrue) {
+            brownoutVariable = .7;
+        } else {
+            brownoutVariable = 1.0;
+        }	
+    } 
 }

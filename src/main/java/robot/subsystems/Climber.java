@@ -16,6 +16,8 @@ public class Climber extends Subsystem {
 
     // Constants
     private final double RAMP_RATE = 0.2; // seconds
+    public static double brownoutVariable;
+
 
     // State variables
     private boolean climberInverted;
@@ -91,5 +93,12 @@ public class Climber extends Subsystem {
         leftClimberMotor.configClosedloopRamp(RAMP_RATE);
         rightClimberMotor.configClosedloopRamp(RAMP_RATE);
     }
+    public static void conservePower(boolean isTrue) {
+        if (isTrue) {
+            brownoutVariable = .7;
+        } else {
+            brownoutVariable = 1.0;
+        }	
+    } 
 
 }

@@ -35,6 +35,7 @@ public class Arm extends Subsystem {
     private final int    SLOT_ID = 0;
     public final double  MAX_OUT = 1.0; // percent out
     public final double  DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
 
     // State vars
     private boolean shoulderInverted;
@@ -184,5 +185,11 @@ public class Arm extends Subsystem {
         index -= 21;
         return sparks[index].getMotorTemperature();
     }
-
+    public static void conservePower(boolean isTrue) {
+        if (isTrue) {
+            brownoutVariable = .7;
+        } else {
+            brownoutVariable = 1.0;
+        }	
+    }  
 }

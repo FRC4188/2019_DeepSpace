@@ -54,6 +54,8 @@ public class Drivetrain extends Subsystem {
     public final double RAMP_RATE = 0.75; // seconds
     public double       ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
     public final double DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
+
 
     // State vars
     private double fieldPosX, fieldPosY = 0;
@@ -432,5 +434,11 @@ public class Drivetrain extends Subsystem {
         index -= 1;
         return sparks[index].getMotorTemperature();
     }
-
+    public static void conservePower(boolean isTrue) {
+        if (isTrue) {
+            brownoutVariable = .7;
+        } else {
+            brownoutVariable = 1.0;
+        }	
+    } 
 }

@@ -37,6 +37,8 @@ public class Intake extends Subsystem {
     private final int    SLOT_ID = 0;
     private final int    TIMEOUT = 10; // ms
     public final double  DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
+
 
     // State enums
     public enum WristState { CARGO, HATCH }
@@ -261,5 +263,11 @@ public class Intake extends Subsystem {
     public boolean getRearCargoSensor() {
         return rearCargoSensor.get();
     }
-
+    public static void conservePower(boolean isTrue) {
+        if (isTrue) {
+            brownoutVariable = .7;
+        } else {
+            brownoutVariable = 1.0;
+        }	
+    } 
 }

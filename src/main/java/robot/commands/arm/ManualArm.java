@@ -11,6 +11,8 @@ public class ManualArm extends Command {
 
     OI oi = Robot.oi;
     Arm arm = Robot.arm;
+    
+    public double brownoutVariable;
 
     public ManualArm() {
         requires(arm);
@@ -22,7 +24,7 @@ public class ManualArm extends Command {
 
     @Override
     protected void execute() {
-        arm.set(oi.getCopilotY(Hand.kLeft));
+        arm.set(oi.getCopilotY(Hand.kLeft)*brownoutVariable);
     }
 
     @Override

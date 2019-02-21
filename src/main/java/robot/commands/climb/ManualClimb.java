@@ -16,6 +16,8 @@ public class ManualClimb extends Command {
     boolean leftCanExtend, rightCanExtend, leftCanRetract, rightCanRetract;
     boolean lastLeftSwitch, lastRightSwitch;
     double lastLeftSpeed, lastRightSpeed;
+    public double brownoutVariable;
+
 
     public ManualClimb() {
         requires(climber);
@@ -61,8 +63,8 @@ public class ManualClimb extends Command {
         }
 
         // command motor output
-        climber.setLeft(leftPercent);
-        climber.setRight(rightPercent);
+        climber.setLeft(leftPercent * brownoutVariable);
+        climber.setRight(rightPercent * brownoutVariable);
 
         // save values for next loop
         lastLeftSpeed = leftPercent;

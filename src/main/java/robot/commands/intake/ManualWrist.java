@@ -3,6 +3,7 @@ package robot.commands.intake;
 import robot.OI;
 import robot.Robot;
 import robot.subsystems.Intake;
+import robot.utils.Brownout;
 import robot.utils.CSPMath;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
@@ -12,6 +13,7 @@ public class ManualWrist extends Command {
 
     OI oi = Robot.oi;
     Intake intake = Robot.intake;
+    public double brownoutVariable;
 
     double lastDir;
 
@@ -33,7 +35,7 @@ public class ManualWrist extends Command {
         } else {
             if(Math.abs(percent) > 0) lastDir = Math.signum(percent);
         }
-        intake.setWristOpenLoop(percent);
+        intake.setWristOpenLoop(percent * brownoutVariable);
     }
 
     @Override

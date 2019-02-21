@@ -15,6 +15,7 @@ public class ManualDrive extends Command {
 
     final double kSLOW_TURN = 0.25;
     final double kFAST_TURN = 0.5;
+    public double brownoutVariable;
 
     public ManualDrive() {
         requires(drivetrain);
@@ -40,7 +41,7 @@ public class ManualDrive extends Command {
         if(pilotLeftBumper) zTurn = pilotRightX * kSLOW_TURN;
         else if(pilotRightBumper) zTurn = pilotRightX * kFAST_TURN;
 
-        drivetrain.arcade(xSpeed, zTurn);
+        drivetrain.arcade(xSpeed * brownoutVariable, zTurn * brownoutVariable);
 
     }
 
