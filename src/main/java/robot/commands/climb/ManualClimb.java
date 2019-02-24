@@ -4,6 +4,7 @@ import robot.OI;
 import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Runs climber motors at a given percent.
  *  Positive percent extends. */

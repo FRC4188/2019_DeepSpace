@@ -2,6 +2,9 @@ package robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import robot.commands.climb.ManualClimb;
+
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
@@ -29,10 +32,13 @@ public class Climber extends Subsystem {
     /** Defines default command that will run when object is created. */
     @Override
     public void initDefaultCommand() {
+        setDefaultCommand(new ManualClimb(0));
     }
 
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
+        SmartDashboard.putBoolean("Climber left switch", getLeftMagnetSwitch());
+        SmartDashboard.putBoolean("Climber right switch", getRightMagnetSwitch());
     }
 
     /** Runs every loop. */
@@ -64,8 +70,8 @@ public class Climber extends Subsystem {
     /** Inverts the the climber. */
     public void setInverted(boolean isInverted) {
         if(climberInverted) isInverted = !isInverted;
-        leftClimberMotor.setInverted(!isInverted);
-        rightClimberMotor.setInverted(isInverted);
+        leftClimberMotor.setInverted(isInverted);
+        rightClimberMotor.setInverted(!isInverted);
     }
 
     /** Sets Talons to brake mode - Only mode that should be used. */
@@ -74,14 +80,16 @@ public class Climber extends Subsystem {
         rightClimberMotor.setNeutralMode(NeutralMode.Brake);
     }
 
-    /** Returns state of left climber magnetic limit switch. */
+    /** Returns state of left climber magnetic limit switch.
+     *  True means it is on magnet. */
     public boolean getLeftMagnetSwitch() {
-        return leftMagnetSwitch.get();
+        return !leftMagnetSwitch.get();
     }
 
-    /** Returns state of right climber magnetic limit switch. */
+    /** Returns state of right climber magnetic limit switch.
+     *  True means it is on magnet. */
     public boolean getRightMagnetSwitch() {
-        return rightMagnetSwitch.get();
+        return !rightMagnetSwitch.get();
     }
 
     /** Enables ramp rate. */
