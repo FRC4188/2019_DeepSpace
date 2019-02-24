@@ -173,7 +173,13 @@ public class Elevator extends Subsystem {
             elevatorSlave
         };
         index -= 11;
-        return sparks[index].getMotorTemperature();
+        double temp = -1.0;
+        try {
+            temp = sparks[index].getMotorTemperature();
+        } catch(ArrayIndexOutOfBoundsException e) {
+            System.err.println("Error: index not in array of elevator sparks.");
+        }
+        return temp;
     }
 
 }

@@ -25,15 +25,15 @@ public class TemperatureManager {
             }
         }
         for(int i = 11; i < 13; i++){
-            if(arm.getMotorTemperature(i) > MAX_TEMP){
-                double tempInF = CSPMath.cToF(drivetrain.getMotorTemperature(i));
-                sb.append("A" + i + ": " + tempInF + ", ");
-            }
-        }
-        for(int i = 21; i < 23; i++){
             if(elevator.getMotorTemperature(i) > MAX_TEMP){
                 double tempInF = CSPMath.cToF(drivetrain.getMotorTemperature(i));
                 sb.append("E" + i + ": " + tempInF + ", ");
+            }
+        }
+        for(int i = 21; i < 23; i++){
+            if(arm.getMotorTemperature(i) > MAX_TEMP){
+                double tempInF = CSPMath.cToF(drivetrain.getMotorTemperature(i));
+                sb.append("A" + i + ": " + tempInF + ", ");
             }
         }
         SmartDashboard.putString("Temp Warnings", sb.toString());

@@ -179,7 +179,13 @@ public class Arm extends Subsystem {
             shoulderSlave,
         };
         index -= 21;
-        return sparks[index].getMotorTemperature();
+        double temp = -1.0;
+        try {
+            temp = sparks[index].getMotorTemperature();
+        } catch(ArrayIndexOutOfBoundsException e) {
+            System.err.println("Error: index not in array of arm sparks.");
+        }
+        return temp;
     }
 
 }
