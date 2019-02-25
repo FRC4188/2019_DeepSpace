@@ -86,7 +86,7 @@ public class FollowPath extends Command {
             SmartDashboard.putNumber("target angle", targetAngle);
             */
 
-            final double PERP_LENGTH = 2.75;
+            final double PERP_LENGTH = 4.0;
             double[] distances = limelight.getDistance3d();
             double robotAngle = limelight.getRobotAngle();
             SmartDashboard.putNumber("robot angle", robotAngle);
@@ -106,7 +106,7 @@ public class FollowPath extends Command {
                 //new Waypoint(0, 0, currentAngle),
                 //new Waypoint(x, y, targetAngle)
                 new Waypoint(0, 0, 0),
-                new Waypoint(horizontalDistance, forwardDistance, Math.toRadians(robotAngle))
+                new Waypoint(forwardDistance, horizontalDistance, Math.toRadians(robotAngle))
             };
 
             this.initialGyroAngle = drivetrain.getGyroAngle();

@@ -15,7 +15,7 @@ public class DepositToBay extends CommandGroup {
     public DepositToBay() {
 
         // drive close to baycommand
-        addSequential(new FollowObject(Object.BAY_3D, 5.2, false));
+        addSequential(new FollowObject(Object.BAY_3D, 5.25, false));
 
         // drive to perpendicular
         addSequential(new FollowPath(Path.TO_PERPENDICULAR, false));
