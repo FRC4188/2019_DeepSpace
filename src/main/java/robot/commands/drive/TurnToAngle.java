@@ -25,6 +25,7 @@ public class TurnToAngle extends Command {
 
     public TurnToAngle(double angle, double tolerance, Angle type) {
         requires(Robot.drivetrain);
+        setName("TurnToAngle: " + angle);
         this.angleParam = angle;
         this.tolerance = tolerance;
         this.type = type;

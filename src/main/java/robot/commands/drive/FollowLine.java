@@ -37,45 +37,45 @@ public class FollowLine extends Command {
         // lastLineTurn stores the direction needed to turn while reversing if line is lost
         if(!isFollowingLine) {
             System.out.println("Not tracking line, continuing straight.");
-            drivetrain.arcade(SPEED, 0, true);
+            drivetrain.arcade(SPEED, 0);
             if(leftSense || rightSense || midSense) isFollowingLine = true;
         } else {
             if(leftSense && !midSense && !rightSense) {         // left only
                 System.out.println("Only left sensing, major turn right.");
-                drivetrain.arcade(SPEED, -TURN_MAJOR, true);
+                drivetrain.arcade(SPEED, -TURN_MAJOR);
                 lastLineTurn = -1;
             } else if(leftSense && midSense && !rightSense) {   // left and mid
                 System.out.println("Left and mid sensing, minor turn right.");
-                drivetrain.arcade(SPEED, -TURN_MINOR, true);
+                drivetrain.arcade(SPEED, -TURN_MINOR);
                 lastLineTurn = -1;
             } else if(!leftSense && midSense && !rightSense) {  // mid only
                 System.out.println("Only mid sensing, continuing straight.");
-                drivetrain.arcade(SPEED, 0, true);
+                drivetrain.arcade(SPEED, 0);
                 lastLineTurn = 0;
             } else if(!leftSense && midSense && rightSense) {   // right and mid
                 System.out.println("Right and mid sensing, minor turn left.");
-                drivetrain.arcade(SPEED, TURN_MINOR, true);
+                drivetrain.arcade(SPEED, TURN_MINOR);
                 lastLineTurn = 1;
             } else if(!leftSense && !midSense && rightSense) {  // right only
                 System.out.println("Only right sensing, major turn left.");
-                drivetrain.arcade(SPEED, TURN_MAJOR, true);
+                drivetrain.arcade(SPEED, TURN_MAJOR);
                 lastLineTurn = 1;
             } else if(leftSense && !midSense && rightSense) {   // left and right
                 System.out.println("Left and right sensing, continuing straight.");
-                drivetrain.arcade(SPEED, 0, true);
+                drivetrain.arcade(SPEED, 0);
                 lastLineTurn = 0;
             } else if(leftSense && midSense && rightSense) {    // all three
                 System.out.println("All three sensing, continuing straight.");
-                drivetrain.arcade(SPEED, 0, true);
+                drivetrain.arcade(SPEED, 0);
                 lastLineTurn = 0;
             } else {
                 String lastSense;
                 if(lastLineTurn == 0) {
-                    drivetrain.arcade(SPEED, 0, true);
+                    drivetrain.arcade(SPEED, 0);
                     System.out.println("Lost line, driving forward.");
                 } else {
                     lastSense = (lastLineTurn == 1) ? "right" : "left";
-                    drivetrain.arcade(-SPEED, lastLineTurn * TURN_MAJOR, true);
+                    drivetrain.arcade(-SPEED, lastLineTurn * TURN_MAJOR);
                     System.out.println("Lost line, driving backwards and " + lastSense);
                 }
             }

@@ -11,7 +11,7 @@ import robot.utils.CSPMath;
 public class FollowObject extends Command {
 
     public enum Object {
-        CARGO, BAY, BAY_3D
+        CARGO, BAY_CLOSE, BAY_3D
     }
 
     Drivetrain drivetrain = Robot.drivetrain;
@@ -42,6 +42,7 @@ public class FollowObject extends Command {
     public FollowObject(Object object, double perpLength, boolean drift){
         requires(Robot.drivetrain);
         requires(Robot.limelight);
+        setName("FollowObject: " + object.toString());
         this.object = object;
         this.perpLength = perpLength;
         if(drift){ 
@@ -56,7 +57,7 @@ public class FollowObject extends Command {
 
         if(object == Object.CARGO) {
             limelight.trackCargo();
-        } else if(object == Object.BAY) {
+        } else if(object == Object.BAY_CLOSE) {
             limelight.trackBay();
         } else if(object == Object.BAY_3D){
             limelight.trackBay3D();
@@ -100,7 +101,7 @@ public class FollowObject extends Command {
                 CSPMath.constrainKeepSign(turnOutput, 0.15, 1.0) : 0;
 
         // command motor output
-        drivetrain.arcade(xSpeed, zTurn, false);
+        drivetrain.arcade(xSpeed, zTurn);
 
         // debugging
         if(!(Math.abs(angleErr) < ANGLE_TOLERANCE)) System.out.println("turning" + angleErr);

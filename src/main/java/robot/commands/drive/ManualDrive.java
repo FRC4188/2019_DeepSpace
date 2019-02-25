@@ -13,6 +13,9 @@ public class ManualDrive extends Command {
     OI oi = Robot.oi;
     Drivetrain drivetrain = Robot.drivetrain;
 
+    final double kSLOW_TURN = 0.25;
+    final double kFAST_TURN = 0.5;
+
     public ManualDrive() {
         requires(drivetrain);
     }
@@ -23,8 +26,23 @@ public class ManualDrive extends Command {
 
     @Override
     protected void execute() {
-        drivetrain.arcade(oi.getPilotY(Hand.kLeft), oi.getPilotX(Hand.kRight),
-                oi.getPilotButton(Controller.LB));
+
+        // get values
+        double pilotLeftY = oi.getPilotY(Hand.kLeft);
+        double pilotRightX = oi.getPilotX(Hand.kRight);
+        boolean pilotLeftBumper = oi.getPilotButton(Controller.LB);
+        boolean pilotRightBumper = oi.getPilotButton(Controller.RB);
+        double brownoutVar = Robot.brownoutProtection.getBrownoutVar();
+
+        // turn multiplied by speed unless bumpers held
+        // left bumper slow turn, right bumper fast
+        double xSpeed = pilotLeftY;
+        double zTurn = pilotRightX * xSpeed;
+        if(pilotLeftBumper) zTurn = pilotRightX * kSLOW_TURN;
+        else if(pilotRightBumper) zTurn = pilotRightX * kFAST_TURN;
+
+        drivetrain.arcade(xSpeed * brownoutVar, zTurn * brownoutVar);
+
     }
 
     @Override

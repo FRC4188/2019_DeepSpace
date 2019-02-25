@@ -50,9 +50,12 @@ public class Drivetrain extends Subsystem {
     public final double TICKS_PER_REV = 1.0; // neo
     public final double LOW_GEAR_RATIO = 15.32;
     public final double HIGH_GEAR_RATIO = 7.08;
+    private double      currentGearRatio = HIGH_GEAR_RATIO;
     public final double RAMP_RATE = 0.75; // seconds
-    public final double ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * LOW_GEAR_RATIO); // ft
+    public double       ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
     public final double DELTA_T = 0.02; // seconds
+    public static double brownoutVariable;
+
 
     // State vars
     private double fieldPosX, fieldPosY = 0;
@@ -90,6 +93,12 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
         SmartDashboard.putNumber("Target angle", getTargetAngle());
+        SmartDashboard.putNumber("L1 temp", leftMotor.getMotorTemperature());
+        SmartDashboard.putNumber("L2 temp", leftSlave1.getMotorTemperature());
+        SmartDashboard.putNumber("L3 temp", leftSlave2.getMotorTemperature());
+        SmartDashboard.putNumber("R4 temp", rightMotor.getMotorTemperature());
+        SmartDashboard.putNumber("R5 temp", rightSlave1.getMotorTemperature());
+        SmartDashboard.putNumber("R6 temp", rightSlave2.getMotorTemperature());
     }
 
     /** Runs every loop. */
@@ -339,20 +348,35 @@ public class Drivetrain extends Subsystem {
         rightMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
-    /** Sets gear shift solenoid to given value. */
-    public void shiftGear(Value value) {
-        gearShift.set(value);
+    /** Shifts drivetrain to low gear. */
+    public void setLowGear() {
+        gearShift.set(Value.kForward);
+        currentGearRatio = LOW_GEAR_RATIO;
+    }
+
+    /** Shifts drivetrain to high gear. */
+    public void setHighGear() {
+        gearShift.set(Value.kReverse);
+        currentGearRatio = LOW_GEAR_RATIO;
+    }
+
+    /** Turns gear shift solenoid off. */
+    public void setGearShiftOff() {
+        gearShift.set(Value.kOff);
     }
 
     /** Controls drivetrain with arcade model, with positive xSpeed going forward
-     *  and positive zTurn turning right. zTurn is reduced as xSpeed is, so if xSpeed
-     *  is zero it will become impossible to turn. To overcome this, quickTurn must be true. */
-    public void arcade(double xSpeed, double zTurn, boolean quickTurn) {
+     *  and positive zTurn turning right. */
+    public void arcade(double xSpeed, double zTurn) {
 
-        double MAX_INPUT = 1.0;
+        final double kQUICKSTOP = 1.5;
+        final double MAX_INPUT = 1.0;
         double turnRatio;
-        if(!quickTurn) zTurn *= Math.abs(xSpeed);
-        else zTurn *= 0.5;
+        double quickStop = 0;
+
+        quickStop += -kQUICKSTOP * zTurn * DELTA_T;
+        if(zTurn == 0) zTurn = quickStop;
+
         double leftInput = xSpeed + zTurn;
         double rightInput = xSpeed - zTurn;
 
@@ -393,11 +417,8 @@ public class Drivetrain extends Subsystem {
         setRight(rightSpeed * throttle);
     }
 
-    /**
-    * Returns temperature of motor based off CAN ID
-    */
+    /** Returns temperature of motor based off CAN ID. */
     public double getMotorTemperature(int index){
-
         CANSparkMax[] sparks = new CANSparkMax[]{
             leftMotor,
             leftSlave1,
@@ -406,9 +427,14 @@ public class Drivetrain extends Subsystem {
             rightSlave1,
             rightSlave2
         };
-
         index -= 1;
-        return sparks[index].getMotorTemperature();
+        double temp = -1.0;
+        try {
+            temp = sparks[index].getMotorTemperature();
+        } catch(ArrayIndexOutOfBoundsException e) {
+            System.err.println("Error: index not in array of drive sparks.");
+        }
+        return temp;
     }
 
 }

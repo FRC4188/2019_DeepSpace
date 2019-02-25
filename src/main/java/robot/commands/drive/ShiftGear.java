@@ -2,18 +2,20 @@ package robot.commands.drive;
 
 import robot.Robot;
 import robot.subsystems.Drivetrain;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Sets gear shift to given value. kForward is high gear. */
+/** Sets gear shift to given value. */
 public class ShiftGear extends Command {
 
-    Drivetrain drivetrain = Robot.drivetrain;
-    Value value;
+    public enum Gear { HIGH, LOW, OFF }
 
-    public ShiftGear(Value value) {
+    Drivetrain drivetrain = Robot.drivetrain;
+    Gear gear;
+
+    public ShiftGear(Gear gear) {
         requires(Robot.drivetrain);
-        this.value = value;
+        setName("ShiftGear: " + gear.toString());
+        this.gear = gear;
     }
 
     @Override
@@ -22,7 +24,9 @@ public class ShiftGear extends Command {
 
     @Override
     protected void execute() {
-        drivetrain.shiftGear(value);
+        if(gear == Gear.HIGH) drivetrain.setHighGear();
+        else if(gear == Gear.LOW) drivetrain.setLowGear();
+        else if(gear == Gear.OFF) drivetrain.setGearShiftOff();
     }
 
     @Override
