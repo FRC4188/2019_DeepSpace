@@ -35,27 +35,25 @@ public class Drivetrain extends Subsystem {
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Constants
-    public final double MAX_VELOCITY = 9; // ft/s
-    public final double MAX_ACCELERATION = 5; // ft/s^2
-    public final double MAX_JERK = 190; // ft/s^3
-    public final double kP = 5e-5;
-    public final double kI = 1e-6;
-    public final double kD = 0;
-    public final double kF = 0;
-    public final double kI_ZONE = 0;
-    public final int    SLOT_ID = 0;
-    public final double MAX_OUT = 1.0;
-    public final double WHEELBASE_WIDTH = 2; // ft
-    public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
-    public final double TICKS_PER_REV = 1.0; // neo
-    public final double LOW_GEAR_RATIO = 15.32;
-    public final double HIGH_GEAR_RATIO = 7.08;
-    private double      currentGearRatio = HIGH_GEAR_RATIO;
-    public final double RAMP_RATE = 0.75; // seconds
-    public double       ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
-    public final double DELTA_T = 0.02; // seconds
-    public static double brownoutVariable;
-
+    public final double  MAX_VELOCITY = 9; // ft/s
+    public final double  MAX_ACCELERATION = 5; // ft/s^2
+    public final double  MAX_JERK = 190; // ft/s^3
+    public final double  kP = 5e-5;
+    public final double  kI = 1e-6;
+    public final double  kD = 0;
+    public final double  kF = 0;
+    public final double  kI_ZONE = 0;
+    public final int     SLOT_ID = 0;
+    public final double  MAX_OUT = 1.0;
+    public final double  WHEELBASE_WIDTH = 2; // ft
+    public final double  WHEEL_DIAMETER = (6.0 / 12.0); // ft
+    public final double  TICKS_PER_REV = 1.0; // neo
+    public final double  LOW_GEAR_RATIO = 15.32;
+    public final double  HIGH_GEAR_RATIO = 7.08;
+    private double       currentGearRatio = HIGH_GEAR_RATIO;
+    public final double  RAMP_RATE = 0.75; // seconds
+    public double        ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
+    private final double DELTA_T = 0.2;
 
     // State vars
     private double fieldPosX, fieldPosY = 0;

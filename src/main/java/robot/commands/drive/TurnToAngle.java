@@ -18,6 +18,7 @@ public class TurnToAngle extends Command {
     final double kP = 0.01;
     final double kI = 0;
     final double kD = 0;
+    final double DELTA_T = 0.02; // seconds
 
     double lastError, integral = 0;
     double angle, tolerance, angleParam;
@@ -61,8 +62,8 @@ public class TurnToAngle extends Command {
         double input = drivetrain.getGyroAngle();
         double error = angle - input;
         if(Math.abs(error) > 180) error = (error > 0) ? error - 360 : error + 360; // take shortest path to angle
-        integral += error * drivetrain.DELTA_T;
-        double derivative = (error - lastError) / drivetrain.DELTA_T;
+        integral += error * DELTA_T;
+        double derivative = (error - lastError) / DELTA_T;
         double output = kP * error + kI * integral + kD * derivative;
         output = CSPMath.constrainKeepSign(output, 0.21, 1.0);
         lastError = error;

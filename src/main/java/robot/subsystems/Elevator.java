@@ -33,9 +33,6 @@ public class Elevator extends Subsystem {
     private final double MAX_VELOCITY = 1500; // rpm
     private final double MAX_ACCELERATION = 1000;
     private final int    SLOT_ID = 0;
-    public final double  DELTA_T = 0.02; // seconds
-    public static double brownoutVariable;
-
 
     // State vars
     private boolean elevatorInverted;

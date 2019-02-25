@@ -16,6 +16,7 @@ public class DriveToDistance extends Command {
     final double kP = 0.1;
     final double kI = 0;
     final double kD = 0;
+    final double DELTA_T = 0.02; // seconds
 
     double lastError, integral = 0;
     double distance, tolerance, distanceParam;
@@ -56,8 +57,8 @@ public class DriveToDistance extends Command {
     protected void execute() {
         double input = drivetrain.getPosition();
         double error = distance - input;
-        integral += error * drivetrain.DELTA_T;
-        double derivative = (error - lastError) / drivetrain.DELTA_T;
+        integral += error * DELTA_T;
+        double derivative = (error - lastError) / DELTA_T;
         double output = kP * error + kI * integral + kD * derivative;
         lastError = error;
         drivetrain.tank(output, output, 1.0);
