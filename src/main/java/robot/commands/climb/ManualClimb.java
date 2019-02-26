@@ -4,7 +4,6 @@ import robot.OI;
 import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Runs climber motors at a given percent.
  *  Positive percent extends. */
@@ -14,15 +13,13 @@ public class ManualClimb extends Command {
     Climber climber = Robot.climber;
 
     double percent;
-    boolean leftCanExtend, rightCanExtend, leftCanRetract, rightCanRetract;
+    boolean leftCanExtend, rightCanExtend;
+    boolean leftCanRetract, rightCanRetract;
     boolean lastLeftSwitch, lastRightSwitch;
     double lastLeftSpeed, lastRightSpeed;
-    public double brownoutVariable;
 
-
-    public ManualClimb(double percent) {
+    public ManualClimb() {
         requires(climber);
-        this.percent = percent;
     }
 
     @Override
@@ -36,19 +33,51 @@ public class ManualClimb extends Command {
     @Override
     protected void execute() {
 
+        // get percent
+        if(oi.getPilotDpad() == 0) percent = 0.2;
+        else if(oi.getPilotDpad() == 180) percent = -0.2;
+        else percent = 0;
+
         // handle limit switches
         boolean leftSwitch = climber.getLeftMagnetSwitch();
         boolean rightSwitch = climber.getRightMagnetSwitch();
-        if(lastLeftSwitch) {
-            if(!leftSwitch) {
-                if(lastLeftSpeed > 0) leftCanExtend = !leftCanExtend;
-                if(lastLeftSpeed < 0) leftCanRetract = !leftCanRetract;
+        if(lastLeftSpeed > 0) {
+            if(lastLeftSwitch != leftSwitch) {
+                if(leftCanRetract) {
+                    leftCanExtend = false;
+                    leftCanRetract = true;
+                } else {
+                    leftCanExtend = true;
+                    leftCanRetract = true;
+                }
             }
-        }
-        if(lastRightSwitch) {
-            if(!rightSwitch) {
-                if(lastRightSpeed > 0) leftCanExtend = !leftCanExtend;
-                if(lastRightSpeed < 0) leftCanRetract = !leftCanRetract;
+            if(lastRightSwitch != rightSwitch) {
+                if(rightCanRetract) {
+                    rightCanExtend = false;
+                    rightCanRetract = true;
+                } else {
+                    rightCanExtend = true;
+                    rightCanRetract = true;
+                }
+            }
+        } else if(lastLeftSpeed < 0) {
+            if(lastLeftSwitch != leftSwitch) {
+                if(leftCanExtend) {
+                    leftCanExtend = true;
+                    leftCanRetract = false;
+                } else {
+                    leftCanExtend = true;
+                    leftCanRetract = true;
+                }
+            }
+            if(lastRightSwitch != rightSwitch) {
+                if(rightCanExtend) {
+                    rightCanExtend = true;
+                    rightCanRetract = false;
+                } else {
+                    rightCanExtend = true;
+                    rightCanRetract = true;
+                }
             }
         }
 
