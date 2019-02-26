@@ -4,10 +4,11 @@ import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
+/** Sets climber to a given speed without observing limit
+ *  switch state. Positive value extends. */
 public class ClimbWithoutSwitches extends Command {
 
     Climber climber = Robot.climber;
-
     double percent;
 
     public ClimbWithoutSwitches(double percent) {

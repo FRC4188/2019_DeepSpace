@@ -11,7 +11,6 @@ public class ManualElevator extends Command {
 
     OI oi = Robot.oi;
     Elevator elevator = Robot.elevator;
-    public double brownoutVariable;
 
     public ManualElevator() {
         requires(elevator);

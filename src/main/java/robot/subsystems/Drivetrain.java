@@ -6,6 +6,7 @@ import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -41,7 +42,8 @@ public class Drivetrain extends Subsystem {
     public final double  kP = 5e-5;
     public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kF = 0;
+    public final double  kV = 0;
+    public final double  kA = 0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
     public final double  MAX_OUT = 1.0;
@@ -124,7 +126,7 @@ public class Drivetrain extends Subsystem {
         leftPidC.setI(kI);
         leftPidC.setD(kD);
         leftPidC.setIZone(kI_ZONE);
-        leftPidC.setFF(kF);
+        leftPidC.setFF(kV);
         leftPidC.setOutputRange(-MAX_OUT, MAX_OUT);
         leftPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         leftPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
@@ -132,20 +134,31 @@ public class Drivetrain extends Subsystem {
         rightPidC.setI(kI);
         rightPidC.setD(kD);
         rightPidC.setIZone(kI_ZONE);
-        rightPidC.setFF(kF);
+        rightPidC.setFF(kV);
         rightPidC.setOutputRange(-MAX_OUT, MAX_OUT);
         rightPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         rightPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
-    /** Sets left motors to given percentage (-1.0 - 1.0). */
+    /** Sets left motors to given percentage (-1.0, 1.0). */
     public void setLeft(double percent) {
         leftMotor.set(percent);
     }
 
-    /** Sets right motors to given percentage (-1.0 - 1.0). */
+    /** Sets right motors to given percentage (-1.0, 1.0). */
     public void setRight(double percent) {
         rightMotor.set(percent);
+    }
+
+    /** Drives forward a given distance in feet. */
+    public void driveToDistance(double distance, double tolerance) {
+        // convert from feet to rotations (Spark units)
+        distance /= ENCODER_TO_FEET;
+        tolerance /= ENCODER_TO_FEET;
+        leftPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
+        rightPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
+        leftPidC.setReference(distance, ControlType.kSmartMotion);
+        rightPidC.setReference(distance, ControlType.kSmartMotion);
     }
 
     /** Inverts drivetrain. True inverts each side from the

@@ -26,7 +26,7 @@ public class ElevatorToHeight extends Command {
     protected void execute() {
         elevator.elevatorToHeight(height, tolerance);
         double error = height - elevator.getPosition();
-        if(Math.abs(error) < tolerance) counter ++;
+        if(Math.abs(error) < tolerance) counter++;
         else counter = 0;
     }
 

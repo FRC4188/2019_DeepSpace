@@ -5,8 +5,7 @@ import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Runs climber motors at a given percent.
- *  Positive percent extends. */
+/** Runs climber using pilot Dpad (up extends). */
 public class ManualClimb extends Command {
 
     OI oi = Robot.oi;
@@ -81,6 +80,7 @@ public class ManualClimb extends Command {
             }
         }
 
+        // determine output values
         double leftPercent = 0;
         double rightPercent = 0;
         if(percent > 0) {
