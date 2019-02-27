@@ -52,9 +52,8 @@ public class Drivetrain extends Subsystem {
     public final double  TICKS_PER_REV = 1.0; // neo
     public final double  LOW_GEAR_RATIO = 15.32;
     public final double  HIGH_GEAR_RATIO = 7.08;
-    private double       currentGearRatio = HIGH_GEAR_RATIO;
     public final double  RAMP_RATE = 0.75; // seconds
-    public double        ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
+    public double        ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV); // ft
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -74,6 +73,7 @@ public class Drivetrain extends Subsystem {
         controllerInit();
         reset();
         calibrateGyro();
+        setHighGear();
 
     }
 
@@ -362,13 +362,13 @@ public class Drivetrain extends Subsystem {
     /** Shifts drivetrain to low gear. */
     public void setLowGear() {
         gearShift.set(Value.kForward);
-        currentGearRatio = LOW_GEAR_RATIO;
+        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
     }
 
     /** Shifts drivetrain to high gear. */
     public void setHighGear() {
         gearShift.set(Value.kReverse);
-        currentGearRatio = LOW_GEAR_RATIO;
+        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
     }
 
     /** Turns gear shift solenoid off. */

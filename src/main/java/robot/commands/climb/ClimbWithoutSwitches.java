@@ -4,8 +4,8 @@ import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Sets climber to a given speed without observing limit
- *  switch state. Positive value extends. */
+/** Runs climber motors at given percent, ignoring limits.
+ *  Positive percent extends. */
 public class ClimbWithoutSwitches extends Command {
 
     Climber climber = Robot.climber;
@@ -21,8 +21,8 @@ public class ClimbWithoutSwitches extends Command {
 
     @Override
     protected void execute() {
-        climber.setLeft(percent);
-        climber.setRight(percent);
+        climber.setLeftOpenLoop(percent);
+        climber.setRightOpenLoop(percent);
     }
 
     @Override

@@ -50,7 +50,8 @@ public class Intake extends Subsystem {
     public Intake(){
 
         // Encoders
-        wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, SLOT_ID, TIMEOUT);
+        wristMotor.configSelectedFeedbackSensor(
+                FeedbackDevice.CTRE_MagEncoder_Relative, SLOT_ID, TIMEOUT);
         wristMotor.setSensorPhase(true);
 
         // Reset
