@@ -346,7 +346,7 @@ public class LimeLight extends Subsystem {
             }
         } else{
             // flip
-            flipServo.setAngle(360.0);
+            flipServo.setAngle(672.0); // 180 * 56/15 gear ratio
             switch (currentPipeline) {
             case CARGO:
                 setPipeline(Pipeline.CARGO_FLIP);
