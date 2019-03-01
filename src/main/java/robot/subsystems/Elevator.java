@@ -93,6 +93,13 @@ public class Elevator extends Subsystem {
         pidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Elevator Position", "ft", () -> getPosition());
+        BadLog.createTopic("Elevator Velocity", "ft/s", () -> getVelocity());
+        BadLog.createTopic("Elevator Current", "amps", () -> getCurrent());
+    }
+
     /** Sets elevator motors to given percentage using velocity controller. */
     public void set(double percent) {
         double setpoint = percent * MAX_VELOCITY;
@@ -180,12 +187,6 @@ public class Elevator extends Subsystem {
             System.err.println("Error: index not in array of elevator sparks.");
         }
         return temp;
-    }
-
-    public void initializeBadLog() {
-        BadLog.createTopic("Elevator Position", "Ft", () -> getPosition());
-        BadLog.createTopic("Elevator Velocity", "Ft/s", () -> getVelocity());
-        BadLog.createTopic("Motor Output", "%", () -> getCurrent());
     }
 
 }

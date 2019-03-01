@@ -173,6 +173,7 @@ public class Climber extends Subsystem {
         rightClimberMotor.configClosedloopRamp(RAMP_RATE);
     }
 
+    /** Creates topics for BadLog. */
     public void initializeBadLog() {
         // BadLog.createTopic("Left Top Switch", BadLog.UNITLESS, () -> getLeftTopSwitch());
         // BadLog.createTopic("Right Top Switch", BadLog.UNITLESS, () -> getRightTopSwitch());

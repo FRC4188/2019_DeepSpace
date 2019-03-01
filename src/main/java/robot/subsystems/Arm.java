@@ -63,8 +63,6 @@ public class Arm extends Subsystem {
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Shoulder pos", getPosition());
-        SmartDashboard.putNumber("Shoulder raw vel", getRawVelocity());
-        SmartDashboard.putNumber("Shoulder raw pos", getRawPosition());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
     }
@@ -190,12 +188,13 @@ public class Arm extends Subsystem {
         return temp;
     }
 
+    /** Creates topics for BadLog. */
     public void initializeBadLog() {
        BadLog.createTopic("Arm Position", "deg", () -> getPosition()); 
-       BadLog.createTopic("Arm Velocity", "rpm", () -> getVelocity());
-       BadLog.createTopic("Shoulder Motor Ouput", "%", () -> getCurrent());
-       BadLog.createTopic("Arm Temp", "C", () -> shoulderMotor.getMotorTemperature());
-       BadLog.createTopic("Arm Temp(Slave)", "C", () -> shoulderSlave.getMotorTemperature());
+       BadLog.createTopic("Arm Velocity", "deg/s", () -> getVelocity());
+       BadLog.createTopic("Arm Current", "amps", () -> getCurrent());
+       BadLog.createTopic("Arm 11 Temp", "C", () -> shoulderMotor.getMotorTemperature());
+       BadLog.createTopic("Arm 12 Temp", "C", () -> shoulderSlave.getMotorTemperature());
     }
 
 }

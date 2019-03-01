@@ -109,6 +109,14 @@ public class Intake extends Subsystem {
         wristMotor.configMotionAcceleration(CRUISE_ACCEL, TIMEOUT);
     }
 
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Wrist Position", "deg", () -> getWristPosition());
+        BadLog.createTopic("Wrist Velocity", "deg/s", () -> getWristVelocity());
+        BadLog.createTopic("Intake Current", "amps", () -> getIntakeCurrent());
+        BadLog.createTopic("Wrist Current", "amps", () -> getWristCurrent());
+    }
+
     /** Sets intake motors to given percentage (-1.0, 1.0) */
     public void spinIntake(double percent) {
         intakeMotor.set(ControlMode.PercentOutput, percent);
@@ -266,10 +274,4 @@ public class Intake extends Subsystem {
         return rearCargoSensor.get();
     }
 
-    public void initializeBadLog() {
-        BadLog.createTopic("Wrist Position", "Deg", () -> getWristPosition());
-        BadLog.createTopic("Wrist Velocity", "Deg/s", () -> getWristVelocity());
-        BadLog.createTopic("Intake Output", "%", () -> getIntakeCurrent());
-        BadLog.createTopic("Wrist Output", "%", () -> getWristCurrent());
-    }
 }

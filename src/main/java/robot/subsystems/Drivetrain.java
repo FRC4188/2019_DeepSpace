@@ -144,6 +144,21 @@ public class Drivetrain extends Subsystem {
         rightPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Drivetrain Position", "ft", () -> getPosition());
+        BadLog.createTopic("Drivetrain Velocity", "ft/s", () -> getVelocity());
+        BadLog.createTopic("Drivetrain Left Output", "%", () -> getLeftOutput());
+        BadLog.createTopic("Drivetrain Right Output", "%", () -> getRightOutput());
+        BadLog.createTopic("Drivetrain Gyro Angle", "deg", () -> getGyroAngle());
+        BadLog.createTopic("Drivetrain Current", "amps", () -> getMotorCurrent());
+        // BadLog.createTopic("Left Line Sensor", BadLog.UNITLESS, () -> getLeftLineSensor());
+        // BadLog.createTopic("Mid Line Sensor", BadLog.UNITLESS, () -> getMidLineSensor());
+        // BadLog.createTopic("Right Line Sensor", BadLog.UNITLESS, () -> getRightLineSensor());
+        BadLog.createTopic("Field Pos X", "ft", () -> getFieldPosX());
+        BadLog.createTopic("Field Pos Y", "ft", () -> getFieldPosY());
+    }
+
     /** Sets left motors to given percentage (-1.0, 1.0). */
     public void setLeft(double percent) {
         leftMotor.set(percent);
@@ -450,19 +465,6 @@ public class Drivetrain extends Subsystem {
             System.err.println("Error: index not in array of drive sparks.");
         }
         return temp;
-    }
-
-    public void initializeBadLog() {
-        BadLog.createTopic("Drivetrain Position", "Ft", () -> getPosition());
-        BadLog.createTopic("Drivetrain Velocity", "Ft/s", () -> getVelocity());
-        BadLog.createTopic("Drivetrain Left Motor", "%", () -> getLeftOutput());
-        BadLog.createTopic("Drivetrain Right Motor", "%", () -> getRightOutput());
-        BadLog.createTopic("Drivetrain Gyro Angle", "deg", () -> getGyroAngle());
-        // BadLog.createTopic("Left Line Sensor", BadLog.UNITLESS, () -> getLeftLineSensor());
-        // BadLog.createTopic("Mid Line Sensor", BadLog.UNITLESS, () -> getMidLineSensor());
-        // BadLog.createTopic("Right Line Sensor", BadLog.UNITLESS, () -> getRightLineSensor());
-        BadLog.createTopic("Field Pos X", "FT", () -> getFieldPosX());
-        BadLog.createTopic("Field Pos Y", "FT", () -> getFieldPosY());
     }
 
 }
