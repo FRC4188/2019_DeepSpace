@@ -4,17 +4,17 @@ import robot.Robot;
 import robot.subsystems.LimeLight;
 import edu.wpi.first.wpilibj.command.Command;
 
-public class LimeLightDefault extends Command {
+public class FlipLimelight extends Command {
 
     LimeLight limelight = Robot.limelight;
 
-    public LimeLightDefault() {
+    public FlipLimelight() {
         requires(limelight);
     }
 
     @Override
     protected void initialize() {
-        limelight.useAsCamera();
+        limelight.flipCamera();
     }
 
     @Override

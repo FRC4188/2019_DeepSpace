@@ -3,16 +3,12 @@ package robot.subsystems;
 import robot.Robot;
 import robot.commands.vision.LimeLightDefault;
 import robot.utils.CSPMath;
-import robot.utils.PointFinder;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
-
 import java.util.ArrayList;
-
-import org.opencv.calib3d.*;
 import org.opencv.core.*;
 
 /** Limelight vision camera. Used to detect reflective tape. */

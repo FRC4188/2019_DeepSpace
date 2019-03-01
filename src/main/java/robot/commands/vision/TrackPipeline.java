@@ -2,19 +2,32 @@ package robot.commands.vision;
 
 import robot.Robot;
 import robot.subsystems.LimeLight;
+import robot.subsystems.LimeLight.Pipeline;
 import edu.wpi.first.wpilibj.command.Command;
 
-public class LimeLightDefault extends Command {
+public class TrackPipeline extends Command {
 
     LimeLight limelight = Robot.limelight;
+    Pipeline pl;
 
-    public LimeLightDefault() {
+    public TrackPipeline(Pipeline pipeline) {
         requires(limelight);
+        pl = pipeline;
     }
 
     @Override
     protected void initialize() {
-        limelight.useAsCamera();
+        switch(pl) {
+        case BAY_CLOSE:
+            limelight.trackBay();
+            break;
+        case BAY_3D:
+            limelight.trackBay3D();
+            break;
+        case CARGO:
+            limelight.trackCargo();
+            break;
+        }
     }
 
     @Override
@@ -23,7 +36,7 @@ public class LimeLightDefault extends Command {
 
     @Override
     protected boolean isFinished() {
-        return false;
+        return true;
     }
 
     @Override

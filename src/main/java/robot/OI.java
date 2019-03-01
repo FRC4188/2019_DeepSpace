@@ -7,6 +7,7 @@ import robot.commands.groups.*;
 import robot.commands.groups.ToHeight.Height;
 import robot.commands.drive.FollowObject.Object;
 import robot.commands.intake.*;
+import robot.commands.vision.*;
 import robot.commands.arm.*;
 import robot.commands.climb.*;
 import robot.utils.*;
@@ -113,7 +114,7 @@ public class OI {
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
 
-        pilotB.whenPressed(new FollowLine());
+        pilotB.whenPressed(new FlipLimelight());
         pilotX.whenPressed(new FollowObject(Object.BAY_CLOSE, 0.5));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
