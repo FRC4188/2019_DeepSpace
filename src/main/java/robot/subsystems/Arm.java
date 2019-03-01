@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.IdleMode;
+import badlog.lib.BadLog;
 
 public class Arm extends Subsystem {
 
@@ -48,6 +49,9 @@ public class Arm extends Subsystem {
         controllerInit();
         reset();
 
+        // Initialize BadLog
+        initializeBadLog();
+
     }
 
     /** Defines default command that will run when object is created. */
@@ -59,8 +63,6 @@ public class Arm extends Subsystem {
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Shoulder pos", getPosition());
-        SmartDashboard.putNumber("Shoulder raw vel", getRawVelocity());
-        SmartDashboard.putNumber("Shoulder raw pos", getRawPosition());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
     }
@@ -170,7 +172,7 @@ public class Arm extends Subsystem {
         shoulderMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
-    /** Returns temperature of motor based off CAN ID. */
+    /** Returns temperature (Celsius) of motor based off CAN ID. */
     public double getMotorTemperature(int index) {
         CANSparkMax[] sparks = new CANSparkMax[]{
             shoulderMotor,
@@ -184,6 +186,15 @@ public class Arm extends Subsystem {
             System.err.println("Error: index not in array of arm sparks.");
         }
         return temp;
+    }
+
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+       BadLog.createTopic("Arm Position", "deg", () -> getPosition()); 
+       BadLog.createTopic("Arm Velocity", "deg/s", () -> getVelocity());
+       BadLog.createTopic("Arm Current", "amps", () -> getCurrent());
+       BadLog.createTopic("Arm 11 Temp", "C", () -> shoulderMotor.getMotorTemperature());
+       BadLog.createTopic("Arm 12 Temp", "C", () -> shoulderSlave.getMotorTemperature());
     }
 
 }

@@ -4,11 +4,11 @@ import robot.commands.elevator.ManualElevator;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANPIDController; import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import badlog.lib.BadLog;
 
 public class Elevator extends Subsystem {
 
@@ -46,6 +46,9 @@ public class Elevator extends Subsystem {
         // Reset
         controllerInit();
         reset();
+
+        // Initialize BadLog
+        initializeBadLog();
 
     }
 
@@ -88,6 +91,13 @@ public class Elevator extends Subsystem {
         pidC.setOutputRange(-MAX_OUT, MAX_OUT);
         pidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         pidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
+    }
+
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Elevator Position", "ft", () -> getPosition());
+        BadLog.createTopic("Elevator Velocity", "ft/s", () -> getVelocity());
+        BadLog.createTopic("Elevator Current", "amps", () -> getCurrent());
     }
 
     /** Sets elevator motors to given percentage using velocity controller. */

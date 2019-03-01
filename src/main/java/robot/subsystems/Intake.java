@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import badlog.lib.BadLog;
 
 public class Intake extends Subsystem {
 
@@ -58,6 +59,9 @@ public class Intake extends Subsystem {
         controllerInit();
         reset();
 
+        // Initialize BadLog
+        initializeBadLog();
+
     }
 
     @Override
@@ -103,6 +107,14 @@ public class Intake extends Subsystem {
         wristMotor.config_kF(SLOT_ID, kF, TIMEOUT);
         wristMotor.configMotionCruiseVelocity(CRUISE_VEL, TIMEOUT);
         wristMotor.configMotionAcceleration(CRUISE_ACCEL, TIMEOUT);
+    }
+
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Wrist Position", "deg", () -> getWristPosition());
+        BadLog.createTopic("Wrist Velocity", "deg/s", () -> getWristVelocity());
+        BadLog.createTopic("Intake Current", "amps", () -> getIntakeCurrent());
+        BadLog.createTopic("Wrist Current", "amps", () -> getWristCurrent());
     }
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */

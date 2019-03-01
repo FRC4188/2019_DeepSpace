@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import badlog.lib.BadLog;
 
 public class Drivetrain extends Subsystem {
 
@@ -74,6 +75,9 @@ public class Drivetrain extends Subsystem {
         reset();
         calibrateGyro();
         setHighGear();
+
+        // Initialize BadLog
+        initializeBadLog();
 
     }
 
@@ -138,6 +142,21 @@ public class Drivetrain extends Subsystem {
         rightPidC.setOutputRange(-MAX_OUT, MAX_OUT);
         rightPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         rightPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
+    }
+
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Drivetrain Position", "ft", () -> getPosition());
+        BadLog.createTopic("Drivetrain Velocity", "ft/s", () -> getVelocity());
+        BadLog.createTopic("Drivetrain Left Output", "%", () -> getLeftOutput());
+        BadLog.createTopic("Drivetrain Right Output", "%", () -> getRightOutput());
+        BadLog.createTopic("Drivetrain Gyro Angle", "deg", () -> getGyroAngle());
+        BadLog.createTopic("Drivetrain Current", "amps", () -> getMotorCurrent());
+        // BadLog.createTopic("Left Line Sensor", BadLog.UNITLESS, () -> getLeftLineSensor());
+        // BadLog.createTopic("Mid Line Sensor", BadLog.UNITLESS, () -> getMidLineSensor());
+        // BadLog.createTopic("Right Line Sensor", BadLog.UNITLESS, () -> getRightLineSensor());
+        BadLog.createTopic("Field Pos X", "ft", () -> getFieldPosX());
+        BadLog.createTopic("Field Pos Y", "ft", () -> getFieldPosY());
     }
 
     /** Sets left motors to given percentage (-1.0, 1.0). */
