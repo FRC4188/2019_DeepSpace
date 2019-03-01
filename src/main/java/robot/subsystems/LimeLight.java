@@ -93,7 +93,7 @@ public class LimeLight extends Subsystem {
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("limelightDistance", getDistance(currentPipeline.getHeight()));
+        // get 3D data
         if(currentPipeline == Pipeline.BAY_3D || currentPipeline == Pipeline.BAY_3D_FLIP){
             double[] camtran = getCamtran();
             if (camtran != null) {
@@ -321,12 +321,25 @@ public class LimeLight extends Subsystem {
     }
 
     /**
+     * Sets the LimeLight to a certain angle
+     * ranges from -90 to 90
+     * 90 faces forward, 0 faces down, -90 faces backward
+     */
+    public void setServoAngle(double angle){
+        double gearRatio = 56.0/15.0;
+        double servoRotationAngle = 675.0; // might need tuning;
+        double scale = servoRotationAngle / gearRatio;
+        double offset = CSPMath.constrainKeepSign(angle/180, 0.0, 0.5);
+        flipServo.setAngle(0.5 - offset);
+    }
+
+    /**
      * Flips the LimeLight so it faces the other way
      */
     public void flipCamera(){
         if(isFlipped){
             // unflip
-            flipServo.setAngle(0.0);
+            setServoAngle(-90.0);
             switch (currentPipeline) {
             case CARGO_FLIP:
                 setPipeline(Pipeline.CARGO);
@@ -346,7 +359,7 @@ public class LimeLight extends Subsystem {
             }
         } else{
             // flip
-            flipServo.setAngle(672.0); // 180 * 56/15 gear ratio
+            setServoAngle(90.0);
             switch (currentPipeline) {
             case CARGO:
                 setPipeline(Pipeline.CARGO_FLIP);
