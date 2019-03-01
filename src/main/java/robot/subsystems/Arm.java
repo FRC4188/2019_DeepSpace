@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.IdleMode;
+import badlog.lib.BadLog;
 
 public class Arm extends Subsystem {
 
@@ -47,6 +48,9 @@ public class Arm extends Subsystem {
         // Reset
         controllerInit();
         reset();
+
+        // Initialize BadLog
+        initializeBadLog();
 
     }
 
@@ -170,7 +174,7 @@ public class Arm extends Subsystem {
         shoulderMotor.setClosedLoopRampRate(RAMP_RATE);
     }
 
-    /** Returns temperature of motor based off CAN ID. */
+    /** Returns temperature (Celsius) of motor based off CAN ID. */
     public double getMotorTemperature(int index) {
         CANSparkMax[] sparks = new CANSparkMax[]{
             shoulderMotor,
@@ -184,6 +188,14 @@ public class Arm extends Subsystem {
             System.err.println("Error: index not in array of arm sparks.");
         }
         return temp;
+    }
+
+    public void initializeBadLog() {
+       BadLog.createTopic("Arm Position", "deg", () -> getPosition()); 
+       BadLog.createTopic("Arm Velocity", "rpm", () -> getVelocity());
+       BadLog.createTopic("Shoulder Motor Ouput", "%", () -> getCurrent());
+       BadLog.createTopic("Arm Temp", "C", () -> shoulderMotor.getMotorTemperature());
+       BadLog.createTopic("Arm Temp(Slave)", "C", () -> shoulderSlave.getMotorTemperature());
     }
 
 }

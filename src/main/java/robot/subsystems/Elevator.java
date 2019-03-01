@@ -4,11 +4,11 @@ import robot.commands.elevator.ManualElevator;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANPIDController; import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import badlog.lib.BadLog;
 
 public class Elevator extends Subsystem {
 
@@ -46,6 +46,9 @@ public class Elevator extends Subsystem {
         // Reset
         controllerInit();
         reset();
+
+        // Initialize BadLog
+        initializeBadLog();
 
     }
 
@@ -177,6 +180,12 @@ public class Elevator extends Subsystem {
             System.err.println("Error: index not in array of elevator sparks.");
         }
         return temp;
+    }
+
+    public void initializeBadLog() {
+        BadLog.createTopic("Elevator Position", "Ft", () -> getPosition());
+        BadLog.createTopic("Elevator Velocity", "Ft/s", () -> getVelocity());
+        BadLog.createTopic("Motor Output", "%", () -> getCurrent());
     }
 
 }

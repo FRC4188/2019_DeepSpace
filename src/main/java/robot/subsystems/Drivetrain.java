@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import badlog.lib.BadLog;
 
 public class Drivetrain extends Subsystem {
 
@@ -74,6 +75,9 @@ public class Drivetrain extends Subsystem {
         reset();
         calibrateGyro();
         setHighGear();
+
+        // Initialize BadLog
+        initializeBadLog();
 
     }
 
@@ -446,6 +450,19 @@ public class Drivetrain extends Subsystem {
             System.err.println("Error: index not in array of drive sparks.");
         }
         return temp;
+    }
+
+    public void initializeBadLog() {
+        BadLog.createTopic("Drivetrain Position", "Ft", () -> getPosition());
+        BadLog.createTopic("Drivetrain Velocity", "Ft/s", () -> getVelocity());
+        BadLog.createTopic("Drivetrain Left Motor", "%", () -> getLeftOutput());
+        BadLog.createTopic("Drivetrain Right Motor", "%", () -> getRightOutput());
+        BadLog.createTopic("Drivetrain Gyro Angle", "deg", () -> getGyroAngle());
+        // BadLog.createTopic("Left Line Sensor", BadLog.UNITLESS, () -> getLeftLineSensor());
+        // BadLog.createTopic("Mid Line Sensor", BadLog.UNITLESS, () -> getMidLineSensor());
+        // BadLog.createTopic("Right Line Sensor", BadLog.UNITLESS, () -> getRightLineSensor());
+        BadLog.createTopic("Field Pos X", "FT", () -> getFieldPosX());
+        BadLog.createTopic("Field Pos Y", "FT", () -> getFieldPosY());
     }
 
 }

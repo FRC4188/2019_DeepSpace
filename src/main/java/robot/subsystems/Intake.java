@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import badlog.lib.BadLog;
 
 public class Intake extends Subsystem {
 
@@ -57,6 +58,9 @@ public class Intake extends Subsystem {
         // Reset
         controllerInit();
         reset();
+
+        // Initialize BadLog
+        initializeBadLog();
 
     }
 
@@ -262,4 +266,10 @@ public class Intake extends Subsystem {
         return rearCargoSensor.get();
     }
 
+    public void initializeBadLog() {
+        BadLog.createTopic("Wrist Position", "Deg", () -> getWristPosition());
+        BadLog.createTopic("Wrist Velocity", "Deg/s", () -> getWristVelocity());
+        BadLog.createTopic("Intake Output", "%", () -> getIntakeCurrent());
+        BadLog.createTopic("Wrist Output", "%", () -> getWristCurrent());
+    }
 }

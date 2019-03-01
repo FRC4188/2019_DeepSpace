@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import badlog.lib.BadLog;
 
 public class Climber extends Subsystem {
 
@@ -47,6 +48,9 @@ public class Climber extends Subsystem {
         // Reset
         controllerInit();
         reset();
+
+        // Initialize Badlog
+        initializeBadLog();
 
     }
 
@@ -167,6 +171,13 @@ public class Climber extends Subsystem {
         rightClimberMotor.configOpenloopRamp(RAMP_RATE);
         leftClimberMotor.configClosedloopRamp(RAMP_RATE);
         rightClimberMotor.configClosedloopRamp(RAMP_RATE);
+    }
+
+    public void initializeBadLog() {
+        // BadLog.createTopic("Left Top Switch", BadLog.UNITLESS, () -> getLeftTopSwitch());
+        // BadLog.createTopic("Right Top Switch", BadLog.UNITLESS, () -> getRightTopSwitch());
+        // BadLog.createTopic("Left Bottom Switch", BadLog.UNITLESS, () -> getLeftBottomSwitch());
+        // BadLog.createTopic("Right Bottom Swtich", BadLog.UNITLESS, () -> getRightBottomSwitch());
     }
 
 }
