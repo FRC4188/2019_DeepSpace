@@ -1,11 +1,15 @@
 package robot.subsystems;
 
 import robot.Robot;
-import robot.commands.vision.LimeLightUseAsCamera;
+import robot.commands.vision.LimeLightDefault;
+import robot.utils.CSPMath;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
+import java.util.ArrayList;
+import org.opencv.core.*;
 
 /** Limelight vision camera. Used to detect reflective tape. */
 public class LimeLight extends Subsystem {
@@ -13,11 +17,20 @@ public class LimeLight extends Subsystem {
     // limelight network table
     NetworkTable limelightTable = null;
 
-    // distance for target
-    private final double TAPE_HEIGHT = 6.0/12;
-
     // current pipeline
     private Pipeline currentPipeline = Pipeline.OFF;
+
+    // matrix stuff
+    private MatOfPoint3f mObjectPoints;
+    private Mat mCameraMatrix;
+    private MatOfDouble mDistortionCoefficients;
+
+    // flipping stuff
+    private boolean isFlipped = false;
+    private Servo flipServo;
+
+    // camtran data
+    ArrayList<double[]> camtranBuffer;
 
     // LED mode enum
     public enum LedMode {
@@ -48,7 +61,9 @@ public class LimeLight extends Subsystem {
     // pipeline enum 
     public enum Pipeline {
         OFF(0, 0.0), CARGO(1, 13.0/12), HATCH(2, 19.0/12),
-                BAY_CLOSE(3, 6.0/12), BAY_HIGH(4, 6.0/12);
+                BAY_CLOSE(3, 6.0/12), BAY_3D(4,6.0/12),
+                CARGO_FLIP(5, 13.0/12), HATCH_FLIP(6, 19.0/12),
+                BAY_CLOSE_FLIP(7, 6.0/12), BAY_3D_FLIP(4, 6.0 / 12);
 
         private final int value;
         private final double height;
@@ -69,7 +84,20 @@ public class LimeLight extends Subsystem {
 
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new LimeLightUseAsCamera());
+        setDefaultCommand(new LimeLightDefault());
+    }
+
+    @Override
+    public void periodic(){
+        // get 3D data
+        if(currentPipeline == Pipeline.BAY_3D || currentPipeline == Pipeline.BAY_3D_FLIP){
+            double[] camtran = getCamtran();
+            if (camtran != null) {
+                camtranBuffer.add(camtran);
+                if (camtranBuffer.size() > 5)
+                    camtranBuffer.remove(0);
+            }
+        }
     }
 
     /**
@@ -77,6 +105,22 @@ public class LimeLight extends Subsystem {
      */
     public LimeLight() {
         limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+        mObjectPoints = new MatOfPoint3f(new Point3(0.0, 0.0, 0.0), // bottom right
+                new Point3(-1.9363, 0.5008, 0.0), // bottom left
+                new Point3(-0.5593, 5.8258, 0.0), // top-left
+                new Point3(1.377, 5.325, 0.0) // top-right
+        );
+        mCameraMatrix = Mat.eye(3, 3, CvType.CV_64F);
+        mCameraMatrix.put(0, 0, 2.5751292067328632e+02);
+        mCameraMatrix.put(0, 2, 1.5971077914723165e+02);
+        mCameraMatrix.put(1, 1, 2.5635071715912881e+02);
+        mCameraMatrix.put(1, 2, 1.1971433393615548e+02);
+
+        mDistortionCoefficients = new MatOfDouble(2.9684613693070039e-01, -1.4380252254747885e+00,
+                -2.2098421479494509e-03, -3.3894563533907176e-03, 2.5344430354806740e+00);
+
+        flipServo = new Servo(0);
+        camtranBuffer = new ArrayList<>();
     }
 
     /**
@@ -125,6 +169,13 @@ public class LimeLight extends Subsystem {
         return limelightTable.getEntry("ty").getDouble(0.0);
     }
 
+    /**
+     * Returns the 3d camera data
+     */
+    public double[] getCamtran(){
+        return limelightTable.getEntry("camtran").getDoubleArray((double[])null);
+    }
+
     /** Returns distance in feet from object of height s (feet). 
      *  Uses s = r(theta). */
     public double getDistance(double objectHeight) {
@@ -135,7 +186,7 @@ public class LimeLight extends Subsystem {
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r * 0.95; // fudge boy
+        return r; // fudge boy
     }
 
     /**
@@ -148,7 +199,82 @@ public class LimeLight extends Subsystem {
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r * 0.95; // fudge lad
+        return r; // fudge lad
+    }
+
+    /**
+     * Returns the robot angle relative to the wall.
+     */
+    public double getRobotAngle(){
+        ArrayList<Double> positives = new ArrayList<>();
+        ArrayList<Double> negatives = new ArrayList<>();
+        for(double[] camtran: camtranBuffer){
+            if(camtran[4] >= 0){
+                positives.add(camtran[4]);
+            } else {
+                negatives.add(camtran[4]);
+            }
+        }
+        double[] pos = new double[positives.size()];
+        double[] neg = new double[negatives.size()];
+        for(int i=0;i<positives.size();++i){
+            pos[i] = positives.get(i);
+        }
+        for (int i = 0; i < negatives.size(); ++i) {
+            neg[i] = negatives.get(i);
+        }
+        SmartDashboard.putNumberArray("AnglePositive", pos);
+        SmartDashboard.putNumberArray("AngleNegative", neg);
+        if(positives.size() > negatives.size()){
+            return CSPMath.average(positives);
+        } else if(negatives.size() > positives.size()){
+            return CSPMath.average(negatives);
+        } else { 
+            return 0.0;
+        }
+    }
+
+    /**
+     * Returns the distances using the 3d function in feet
+     */
+    public double[] getDistance3d(){
+        double zOffset;
+        double xOffset;
+        ArrayList<Double> positives = new ArrayList<>();
+        ArrayList<Double> negatives = new ArrayList<>();
+        ArrayList<Double> zOffsets = new ArrayList<>();
+        for (double[] camtran : camtranBuffer) {
+            if (camtran[0] >= 0) {
+                positives.add(camtran[0]);
+            } else {
+                negatives.add(camtran[0]);
+            }
+            zOffsets.add(camtran[2]);
+        }
+        if (positives.size() > negatives.size()) {
+            xOffset = CSPMath.average(positives);
+        } else if (negatives.size() > positives.size()) {
+            xOffset = CSPMath.average(negatives);
+        } else {
+            xOffset = 0.0;
+        }
+        double[] pos = new double[positives.size()];
+        double[] neg = new double[negatives.size()];
+        double[] zed = new double[zOffsets.size()];
+        for (int i = 0; i < positives.size(); ++i) {
+            pos[i] = positives.get(i);
+        }
+        for (int i = 0; i < negatives.size(); ++i) {
+            neg[i] = negatives.get(i);
+        }
+        for(int i=0;i<zOffsets.size();++i){
+            zed[i] = zOffsets.get(i);
+        }
+        SmartDashboard.putNumberArray("Xpositive", pos);
+        SmartDashboard.putNumberArray("Xnegative", neg);
+        SmartDashboard.putNumberArray("Zoff", zed);
+        zOffset = Math.abs(CSPMath.average(zOffsets));
+        return new double[]{xOffset/12, zOffset/12};
     }
 
     /** Returns necessary distances and turns to get from current location to
@@ -199,6 +325,67 @@ public class LimeLight extends Subsystem {
     }
 
     /**
+     * Sets the LimeLight to a certain angle
+     * ranges from -90 to 90
+     * 90 faces forward, 0 faces down, -90 faces backward
+     */
+    public void setServoAngle(double angle){
+        double gearRatio = 56.0/15.0;
+        double servoRotationAngle = 675.0; // might need tuning;
+        double scale = servoRotationAngle / gearRatio;
+        double offset = CSPMath.constrainKeepSign(angle/180, 0.0, 0.5);
+        flipServo.setAngle(0.5 - offset);
+    }
+
+    /**
+     * Flips the LimeLight so it faces the other way
+     */
+    public void flipCamera(){
+        if(isFlipped){
+            // unflip
+            setServoAngle(-90.0);
+            switch (currentPipeline) {
+            case CARGO_FLIP:
+                setPipeline(Pipeline.CARGO);
+                break;
+            case HATCH_FLIP:
+                setPipeline(Pipeline.HATCH);
+                break;
+            case BAY_CLOSE_FLIP:
+                setPipeline(Pipeline.BAY_CLOSE);
+                break;
+            case BAY_3D_FLIP:
+                setPipeline(Pipeline.BAY_3D);
+                break;
+            default:
+                // do nothing
+                break;
+            }
+        } else{
+            // flip
+            setServoAngle(90.0);
+            switch (currentPipeline) {
+            case CARGO:
+                setPipeline(Pipeline.CARGO_FLIP);
+                break;
+            case HATCH:
+                setPipeline(Pipeline.HATCH_FLIP);
+                break;
+            case BAY_CLOSE:
+                setPipeline(Pipeline.BAY_CLOSE_FLIP);
+                break;
+            case BAY_3D:
+                setPipeline(Pipeline.BAY_3D_FLIP);
+                break;
+            default:
+                // do nothing
+                break;
+            }
+        }
+        isFlipped = !isFlipped;
+    }
+
+    /**
      * Returns the pipeline the camera is running
      */
     public Pipeline getPipeline() {
@@ -208,28 +395,24 @@ public class LimeLight extends Subsystem {
     /**
      * Start tracking the ship bays
      */
-    public void trackShipBay() {
+    public void trackBay() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY_CLOSE);
+        if(isFlipped){
+            setPipeline(Pipeline.BAY_CLOSE_FLIP);
+        } else {
+            setPipeline(Pipeline.BAY_CLOSE);
+        }
     }
 
-    /**
-     * Start tracking the closest rocket bays (slightly higher up)
-     */
-    public void trackRocketBayClose() {
+    public void trackBay3D(){
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY_CLOSE);
-    }
-
-    /**
-     * Start tracking the hightest rocket bays (slightly higher up)
-     */
-    public void trackRocketBayHigh() {
-        setLightMode(LedMode.ON);
-        setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.BAY_HIGH);
+        if (isFlipped) {
+            setPipeline(Pipeline.BAY_3D_FLIP);
+        } else {
+            setPipeline(Pipeline.BAY_3D);
+        }
     }
 
     /**
@@ -238,7 +421,11 @@ public class LimeLight extends Subsystem {
     public void trackCargo() {
         setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.CARGO);
+        if(isFlipped){
+            setPipeline(Pipeline.CARGO_FLIP);
+        } else {
+            setPipeline(Pipeline.CARGO);
+        }
     }
 
     /**
@@ -247,7 +434,11 @@ public class LimeLight extends Subsystem {
     public void trackHatch() {
         setLightMode(LedMode.ON);
         setCameraMode(CameraMode.VISION);
-        setPipeline(Pipeline.HATCH);
+        if (isFlipped) {
+            setPipeline(Pipeline.HATCH_FLIP);
+        } else {
+            setPipeline(Pipeline.HATCH);
+        }
     }
 
     /**
@@ -256,6 +447,6 @@ public class LimeLight extends Subsystem {
     public void useAsCamera() {
         setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.CAMERA);
-        setPipeline(Pipeline.BAY_CLOSE);
+        setPipeline(Pipeline.OFF);
     }
 }

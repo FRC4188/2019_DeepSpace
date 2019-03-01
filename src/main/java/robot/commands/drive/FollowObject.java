@@ -10,7 +10,7 @@ import robot.utils.CSPMath;
 public class FollowObject extends Command {
 
     public enum Object {
-        CARGO, BAY_CLOSE, BAY_HIGH
+        CARGO, BAY, BAY_3D
     }
 
     Drivetrain drivetrain = Robot.drivetrain;
@@ -18,13 +18,14 @@ public class FollowObject extends Command {
 
     // super high to make sure command doesn't terminate
     double distance, initialDist, distErr, angleSetpoint, angleErr = 1000;
-    boolean isFollowing, leftSense, midSense, rightSense = false;
+    boolean isFollowing, leftSense, midSense, rightSense, closerThanTarget = false;
     Object object;
 
     final double TURN_kP = 0.007;
     final double DIST_kP = 0.09;
     final double ANGLE_TOLERANCE = 3.0;
     final double DIST_TOLERANCE = 0.5;
+    final double PERP_LENGTH = 4; // ft
 
     public FollowObject(Object object) {
         requires(Robot.drivetrain);
@@ -38,14 +39,17 @@ public class FollowObject extends Command {
 
         if(object == Object.CARGO) {
             limelight.trackCargo();
-        } else if(object == Object.BAY_CLOSE) {
-            limelight.trackRocketBayClose();
-        } else if(object == Object.BAY_HIGH) {
-            limelight.trackRocketBayHigh();
+        } else if(object == Object.BAY) {
+            limelight.trackBay();
+        } else if(object == Object.BAY_3D) {
+            limelight.trackBay3D();
         }
 
         // reset
         isFollowing = false;
+        closerThanTarget = PERP_LENGTH > 
+                limelight.getDistance(limelight.getPipeline().getHeight());
+
 
     }
 
@@ -66,7 +70,7 @@ public class FollowObject extends Command {
         // get angle and distance
         angleSetpoint = limelight.getHorizontalAngle() + drivetrain.getGyroAngle();
         distance = limelight.getDistance(limelight.getPipeline().getHeight());
-        distErr = distance - 4.5; // stop 5.5 ft away
+        distErr = distance - PERP_LENGTH;
         if(distErr < 0) distErr = 0;
 
         // distance p loop

@@ -1,17 +1,20 @@
 package robot.commands.vision;
 
-import edu.wpi.first.wpilibj.command.Command;
 import robot.Robot;
+import robot.subsystems.LimeLight;
+import edu.wpi.first.wpilibj.command.Command;
 
-public class LimeLightUseAsCamera extends Command {
+public class FlipLimelight extends Command {
 
-    public LimeLightUseAsCamera() {
-        requires(Robot.limelight);
+    LimeLight limelight = Robot.limelight;
+
+    public FlipLimelight() {
+        requires(limelight);
     }
 
     @Override
     protected void initialize() {
-        Robot.limelight.useAsCamera();
+        limelight.flipCamera();
     }
 
     @Override

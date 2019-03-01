@@ -1,5 +1,7 @@
 package robot.utils;
 
+import java.util.ArrayList;
+
 /** Contains various math related utilities. */
 public class CSPMath {
 
@@ -28,6 +30,14 @@ public class CSPMath {
         return (value >= min && value <= max);
     }
 
+    /** Returns the average of an arraylist of numbers */
+    public static double average(ArrayList<Double> nums){
+        double sum = 0.0;
+        for(Double num : nums){
+            sum += num;
+        }
+        return sum / nums.size();
+    }
     /** Converts from celsius to fahrenheit */
     public static double cToF(double temp) {
         return (temp * (9/5)) + 32;
