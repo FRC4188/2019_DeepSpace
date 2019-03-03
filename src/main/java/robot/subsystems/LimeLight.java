@@ -344,6 +344,7 @@ public class LimeLight extends Subsystem {
         if(isFlipped){
             // unflip
             setServoAngle(-90.0);
+            System.out.println("flipping to pos 90");
             switch (currentPipeline) {
             case CARGO_FLIP:
                 setPipeline(Pipeline.CARGO);
@@ -364,6 +365,7 @@ public class LimeLight extends Subsystem {
         } else{
             // flip
             setServoAngle(90.0);
+            System.out.println("flipping to neg 90");
             switch (currentPipeline) {
             case CARGO:
                 setPipeline(Pipeline.CARGO_FLIP);

@@ -15,6 +15,7 @@ public class FlipLimelight extends Command {
     @Override
     protected void initialize() {
         limelight.flipCamera();
+        System.out.println("flipping");
     }
 
     @Override
@@ -23,7 +24,7 @@ public class FlipLimelight extends Command {
 
     @Override
     protected boolean isFinished() {
-        return false;
+        return true;
     }
 
     @Override

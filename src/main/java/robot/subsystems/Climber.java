@@ -50,7 +50,7 @@ public class Climber extends Subsystem {
         reset();
 
         // Initialize Badlog
-        initializeBadLog();
+        //initializeBadLog();
 
     }
 
@@ -132,7 +132,7 @@ public class Climber extends Subsystem {
     public void setInverted(boolean isInverted) {
         if(climberInverted) isInverted = !isInverted;
         leftClimberMotor.setInverted(isInverted);
-        rightClimberMotor.setInverted(isInverted);
+        rightClimberMotor.setInverted(!isInverted);
     }
 
     /** Sets Talons to brake mode - Only mode that should be used. */
@@ -178,7 +178,7 @@ public class Climber extends Subsystem {
         // BadLog.createTopic("Left Top Switch", BadLog.UNITLESS, () -> getLeftTopSwitch());
         // BadLog.createTopic("Right Top Switch", BadLog.UNITLESS, () -> getRightTopSwitch());
         // BadLog.createTopic("Left Bottom Switch", BadLog.UNITLESS, () -> getLeftBottomSwitch());
-        // BadLog.createTopic("Right Bottom Swtich", BadLog.UNITLESS, () -> getRightBottomSwitch());
+        // ,BadLog.createTopic("Right Bottom Swtich", BadLog.UNITLESS, () -> getRightBottomSwitch());
     }
 
 }

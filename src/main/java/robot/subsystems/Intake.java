@@ -60,7 +60,7 @@ public class Intake extends Subsystem {
         reset();
 
         // Initialize BadLog
-        initializeBadLog();
+        //initializeBadLog();
 
     }
 

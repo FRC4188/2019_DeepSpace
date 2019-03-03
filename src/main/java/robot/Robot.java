@@ -37,7 +37,7 @@ public class Robot extends TimedRobot {
         climber = new Climber();
         limelight = new LimeLight();
         led = new LED();
-        logger = new Logger();
+        //logger = new Logger();
         brownoutProtection = new BrownoutProtection();
         tempManager = new TemperatureManager();
         oi = new OI();
@@ -50,7 +50,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         // services
-        logger.update();
+        //logger.update();
         brownoutProtection.run();
         tempManager.run();
     }
@@ -68,6 +68,9 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         Scheduler.getInstance().run();
+        // hold position
+        arm.set(0);
+        elevator.set(0);
     }
 
     @Override

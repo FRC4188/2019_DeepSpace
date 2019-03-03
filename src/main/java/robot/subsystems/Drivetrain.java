@@ -74,10 +74,10 @@ public class Drivetrain extends Subsystem {
         controllerInit();
         reset();
         calibrateGyro();
-        setHighGear();
+        setLowGear();
 
         // Initialize BadLog
-        initializeBadLog();
+        //initializeBadLog();
 
     }
 
@@ -348,12 +348,14 @@ public class Drivetrain extends Subsystem {
     public double getTargetAngle() {
 
         // get robot info
+        double x = getFieldPosX();
         double y = getFieldPosY();
         double theta = getGyroAngle();
 
         // vars based on info
         double angleDir = (theta > 0) ? 1 : -1;
         boolean inHab = CSPMath.isBetween(y, -6, 6);
+        boolean farRocket = x > 20;
 
         // estimate angle
         if(inHab && CSPMath.isBetween(theta, -30, 30)) {
@@ -362,8 +364,10 @@ public class Drivetrain extends Subsystem {
             return 28.75 * angleDir; // front of rocket
         } else if(CSPMath.isBetween(theta, 31 * angleDir, 130 * angleDir)) {
             return 90 * angleDir; // middle of rocket or side of ship
-        } else if(CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
+        } else if(farRocket && CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
             return 151.25 * angleDir; // back of rocket
+        } else if(!farRocket && CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
+            return 180; // loading station
         } else {
             return 0; // default
         }
@@ -405,7 +409,7 @@ public class Drivetrain extends Subsystem {
         double quickStop = 0;
 
         quickStop += -kQUICKSTOP * zTurn * DELTA_T;
-        if(zTurn == 0) zTurn = quickStop;
+        //if(zTurn == 0) zTurn = quickStop;
 
         double leftInput = xSpeed + zTurn;
         double rightInput = xSpeed - zTurn;
