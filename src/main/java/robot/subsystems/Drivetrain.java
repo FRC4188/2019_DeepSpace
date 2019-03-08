@@ -77,7 +77,7 @@ public class Drivetrain extends Subsystem {
         setLowGear();
 
         // Initialize BadLog
-        //initializeBadLog();
+        initializeBadLog();
 
     }
 

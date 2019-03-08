@@ -48,7 +48,7 @@ public class Elevator extends Subsystem {
         reset();
 
         // Initialize BadLog
-        //initializeBadLog();
+        initializeBadLog();
 
     }
 

@@ -50,7 +50,7 @@ public class Arm extends Subsystem {
         reset();
 
         // Initialize BadLog
-        //initializeBadLog();
+        initializeBadLog();
 
     }
 

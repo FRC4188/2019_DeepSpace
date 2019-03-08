@@ -50,7 +50,7 @@ public class Climber extends Subsystem {
         reset();
 
         // Initialize Badlog
-        //initializeBadLog();
+        initializeBadLog();
 
     }
 

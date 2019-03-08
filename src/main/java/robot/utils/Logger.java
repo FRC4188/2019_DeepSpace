@@ -15,11 +15,10 @@ public class Logger {
     public Logger() {
         log = BadLog.init(getLogDir());
         createTopics();
-        finishInit();
     }
     
     /** Closes the log file in order to be able to write to it */
-    private void finishInit() {
+    public void finishInit() {
         log.finishInitialization();
     }
 
@@ -39,7 +38,9 @@ public class Logger {
     }
 
     private void createTopics() {
-        BadLog.createTopic("Match Time", "s", () -> DriverStation.getInstance().getMatchTime());
+        BadLog.createValue("Team", "4188");
+        BadLog.createValue("Match Time", getTimeStamp());
+        // Badlog.createValue("Alliance", );
         BadLog.createTopic("Voltage", "V", () -> RobotController.getBatteryVoltage());
     }
 
