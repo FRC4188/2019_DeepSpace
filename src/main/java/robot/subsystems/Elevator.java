@@ -20,7 +20,7 @@ public class Elevator extends Subsystem {
 
     // Constants
     private final double TICKS_PER_REV = 1; // neo
-    private final double SPOOL_DIAMETER = (2 / 12); //feet
+    private final double SPOOL_DIAMETER = (2.0 / 12.0); //feet
     private final double GEAR_RATIO = 2.84;
     private final double ENCODER_TO_FEET = (SPOOL_DIAMETER * Math.PI) / (TICKS_PER_REV * GEAR_RATIO); // feet
     private final double RAMP_RATE = 0.2; // seconds
@@ -184,7 +184,7 @@ public class Elevator extends Subsystem {
         try {
             temp = sparks[index].getMotorTemperature();
         } catch(ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error: index not in array of elevator sparks.");
+            System.err.println("Error: index " + index + " not in array of elevator sparks.");
         }
         return temp;
     }

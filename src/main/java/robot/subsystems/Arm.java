@@ -183,7 +183,7 @@ public class Arm extends Subsystem {
         try {
             temp = sparks[index].getMotorTemperature();
         } catch(ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error: index not in array of arm sparks.");
+            System.err.println("Error: index " + index + " not in array of arm sparks.");
         }
         return temp;
     }

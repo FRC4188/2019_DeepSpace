@@ -197,8 +197,7 @@ public class Intake extends Subsystem {
 
     /** Returns intake wrist encoder position in degrees. */
     public double getWristPosition() {
-        double angle = wristMotor.getSelectedSensorPosition(0) * ENCODER_TO_DEGREES;
-        return angle;
+        return wristMotor.getSelectedSensorPosition(0) * ENCODER_TO_DEGREES;
     }
 
     /** Returns intake wrist encoder position in native talon units. */

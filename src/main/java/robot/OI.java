@@ -3,9 +3,9 @@ package robot;
 import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
 import robot.commands.drive.ShiftGear.Gear;
+import robot.commands.drive.DriveToTarget.VisionTarget;
 import robot.commands.groups.*;
 import robot.commands.groups.ToHeight.Height;
-import robot.commands.drive.FollowObject.Object;
 import robot.commands.intake.*;
 import robot.commands.vision.*;
 import robot.commands.arm.*;
@@ -76,6 +76,8 @@ public class OI {
     private POVButton pilotDpadEast = new POVButton(pilot, Controller.DPAD_EAST);
     private POVButton pilotDpadSouth = new POVButton(pilot, Controller.DPAD_SOUTH);
     private POVButton pilotDpadWest = new POVButton(pilot, Controller.DPAD_WEST);
+    private Trigger pilotLTrig = new TriggerAsButton(pilot, Hand.kLeft);
+    private Trigger pilotRTrig = new TriggerAsButton(pilot, Hand.kRight);
 
     private JoystickButton copilotA = new JoystickButton(copilot, Controller.A);
     private JoystickButton copilotB = new JoystickButton(copilot, Controller.B);
@@ -91,6 +93,8 @@ public class OI {
     private POVButton copilotDpadEast = new POVButton(copilot, Controller.DPAD_EAST);
     private POVButton copilotDpadSouth = new POVButton(copilot, Controller.DPAD_SOUTH);
     private POVButton copilotDpadWest = new POVButton(copilot, Controller.DPAD_WEST);
+    private Trigger copilotLTrig = new TriggerAsButton(copilot, Hand.kLeft);
+    private Trigger copilotRTrig = new TriggerAsButton(copilot, Hand.kRight);
 
     private JoystickButton rbGround = new JoystickButton(rocketBox, RocketBox.GROUND);
     private JoystickButton rbCargoLow = new JoystickButton(rocketBox, RocketBox.CARGO_LOW);
@@ -101,8 +105,6 @@ public class OI {
     private JoystickButton rbHatchHigh = new JoystickButton(rocketBox, RocketBox.HATCH_HIGH);
 
     // Iterator initialization
-    private Trigger copilotLTrig = new TriggerAsButton(copilot, Hand.kLeft);
-    private Trigger copilotRTrig = new TriggerAsButton(copilot, Hand.kRight);
     private CommandIterator hatchIterator = new CommandIterator((Trigger) copilotLb, copilotLTrig, 160, "Hatch Iterator");
     private CommandIterator cargoIterator = new CommandIterator((Trigger) copilotRb, copilotRTrig, 160, "Cargo Iterator");
 
@@ -114,8 +116,9 @@ public class OI {
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
 
+        pilotRTrig.whileActive(new DriveToTarget(VisionTarget.BAY));
+
         pilotB.whenPressed(new FlipLimelight());
-        pilotX.whenPressed(new FollowObject(Object.BAY));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         pilotDpadNorth.whileHeld(new ManualClimb(1.0));

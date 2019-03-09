@@ -27,10 +27,8 @@ public class ManualArm extends Command {
         double brownoutVar = Robot.brownoutProtection.getBrownoutVar();
         boolean isClosedLoop = SmartDashboard.getBoolean("Arm closed loop", true);
         if(isClosedLoop) {
-            System.out.println("arm is closed loop");
             arm.set(oi.getCopilotY(Hand.kLeft) * brownoutVar);
         } else {
-            System.out.println("arm is open loop");
             arm.setOpenLoop(oi.getCopilotY(Hand.kLeft) * brownoutVar, false);
         }
     }
