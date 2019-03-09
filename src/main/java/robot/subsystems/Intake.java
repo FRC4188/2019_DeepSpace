@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import badlog.lib.BadLog;
+import robot.utils.Logger;
 
 public class Intake extends Subsystem {
 
@@ -61,7 +62,6 @@ public class Intake extends Subsystem {
 
         // Initialize BadLog
         initializeBadLog();
-
     }
 
     @Override
@@ -111,11 +111,13 @@ public class Intake extends Subsystem {
 
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-        BadLog.createTopic("Wrist Position", "deg", () -> getWristPosition());
-        BadLog.createTopic("Wrist Velocity", "deg/s", () -> getWristVelocity());
-        BadLog.createTopic("Intake Current", "amps", () -> getIntakeCurrent());
-        BadLog.createTopic("Wrist Current", "amps", () -> getWristCurrent());
-    }
+        BadLog.createTopic("Intake/Wrist Position", "degs", () -> getWristPosition());
+        BadLog.createTopic("Intake/Wrist Velocity", "deg/s", () -> getWristVelocity());
+        BadLog.createTopic("Intake/Wrist Current", "amps", () -> getWristCurrent());
+        BadLog.createTopic("Intake/Current", "amps", () -> getIntakeCurrent());
+        BadLog.createTopicStr("Intake/Rear Cargo Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getRearCargoSensor()), "hide", "join:Intake/Cargo Sensor");
+        BadLog.createTopicStr("Intake/Front Cargo Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getFrontCargoSensor()), "hide", "join:Intake/Cargo Sensor");
+   }
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */
     public void spinIntake(double percent) {

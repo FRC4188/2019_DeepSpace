@@ -1,6 +1,7 @@
 package robot.utils;
 
 import badlog.lib.BadLog;
+import badlog.lib.DataInferMode;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,21 +28,23 @@ public class Logger {
     private String getTimeStamp() {
         long timeMs = System.currentTimeMillis();
         Date now = new Date(timeMs);
-        DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); 
+        DateFormat df = new SimpleDateFormat("HH:mm:ss dd-MM-yyyy"); 
         return df.format(now); 
     }
 
     /** Assigns log directory to /home/lvuser/logs/ and creates a new file
      *  using the timestamp when initiated */
     private String getLogDir() {
-        return ("/home/lvuser/logs/" + getTimeStamp() + "_log.bag");
+        return ("/home/lvuser/logs/" + getTimeStamp() + ".log.bag");
     }
 
     private void createTopics() {
         BadLog.createValue("Team", "4188");
-        BadLog.createValue("Match Time", getTimeStamp());
-        // Badlog.createValue("Alliance", );
-        BadLog.createTopic("Voltage", "V", () -> RobotController.getBatteryVoltage());
+        BadLog.createValue("Match Start Time", getTimeStamp());
+        BadLog.createTopic("Match Time", "s", () -> DriverStation.getInstance().getMatchTime());
+        BadLog.createValue("Event Name", DriverStation.getInstance().getEventName());
+        BadLog.createValue("Alliance", DriverStation.getInstance().getAlliance().toString());
+        BadLog.createTopic("System/Voltage", "V", () -> RobotController.getBatteryVoltage());
     }
 
     /** Pushes updates to the log file - Should be updated periodically */
@@ -50,5 +53,7 @@ public class Logger {
         log.log();
     }
 
-
+    public static String useBoolean(boolean input) {
+        return input ? "1" : "0";
+    }
 }

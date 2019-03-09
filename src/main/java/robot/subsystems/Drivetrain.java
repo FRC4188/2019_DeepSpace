@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import badlog.lib.BadLog;
+import robot.utils.Logger; 
 
 public class Drivetrain extends Subsystem {
 
@@ -78,7 +79,6 @@ public class Drivetrain extends Subsystem {
 
         // Initialize BadLog
         initializeBadLog();
-
     }
 
     /** Defines default command that will run when object is created. */
@@ -146,17 +146,18 @@ public class Drivetrain extends Subsystem {
 
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-        BadLog.createTopic("Drivetrain Position", "ft", () -> getPosition());
-        BadLog.createTopic("Drivetrain Velocity", "ft/s", () -> getVelocity());
-        BadLog.createTopic("Drivetrain Left Output", "%", () -> getLeftOutput());
-        BadLog.createTopic("Drivetrain Right Output", "%", () -> getRightOutput());
-        BadLog.createTopic("Drivetrain Gyro Angle", "deg", () -> getGyroAngle());
-        BadLog.createTopic("Drivetrain Current", "amps", () -> getMotorCurrent());
-        // BadLog.createTopic("Left Line Sensor", BadLog.UNITLESS, () -> getLeftLineSensor());
-        // BadLog.createTopic("Mid Line Sensor", BadLog.UNITLESS, () -> getMidLineSensor());
-        // BadLog.createTopic("Right Line Sensor", BadLog.UNITLESS, () -> getRightLineSensor());
-        BadLog.createTopic("Field Pos X", "ft", () -> getFieldPosX());
-        BadLog.createTopic("Field Pos Y", "ft", () -> getFieldPosY());
+        BadLog.createTopicStr("Left Line Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getLeftLineSensor()), "hide", "join:Drivetrain/Line Sensors");
+        BadLog.createTopicStr("Mid Line Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getMidLineSensor()), "hide", "join:Drivetrain/Line Sensors");
+        BadLog.createTopicStr("Right Line Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getRightLineSensor()), "hide", "join:Drivetrain/Line Sensors");
+        BadLog.createTopic("Drivetrain/Position", "ft", () -> getPosition());
+        BadLog.createTopic("Drivetrain/Velocity", "ft/s", () -> getVelocity());;
+        BadLog.createTopic("Drivetrain/Gyro Angle", "deg", () -> getGyroAngle());
+        BadLog.createTopic("Drivetrain/Current", "amps", () -> getMotorCurrent());
+        BadLog.createTopic("Drivetrain/Field Pos X", "ft", () -> getFieldPosX(), "hide", "join:Drivetrain/Field Pos");
+        BadLog.createTopic("Drivetrain/Field Pos Y", "ft", () -> getFieldPosY(), "hide", "join:Drivetrain/Field Pos");
+        BadLog.createTopic("Drivetrain/Left Output", "%", () -> getLeftOutput(), "hide", "join:Drivetrain/Output");
+        BadLog.createTopic("Drivetrain/Right Output", "%", () -> getRightOutput(), "hide", "join:Drivetrain/Output");
+
     }
 
     /** Sets left motors to given percentage (-1.0, 1.0). */

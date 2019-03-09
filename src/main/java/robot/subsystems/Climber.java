@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import badlog.lib.BadLog;
+import robot.utils.Logger;
 
 public class Climber extends Subsystem {
 
@@ -175,10 +176,10 @@ public class Climber extends Subsystem {
 
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-        // BadLog.createTopic("Left Top Switch", BadLog.UNITLESS, () -> getLeftTopSwitch());
-        // BadLog.createTopic("Right Top Switch", BadLog.UNITLESS, () -> getRightTopSwitch());
-        // BadLog.createTopic("Left Bottom Switch", BadLog.UNITLESS, () -> getLeftBottomSwitch());
-        // ,BadLog.createTopic("Right Bottom Swtich", BadLog.UNITLESS, () -> getRightBottomSwitch());
+        BadLog.createTopicStr("Left Top Switch", BadLog.UNITLESS, () -> Logger.useBoolean(getLeftTopSwitch()), "hide", "join:Climber/Switches");
+        BadLog.createTopicStr("Right Top Switch", BadLog.UNITLESS, () -> Logger.useBoolean(getRightTopSwitch()), "hide", "join:Climber/Switches");
+        BadLog.createTopicStr("Left Bottom Switch", BadLog.UNITLESS, () -> Logger.useBoolean(getLeftBottomSwitch()), "hide", "join:Climber/Switches");
+        BadLog.createTopicStr("Right Bottom Swtich", BadLog.UNITLESS, () -> Logger.useBoolean(getRightBottomSwitch()), "hide", "join:Climber/Switches");
     }
 
 }
