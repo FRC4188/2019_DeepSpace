@@ -327,8 +327,8 @@ public class LimeLight extends Subsystem {
         double gearRatio = 56.0/15.0;
         double servoRotationAngle = 675.0; // might need tuning;
         double scale = servoRotationAngle / gearRatio;
-        double offset = CSPMath.constrainKeepSign(angle/180, 0.0, 0.5);
-        flipServo.setAngle(0.5 - offset);
+        double offset = angle/180;
+        flipServo.set(0.5 - offset);
     }
 
     /**
@@ -337,7 +337,7 @@ public class LimeLight extends Subsystem {
     public void flipCamera(){
         if(isFlipped){
             // unflip
-            setServoAngle(-90.0);
+            setServoAngle(90.0);
             switch (currentPipeline) {
             case CARGO_FLIP:
                 setPipeline(Pipeline.CARGO);
@@ -357,7 +357,7 @@ public class LimeLight extends Subsystem {
             }
         } else{
             // flip
-            setServoAngle(90.0);
+            setServoAngle(-90.0);
             switch (currentPipeline) {
             case CARGO:
                 setPipeline(Pipeline.CARGO_FLIP);
