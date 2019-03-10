@@ -121,6 +121,8 @@ public class LimeLight extends Subsystem {
 
         flipServo = new Servo(0);
         camtranBuffer = new ArrayList<>();
+
+        setServoAngle(90.0);
     }
 
     /**
