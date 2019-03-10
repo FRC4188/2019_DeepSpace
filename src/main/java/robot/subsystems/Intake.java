@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import badlog.lib.BadLog;
 
 public class Intake extends Subsystem {
 
@@ -36,9 +37,6 @@ public class Intake extends Subsystem {
     private final double kF = 1023 / MAX_VELOCITY;
     private final int    SLOT_ID = 0;
     private final int    TIMEOUT = 10; // ms
-    public final double  DELTA_T = 0.02; // seconds
-    public static double brownoutVariable;
-
 
     // State enums
     public enum WristState { CARGO, HATCH }
@@ -53,12 +51,16 @@ public class Intake extends Subsystem {
     public Intake(){
 
         // Encoders
-        wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, SLOT_ID, TIMEOUT);
+        wristMotor.configSelectedFeedbackSensor(
+                FeedbackDevice.CTRE_MagEncoder_Relative, SLOT_ID, TIMEOUT);
         wristMotor.setSensorPhase(true);
 
         // Reset
         controllerInit();
         reset();
+
+        // Initialize BadLog
+        //initializeBadLog();
 
     }
 
@@ -105,6 +107,14 @@ public class Intake extends Subsystem {
         wristMotor.config_kF(SLOT_ID, kF, TIMEOUT);
         wristMotor.configMotionCruiseVelocity(CRUISE_VEL, TIMEOUT);
         wristMotor.configMotionAcceleration(CRUISE_ACCEL, TIMEOUT);
+    }
+
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Wrist Position", "deg", () -> getWristPosition());
+        BadLog.createTopic("Wrist Velocity", "deg/s", () -> getWristVelocity());
+        BadLog.createTopic("Intake Current", "amps", () -> getIntakeCurrent());
+        BadLog.createTopic("Wrist Current", "amps", () -> getWristCurrent());
     }
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */
@@ -187,8 +197,7 @@ public class Intake extends Subsystem {
 
     /** Returns intake wrist encoder position in degrees. */
     public double getWristPosition() {
-        double angle = wristMotor.getSelectedSensorPosition(0) * ENCODER_TO_DEGREES;
-        return angle;
+        return wristMotor.getSelectedSensorPosition(0) * ENCODER_TO_DEGREES;
     }
 
     /** Returns intake wrist encoder position in native talon units. */

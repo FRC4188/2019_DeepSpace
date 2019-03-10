@@ -1,24 +1,15 @@
 package robot.commands.climb;
 
-import robot.OI;
 import robot.Robot;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Runs climber motors at a given percent.
  *  Positive percent extends. */
 public class ManualClimb extends Command {
 
-    OI oi = Robot.oi;
     Climber climber = Robot.climber;
-
     double percent;
-    boolean leftCanExtend, rightCanExtend, leftCanRetract, rightCanRetract;
-    boolean lastLeftSwitch, lastRightSwitch;
-    double lastLeftSpeed, lastRightSpeed;
-    public double brownoutVariable;
-
 
     public ManualClimb(double percent) {
         requires(climber);
@@ -27,29 +18,36 @@ public class ManualClimb extends Command {
 
     @Override
     protected void initialize() {
-        leftCanExtend = rightCanExtend = true;
-        leftCanRetract = rightCanRetract = false;
-        lastLeftSwitch = lastRightSwitch = true;
-        lastLeftSpeed = lastRightSpeed = 0;
     }
 
     @Override
     protected void execute() {
 
         // handle limit switches
-        boolean leftSwitch = climber.getLeftMagnetSwitch();
-        boolean rightSwitch = climber.getRightMagnetSwitch();
-        if(lastLeftSwitch) {
-            if(!leftSwitch) {
-                if(lastLeftSpeed > 0) leftCanExtend = !leftCanExtend;
-                if(lastLeftSpeed < 0) leftCanRetract = !leftCanRetract;
-            }
+        boolean leftTopSwitch = climber.getLeftTopSwitch();
+        boolean rightTopSwitch = climber.getRightTopSwitch();
+        boolean leftBottomSwitch = climber.getLeftBottomSwitch();
+        boolean rightBottomSwitch = climber.getRightBottomSwitch();
+        boolean leftCanExtend, rightCanExtend, leftCanRetract, rightCanRetract;
+        if(leftTopSwitch) { // top
+            leftCanExtend = true;
+            leftCanRetract = false;
+        } else if(leftBottomSwitch) { // bottom
+            leftCanExtend = false;
+            leftCanRetract = true;
+        } else { // middle
+            leftCanExtend = true;
+            leftCanRetract = true;
         }
-        if(lastRightSwitch) {
-            if(!rightSwitch) {
-                if(lastRightSpeed > 0) leftCanExtend = !leftCanExtend;
-                if(lastRightSpeed < 0) leftCanRetract = !leftCanRetract;
-            }
+        if(rightTopSwitch) { // top
+            rightCanExtend = true;
+            rightCanRetract = false;
+        } else if(rightBottomSwitch) { // bottom
+            rightCanExtend = false;
+            rightCanRetract = true;
+        } else { // middle
+            rightCanExtend = true;
+            rightCanRetract = true;
         }
 
         double leftPercent = 0;
@@ -63,14 +61,8 @@ public class ManualClimb extends Command {
         }
 
         // command motor output
-        climber.setLeft(leftPercent);
-        climber.setRight(rightPercent);
-
-        // save values for next loop
-        if(leftPercent != 0) lastLeftSpeed = leftPercent;
-        if(rightPercent != 0) lastRightSpeed = rightPercent;
-        lastLeftSwitch = leftSwitch;
-        lastRightSwitch = rightSwitch;
+        climber.setLeftOpenLoop(leftPercent);
+        climber.setRightOpenLoop(rightPercent);
 
     }
 

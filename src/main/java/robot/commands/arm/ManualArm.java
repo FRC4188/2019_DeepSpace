@@ -5,6 +5,7 @@ import robot.Robot;
 import robot.subsystems.Arm;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Manually controls arm using left copilot Y. */
 public class ManualArm extends Command {
@@ -18,12 +19,18 @@ public class ManualArm extends Command {
 
     @Override
     protected void initialize() {
+        SmartDashboard.putBoolean("Arm closed loop", true);
     }
 
     @Override
     protected void execute() {
         double brownoutVar = Robot.brownoutProtection.getBrownoutVar();
-        arm.set(oi.getCopilotY(Hand.kLeft) * brownoutVar);
+        boolean isClosedLoop = SmartDashboard.getBoolean("Arm closed loop", true);
+        if(isClosedLoop) {
+            arm.set(oi.getCopilotY(Hand.kLeft) * brownoutVar);
+        } else {
+            arm.setOpenLoop(oi.getCopilotY(Hand.kLeft) * brownoutVar, false);
+        }
     }
 
     @Override

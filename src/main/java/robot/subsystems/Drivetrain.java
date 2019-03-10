@@ -6,6 +6,7 @@ import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -14,6 +15,7 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import badlog.lib.BadLog;
 
 public class Drivetrain extends Subsystem {
 
@@ -35,27 +37,25 @@ public class Drivetrain extends Subsystem {
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Constants
-    public final double MAX_VELOCITY = 9; // ft/s
-    public final double MAX_ACCELERATION = 5; // ft/s^2
-    public final double MAX_JERK = 190; // ft/s^3
-    public final double kP = 5e-5;
-    public final double kI = 1e-6;
-    public final double kD = 0;
-    public final double kF = 0;
-    public final double kI_ZONE = 0;
-    public final int    SLOT_ID = 0;
-    public final double MAX_OUT = 1.0;
-    public final double WHEELBASE_WIDTH = 2; // ft
-    public final double WHEEL_DIAMETER = (6.0 / 12.0); // ft
-    public final double TICKS_PER_REV = 1.0; // neo
-    public final double LOW_GEAR_RATIO = 15.32;
-    public final double HIGH_GEAR_RATIO = 7.08;
-    private double      currentGearRatio = HIGH_GEAR_RATIO;
-    public final double RAMP_RATE = 0.75; // seconds
-    public double       ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * currentGearRatio); // ft
-    public final double DELTA_T = 0.02; // seconds
-    public static double brownoutVariable;
-
+    public final double  MAX_VELOCITY = 9; // ft/s
+    public final double  MAX_ACCELERATION = 5; // ft/s^2
+    public final double  MAX_JERK = 190; // ft/s^3
+    public final double  kP = 5e-5;
+    public final double  kI = 1e-6;
+    public final double  kD = 0;
+    public final double  kV = 0;
+    public final double  kA = 0;
+    public final double  kI_ZONE = 0;
+    public final int     SLOT_ID = 0;
+    public final double  MAX_OUT = 1.0;
+    public final double  WHEELBASE_WIDTH = 2; // ft
+    public final double  WHEEL_DIAMETER = (6.0 / 12.0); // ft
+    public final double  TICKS_PER_REV = 1.0; // neo
+    public final double  LOW_GEAR_RATIO = 15.32;
+    public final double  HIGH_GEAR_RATIO = 7.08;
+    public final double  RAMP_RATE = 0.75; // seconds
+    public double        ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV); // ft
+    private final double DELTA_T = 0.2;
 
     // State vars
     private double fieldPosX, fieldPosY = 0;
@@ -74,6 +74,10 @@ public class Drivetrain extends Subsystem {
         controllerInit();
         reset();
         calibrateGyro();
+        setLowGear();
+
+        // Initialize BadLog
+        //initializeBadLog();
 
     }
 
@@ -126,7 +130,7 @@ public class Drivetrain extends Subsystem {
         leftPidC.setI(kI);
         leftPidC.setD(kD);
         leftPidC.setIZone(kI_ZONE);
-        leftPidC.setFF(kF);
+        leftPidC.setFF(kV);
         leftPidC.setOutputRange(-MAX_OUT, MAX_OUT);
         leftPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         leftPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
@@ -134,20 +138,46 @@ public class Drivetrain extends Subsystem {
         rightPidC.setI(kI);
         rightPidC.setD(kD);
         rightPidC.setIZone(kI_ZONE);
-        rightPidC.setFF(kF);
+        rightPidC.setFF(kV);
         rightPidC.setOutputRange(-MAX_OUT, MAX_OUT);
         rightPidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         rightPidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
     }
 
-    /** Sets left motors to given percentage (-1.0 - 1.0). */
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Drivetrain Position", "ft", () -> getPosition());
+        BadLog.createTopic("Drivetrain Velocity", "ft/s", () -> getVelocity());
+        BadLog.createTopic("Drivetrain Left Output", "%", () -> getLeftOutput());
+        BadLog.createTopic("Drivetrain Right Output", "%", () -> getRightOutput());
+        BadLog.createTopic("Drivetrain Gyro Angle", "deg", () -> getGyroAngle());
+        BadLog.createTopic("Drivetrain Current", "amps", () -> getMotorCurrent());
+        // BadLog.createTopic("Left Line Sensor", BadLog.UNITLESS, () -> getLeftLineSensor());
+        // BadLog.createTopic("Mid Line Sensor", BadLog.UNITLESS, () -> getMidLineSensor());
+        // BadLog.createTopic("Right Line Sensor", BadLog.UNITLESS, () -> getRightLineSensor());
+        BadLog.createTopic("Field Pos X", "ft", () -> getFieldPosX());
+        BadLog.createTopic("Field Pos Y", "ft", () -> getFieldPosY());
+    }
+
+    /** Sets left motors to given percentage (-1.0, 1.0). */
     public void setLeft(double percent) {
         leftMotor.set(percent);
     }
 
-    /** Sets right motors to given percentage (-1.0 - 1.0). */
+    /** Sets right motors to given percentage (-1.0, 1.0). */
     public void setRight(double percent) {
         rightMotor.set(percent);
+    }
+
+    /** Drives forward a given distance in feet. */
+    public void driveToDistance(double distance, double tolerance) {
+        // convert from feet to rotations (Spark units)
+        distance /= ENCODER_TO_FEET;
+        tolerance /= ENCODER_TO_FEET;
+        leftPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
+        rightPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
+        leftPidC.setReference(distance, ControlType.kSmartMotion);
+        rightPidC.setReference(distance, ControlType.kSmartMotion);
     }
 
     /** Inverts drivetrain. True inverts each side from the
@@ -318,12 +348,14 @@ public class Drivetrain extends Subsystem {
     public double getTargetAngle() {
 
         // get robot info
+        double x = getFieldPosX();
         double y = getFieldPosY();
         double theta = getGyroAngle();
 
         // vars based on info
         double angleDir = (theta > 0) ? 1 : -1;
         boolean inHab = CSPMath.isBetween(y, -6, 6);
+        boolean farRocket = x > 20;
 
         // estimate angle
         if(inHab && CSPMath.isBetween(theta, -30, 30)) {
@@ -332,8 +364,10 @@ public class Drivetrain extends Subsystem {
             return 28.75 * angleDir; // front of rocket
         } else if(CSPMath.isBetween(theta, 31 * angleDir, 130 * angleDir)) {
             return 90 * angleDir; // middle of rocket or side of ship
-        } else if(CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
+        } else if(farRocket && CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
             return 151.25 * angleDir; // back of rocket
+        } else if(!farRocket && CSPMath.isBetween(theta, 131 * angleDir, 180 * angleDir)) {
+            return 180; // loading station
         } else {
             return 0; // default
         }
@@ -351,13 +385,13 @@ public class Drivetrain extends Subsystem {
     /** Shifts drivetrain to low gear. */
     public void setLowGear() {
         gearShift.set(Value.kForward);
-        currentGearRatio = LOW_GEAR_RATIO;
+        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
     }
 
     /** Shifts drivetrain to high gear. */
     public void setHighGear() {
         gearShift.set(Value.kReverse);
-        currentGearRatio = LOW_GEAR_RATIO;
+        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
     }
 
     /** Turns gear shift solenoid off. */
@@ -375,7 +409,7 @@ public class Drivetrain extends Subsystem {
         double quickStop = 0;
 
         quickStop += -kQUICKSTOP * zTurn * DELTA_T;
-        if(zTurn == 0) zTurn = quickStop;
+        //if(zTurn == 0) zTurn = quickStop;
 
         double leftInput = xSpeed + zTurn;
         double rightInput = xSpeed - zTurn;
@@ -432,7 +466,7 @@ public class Drivetrain extends Subsystem {
         try {
             temp = sparks[index].getMotorTemperature();
         } catch(ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error: index not in array of drive sparks.");
+            System.err.println("Error: index " + index + " not in array of drive sparks.");
         }
         return temp;
     }

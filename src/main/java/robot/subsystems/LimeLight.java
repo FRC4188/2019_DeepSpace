@@ -287,35 +287,43 @@ public class LimeLight extends Subsystem {
     public double[] solvePerpendicular() {
 
         // length away we want to be from target once perpendicular (ft)
-        final double PERP_LENGTH = 3.5;
+        final double PERP_LENGTH = 4;
+
         // get known side lengths and angles (feet and degrees)
-        // all angles relative to target, not field
-        double robotAngle = getRobotAngle();
+        double targetAngle = Robot.drivetrain.getTargetAngle();
+        double robotAngle = Robot.drivetrain.getGyroAngle() - targetAngle;
         double limelightAngle = getHorizontalAngle();
-        //double distToTarget = getDistance(getPipeline().getHeight());
-        double[] distances = getDistance3d();
-        double sideDistance = distances[0];
-        double forwardDistance = distances[1];
-        double newForwardDistance = forwardDistance - PERP_LENGTH;
-        
-        // if the distance to the target is less than PERP_LENGTH, return all 0
-        if (newForwardDistance < 0){
-            return new double[]{0.0, 0.0, 0.0};
-        }
-        // if the side difference is negligable, just turn towards the target;
-        if(Math.abs(sideDistance) < 1){
-            return new double[]{limelightAngle, newForwardDistance, 0.0};
-        }
-        // if the side difference is negligable, just turn towards the target;
-        if(Math.abs(sideDistance) < 1){
-            return new double[]{limelightAngle, newForwardDistance, 0.0};
+        double distToTarget = getDistance(getPipeline().getHeight());
+
+        // angle between line from camera to target and perpendicular line in radians
+        // found using parallel lines
+        double camToPerpAngle = Math.toRadians(robotAngle - limelightAngle);
+
+        // solve for distance to point perpendicular to target, PERP_LENGTH away
+        // uses law of cosines
+        double driveDist = Math.sqrt(Math.pow(PERP_LENGTH, 2) + Math.pow(distToTarget, 2)
+                - 2 * PERP_LENGTH * distToTarget * Math.cos(camToPerpAngle));
+
+        // solve for angle to turn to drive on straight line to point perpendicular to target
+        // uses law of sines, returns in degrees
+        double angleC = Math.toDegrees(Math.asin((PERP_LENGTH *
+                Math.sin(camToPerpAngle)) / driveDist));
+        double firstTurn = Robot.drivetrain.getGyroAngle() + limelightAngle + angleC;
+
+        SmartDashboard.putNumber("first turn", firstTurn);
+        SmartDashboard.putNumber("drive dist", driveDist);
+
+        // if already almost perpendicular (5 deg tolerance) then return 0, else return vals
+        if(Math.abs(camToPerpAngle) < Math.toRadians(5.0)) {
+            return (new double[] { 0, 0, 0 });
+        } else {
+            return (new double[] {
+                firstTurn,  // 0
+                driveDist,  // 1
+                targetAngle // 2
+            });
         }
 
-        double firstTurn = Math.atan2(newForwardDistance, sideDistance) + robotAngle;
-        double driveDistance = Math.sqrt(sideDistance * sideDistance + newForwardDistance * newForwardDistance);
-        double secondTurn = 90 - Math.atan2(newForwardDistance, sideDistance);
-
-        return new double[]{firstTurn, driveDistance, secondTurn};
     }
 
     /**

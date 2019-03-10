@@ -4,11 +4,11 @@ import robot.commands.elevator.ManualElevator;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANPIDController; import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import badlog.lib.BadLog;
 
 public class Elevator extends Subsystem {
 
@@ -20,7 +20,7 @@ public class Elevator extends Subsystem {
 
     // Constants
     private final double TICKS_PER_REV = 1; // neo
-    private final double SPOOL_DIAMETER = (2 / 12); //feet
+    private final double SPOOL_DIAMETER = (2.0 / 12.0); //feet
     private final double GEAR_RATIO = 2.84;
     private final double ENCODER_TO_FEET = (SPOOL_DIAMETER * Math.PI) / (TICKS_PER_REV * GEAR_RATIO); // feet
     private final double RAMP_RATE = 0.2; // seconds
@@ -33,9 +33,6 @@ public class Elevator extends Subsystem {
     private final double MAX_VELOCITY = 1500; // rpm
     private final double MAX_ACCELERATION = 1000;
     private final int    SLOT_ID = 0;
-    public final double  DELTA_T = 0.02; // seconds
-    public static double brownoutVariable;
-
 
     // State vars
     private boolean elevatorInverted;
@@ -49,6 +46,9 @@ public class Elevator extends Subsystem {
         // Reset
         controllerInit();
         reset();
+
+        // Initialize BadLog
+        //initializeBadLog();
 
     }
 
@@ -91,6 +91,13 @@ public class Elevator extends Subsystem {
         pidC.setOutputRange(-MAX_OUT, MAX_OUT);
         pidC.setSmartMotionMaxVelocity(MAX_VELOCITY, SLOT_ID);
         pidC.setSmartMotionMaxAccel(MAX_ACCELERATION, SLOT_ID);
+    }
+
+    /** Creates topics for BadLog. */
+    public void initializeBadLog() {
+        BadLog.createTopic("Elevator Position", "ft", () -> getPosition());
+        BadLog.createTopic("Elevator Velocity", "ft/s", () -> getVelocity());
+        BadLog.createTopic("Elevator Current", "amps", () -> getCurrent());
     }
 
     /** Sets elevator motors to given percentage using velocity controller. */
@@ -177,7 +184,7 @@ public class Elevator extends Subsystem {
         try {
             temp = sparks[index].getMotorTemperature();
         } catch(ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error: index not in array of elevator sparks.");
+            System.err.println("Error: index " + index + " not in array of elevator sparks.");
         }
         return temp;
     }

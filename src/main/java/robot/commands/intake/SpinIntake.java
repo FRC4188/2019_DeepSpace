@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.command.Command;
 public class SpinIntake extends Command {
 
     Intake intake = Robot.intake;
-
     double speed;
 
     public SpinIntake(double speed) {
@@ -24,7 +23,7 @@ public class SpinIntake extends Command {
 
     @Override
     protected void execute() {
-        intake.spinIntake(speed);
+        intake.spinIntake(-speed);
     }
 
     @Override

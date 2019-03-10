@@ -15,6 +15,7 @@ public class ManualDrive extends Command {
 
     final double kSLOW_TURN = 0.25;
     final double kFAST_TURN = 0.5;
+    final double kSTICK_TURN = 0.6;
 
     public ManualDrive() {
         requires(drivetrain);
@@ -37,7 +38,7 @@ public class ManualDrive extends Command {
         // turn multiplied by speed unless bumpers held
         // left bumper slow turn, right bumper fast
         double xSpeed = pilotLeftY;
-        double zTurn = pilotRightX * xSpeed;
+        double zTurn = pilotRightX * Math.abs(xSpeed) * kSTICK_TURN;
         if(pilotLeftBumper) zTurn = pilotRightX * kSLOW_TURN;
         else if(pilotRightBumper) zTurn = pilotRightX * kFAST_TURN;
 

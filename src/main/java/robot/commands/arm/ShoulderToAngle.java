@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.command.Command;
 public class ShoulderToAngle extends Command {
 
     Arm arm = Robot.arm;
-
     double angle, tolerance, counter;
 
     public ShoulderToAngle(double angle, double tolerance) {
@@ -27,7 +26,7 @@ public class ShoulderToAngle extends Command {
     protected void execute() {
         arm.shoulderToAngle(angle, tolerance);
         double error = angle - arm.getPosition();
-        if(Math.abs(error) < tolerance) counter ++;
+        if(Math.abs(error) < tolerance) counter++;
         else counter = 0;
     }
 

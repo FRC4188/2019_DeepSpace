@@ -68,6 +68,9 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         Scheduler.getInstance().run();
+        // hold position
+        arm.set(0);
+        elevator.set(0);
     }
 
     @Override
