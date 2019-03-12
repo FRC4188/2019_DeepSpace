@@ -3,9 +3,9 @@ package robot;
 import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
 import robot.commands.drive.ShiftGear.Gear;
+import robot.commands.drive.DriveToTarget.VisionTarget;
 import robot.commands.groups.*;
 import robot.commands.groups.ToHeight.Height;
-import robot.commands.drive.FollowObject.Object;
 import robot.commands.intake.*;
 import robot.commands.vision.*;
 import robot.commands.arm.*;
@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.buttons.POVButton;
 import edu.wpi.first.wpilibj.buttons.Trigger;
+import jaci.pathfinder.Pathfinder;
+import jaci.pathfinder.Waypoint;
 
 public class OI {
 
@@ -48,12 +50,12 @@ public class OI {
     // button mappings for rocket box
     public class RocketBox {
         public final static int GROUND = 1;
-        public final static int CARGO_LOW = 2;
-        public final static int CARGO_MID = 3;
-        public final static int CARGO_HIGH = 4;
-        public final static int HATCH_LOW = 5;
-        public final static int HATCH_MID = 6;
-        public final static int HATCH_HIGH = 7;
+        public final static int CARGO_LOW = 3;
+        public final static int CARGO_MID = 5;
+        public final static int CARGO_HIGH = 7;
+        public final static int HATCH_LOW = 2;
+        public final static int HATCH_MID = 4;
+        public final static int HATCH_HIGH = 6;
     }
 
     // Controller initialization
@@ -76,6 +78,8 @@ public class OI {
     private POVButton pilotDpadEast = new POVButton(pilot, Controller.DPAD_EAST);
     private POVButton pilotDpadSouth = new POVButton(pilot, Controller.DPAD_SOUTH);
     private POVButton pilotDpadWest = new POVButton(pilot, Controller.DPAD_WEST);
+    private Trigger pilotLTrig = new TriggerAsButton(pilot, Hand.kLeft);
+    private Trigger pilotRTrig = new TriggerAsButton(pilot, Hand.kRight);
 
     private JoystickButton copilotA = new JoystickButton(copilot, Controller.A);
     private JoystickButton copilotB = new JoystickButton(copilot, Controller.B);
@@ -91,6 +95,8 @@ public class OI {
     private POVButton copilotDpadEast = new POVButton(copilot, Controller.DPAD_EAST);
     private POVButton copilotDpadSouth = new POVButton(copilot, Controller.DPAD_SOUTH);
     private POVButton copilotDpadWest = new POVButton(copilot, Controller.DPAD_WEST);
+    private Trigger copilotLTrig = new TriggerAsButton(copilot, Hand.kLeft);
+    private Trigger copilotRTrig = new TriggerAsButton(copilot, Hand.kRight);
 
     private JoystickButton rbGround = new JoystickButton(rocketBox, RocketBox.GROUND);
     private JoystickButton rbCargoLow = new JoystickButton(rocketBox, RocketBox.CARGO_LOW);
@@ -101,10 +107,13 @@ public class OI {
     private JoystickButton rbHatchHigh = new JoystickButton(rocketBox, RocketBox.HATCH_HIGH);
 
     // Iterator initialization
-    private Trigger copilotLTrig = new TriggerAsButton(copilot, Hand.kLeft);
-    private Trigger copilotRTrig = new TriggerAsButton(copilot, Hand.kRight);
     private CommandIterator hatchIterator = new CommandIterator((Trigger) copilotLb, copilotLTrig, 160, "Hatch Iterator");
     private CommandIterator cargoIterator = new CommandIterator((Trigger) copilotRb, copilotRTrig, 160, "Cargo Iterator");
+
+    private Waypoint[] testPath = new Waypoint[] {
+        new Waypoint(0, 0, 0),
+        new Waypoint(5, 3, 0)
+    };
 
     /** Constructs new OI object and assigns commands. */
     public OI() {
@@ -114,8 +123,10 @@ public class OI {
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
 
+        pilotRTrig.whileActive(new DriveToTarget(VisionTarget.BAY));
+
         pilotB.whenPressed(new FlipLimelight());
-        pilotX.whenPressed(new FollowObject(Object.BAY));
+        pilotX.whenPressed(new FollowPath(testPath, false));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         pilotDpadNorth.whileHeld(new ManualClimb(1.0));
@@ -146,6 +157,9 @@ public class OI {
         cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_MID), 2);
         cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_HIGH), 3);
         cargoIterator.start();
+
+        rbGround.whenPressed(new ToHeight(Height.HOME));
+        rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));
 
     }
 

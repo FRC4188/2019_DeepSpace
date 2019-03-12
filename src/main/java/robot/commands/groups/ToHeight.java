@@ -9,12 +9,13 @@ public class ToHeight extends CommandGroup {
 
     public enum Height {
 
+        HOME(0.2, -5.0, 0.0),
         CARGO_LOW(0.0, 0.0, 0.0),
         CARGO_MID(0.0, 0.0, 0.0),
         CARGO_HIGH(0.0, 0.0, 0.0),
         CARGO_SHIP(0.0, 0.0, 0.0),
         CARGO_LOAD(0.0, 0.0, 0.0),
-        HATCH_LOW(0.0, 0.0, 0.0),
+        HATCH_LOW(2.25, -112.0, -19.0),
         HATCH_MID(0.0, 0.0, 0.0),
         HATCH_HIGH(0.0, 0.0, 0.0),
         HATCH_FLOOR(0.0, 0.0, 0.0);
@@ -48,9 +49,9 @@ public class ToHeight extends CommandGroup {
         double shoulderAngle = height.getShoulderAngle();
         double wristAngle = height.getWristAngle();
 
-        addParallel(new ElevatorToHeight(elevatorHeight, 3/12));
-        addParallel(new ShoulderToAngle(shoulderAngle, 3));
-        addParallel(new WristToAngle(wristAngle, 3));
+        addParallel(new ElevatorToHeight(elevatorHeight, 0.05));
+        addParallel(new WristToAngle(wristAngle, 1.0));
+        addSequential(new ShoulderToAngle(shoulderAngle, 1.0));
 
     }
 

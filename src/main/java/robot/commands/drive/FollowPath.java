@@ -10,7 +10,7 @@ import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.PathfinderFRC;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
-import jaci.pathfinder.followers.EncoderFollower;
+import jaci.pathfinder.followers.DistanceFollower;
 import jaci.pathfinder.modifiers.TankModifier;
 
 /** Follows given path of waypoints using Pathfinder library.
@@ -32,7 +32,7 @@ public class FollowPath extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
 
-    EncoderFollower leftFollower, rightFollower;
+    DistanceFollower leftFollower, rightFollower;
     boolean isReversed, fromFile, isFinished;
     double initialAngle;
     Notifier notif;
@@ -88,7 +88,7 @@ public class FollowPath extends Command {
 
             // create points
             points = new Waypoint[] {
-                new Waypoint(0, 0, initialAngleInRad),
+                new Waypoint(0, 0, 0),
                 new Waypoint(x, y, targetAngle)
             };
 
@@ -105,8 +105,8 @@ public class FollowPath extends Command {
 
             // create followers
             TankModifier modifier = new TankModifier(trajectory).modify(drivetrain.WHEELBASE_WIDTH);
-            leftFollower = new EncoderFollower(modifier.getLeftTrajectory());
-            rightFollower = new EncoderFollower(modifier.getRightTrajectory());
+            leftFollower = new DistanceFollower(modifier.getLeftTrajectory());
+            rightFollower = new DistanceFollower(modifier.getRightTrajectory());
 
         } else {
 
@@ -115,16 +115,12 @@ public class FollowPath extends Command {
             Trajectory rightTrajectory = PathfinderFRC.getTrajectory(path.toString() + ".left");
 
             // create followers
-            leftFollower = new EncoderFollower(leftTrajectory);
-            rightFollower = new EncoderFollower(rightTrajectory);
+            leftFollower = new DistanceFollower(leftTrajectory);
+            rightFollower = new DistanceFollower(rightTrajectory);
 
         }
 
         // follower config
-        leftFollower.configureEncoder((int) drivetrain.getRawLeftPosition(),
-                (int) drivetrain.TICKS_PER_REV, drivetrain.WHEEL_DIAMETER);
-        rightFollower.configureEncoder((int) drivetrain.getRawRightPosition(),
-                (int) drivetrain.TICKS_PER_REV, drivetrain.WHEEL_DIAMETER);
         leftFollower.configurePIDVA(kP, kI, kD, kV, kA);
         rightFollower.configurePIDVA(kP, kI, kD, kV, kA);
 
@@ -136,12 +132,9 @@ public class FollowPath extends Command {
 
     protected void follow() {
 
-        // invert drivetrain if needed
-        if(isReversed) drivetrain.setInverted(true);
-
         // get motor setpoints
-        double l = leftFollower.calculate((int) drivetrain.getRawLeftPosition());
-        double r = rightFollower.calculate((int) drivetrain.getRawRightPosition());
+        double l = leftFollower.calculate(drivetrain.getLeftPosition());
+        double r = rightFollower.calculate(drivetrain.getRightPosition());
 
         // turn control loop (kP from 254 presentation)
         double gyroHeading = drivetrain.getGyroAngle() - initialAngle;
@@ -154,25 +147,25 @@ public class FollowPath extends Command {
         drivetrain.tank(l + turn, r - turn, 1.0);
 
         // determine if finished
-        isFinished = leftFollower.isFinished() && rightFollower.isFinished();
-        if(isFinished) notif.stop();
+        isFinished = leftFollower.isFinished() && rightFollower.isFinished() && Math.abs(angleDifference) > 5.0;
+        if(isFinished) {
+            notif.stop();
+            notif.close();
+        }
 
     }
 
     @Override
     protected boolean isFinished() {
-        return leftFollower.isFinished() && rightFollower.isFinished();
+        return isFinished;
     }
 
     @Override
     protected void end() {
-        drivetrain.tank(0, 0, 0);
-        drivetrain.setInverted(false);
     }
 
     @Override
     protected void interrupted() {
-        end();
     }
 
 }

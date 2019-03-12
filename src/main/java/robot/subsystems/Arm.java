@@ -10,6 +10,7 @@ import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import badlog.lib.BadLog;
+import badlog.lib.DataInferMode;
 
 public class Arm extends Subsystem {
 
@@ -20,10 +21,8 @@ public class Arm extends Subsystem {
     public CANPIDController pidC = shoulderMotor.getPIDController();
 
     // Constants
-    private final double TICKS_PER_REV = 1.0; // neo
-    private final double GEAR_RATIO = 48.0;
-    private final double INITIAL_ANGLE = 90; // degrees, 0 when arm is parallel with ground at front of bot
-    private final double ENCODER_TO_DEGREES = 360.0 / (TICKS_PER_REV * GEAR_RATIO); // degrees
+    private final double INITIAL_ANGLE = 0; // degrees, 0 when arm is parallel with ground at front of bot
+    private final double ENCODER_TO_DEGREES = 180.0 / 35.66; // degrees
     private final double RAMP_RATE = 0.5; // seconds
     private final double FLAT_RATE = 0.035; // percent out
     private final double MAX_VELOCITY = 1000; // rpm
@@ -50,8 +49,7 @@ public class Arm extends Subsystem {
         reset();
 
         // Initialize BadLog
-        //initializeBadLog();
-
+        initializeBadLog();
     }
 
     /** Defines default command that will run when object is created. */
@@ -63,6 +61,7 @@ public class Arm extends Subsystem {
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Shoulder pos", getPosition());
+        SmartDashboard.putNumber("Shoulder raw pos", getRawPosition());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
     }
@@ -183,18 +182,20 @@ public class Arm extends Subsystem {
         try {
             temp = sparks[index].getMotorTemperature();
         } catch(ArrayIndexOutOfBoundsException e) {
-            System.err.println("Error: index not in array of arm sparks.");
+            System.err.println("Error: index " + index + " not in array of arm sparks.");
         }
         return temp;
     }
 
+
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-       BadLog.createTopic("Arm Position", "deg", () -> getPosition()); 
-       BadLog.createTopic("Arm Velocity", "deg/s", () -> getVelocity());
-       BadLog.createTopic("Arm Current", "amps", () -> getCurrent());
-       BadLog.createTopic("Arm 11 Temp", "C", () -> shoulderMotor.getMotorTemperature());
-       BadLog.createTopic("Arm 12 Temp", "C", () -> shoulderSlave.getMotorTemperature());
-    }
-
+        // Create new method
+        BadLog.createTopic("Arm/Position", "deg", () -> getPosition());
+        BadLog.createTopic("Arm/Velocity", "deg/s", () -> getVelocity());
+        BadLog.createTopic("Arm/Current", "amps", () -> getCurrent());
+        BadLog.createTopic("21 Temp", "C", () -> shoulderMotor.getMotorTemperature(), "hide", "join:Arm/Temp");
+        BadLog.createTopic("22 Temp", "C", () -> shoulderSlave.getMotorTemperature(), "hide", "join:Arm/Temp");
+     }
+    
 }

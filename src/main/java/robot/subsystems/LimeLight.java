@@ -1,7 +1,7 @@
 package robot.subsystems;
 
 import robot.Robot;
-import robot.commands.vision.LimeLightDefault;
+import robot.commands.vision.*;
 import robot.utils.CSPMath;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Servo;
@@ -84,7 +84,7 @@ public class LimeLight extends Subsystem {
 
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new LimeLightDefault());
+        setDefaultCommand(new TrackPipeline(Pipeline.BAY_CLOSE));
     }
 
     @Override
@@ -121,6 +121,8 @@ public class LimeLight extends Subsystem {
 
         flipServo = new Servo(0);
         camtranBuffer = new ArrayList<>();
+
+        setServoAngle(90.0);
     }
 
     /**
@@ -186,7 +188,7 @@ public class LimeLight extends Subsystem {
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r; // fudge boy
+        return r - 2.5; // from front of bot
     }
 
     /**
@@ -199,7 +201,7 @@ public class LimeLight extends Subsystem {
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r; // fudge lad
+        return r - 2.5; // from front of bot
     }
 
     /**
@@ -333,8 +335,8 @@ public class LimeLight extends Subsystem {
         double gearRatio = 56.0/15.0;
         double servoRotationAngle = 675.0; // might need tuning;
         double scale = servoRotationAngle / gearRatio;
-        double offset = CSPMath.constrainKeepSign(angle/180, 0.0, 0.5);
-        flipServo.setAngle(0.5 - offset);
+        double offset = angle/180;
+        flipServo.set(0.5 - offset);
     }
 
     /**
@@ -343,8 +345,7 @@ public class LimeLight extends Subsystem {
     public void flipCamera(){
         if(isFlipped){
             // unflip
-            setServoAngle(-90.0);
-            System.out.println("flipping to pos 90");
+            setServoAngle(90.0);
             switch (currentPipeline) {
             case CARGO_FLIP:
                 setPipeline(Pipeline.CARGO);
@@ -364,8 +365,7 @@ public class LimeLight extends Subsystem {
             }
         } else{
             // flip
-            setServoAngle(90.0);
-            System.out.println("flipping to neg 90");
+            setServoAngle(-90.0);
             switch (currentPipeline) {
             case CARGO:
                 setPipeline(Pipeline.CARGO_FLIP);

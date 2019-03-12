@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import badlog.lib.BadLog;
+import robot.utils.Logger;
 
 public class Intake extends Subsystem {
 
@@ -22,18 +23,16 @@ public class Intake extends Subsystem {
     private DigitalInput rearCargoSensor = new DigitalInput(4);
 
     // Constants
-    private final double TICKS_PER_REV = 4096; // talon units
-    private final double GEAR_RATIO = 90.0;
-    private final double INITIAL_ANGLE = 90; // degrees, 0 is with bucket facing upward when arm is at 0
-    private final double ENCODER_TO_DEGREES = 360.0 / (TICKS_PER_REV * GEAR_RATIO); // degrees
+    private final double INITIAL_ANGLE = 0; // degrees, 0 is with bucket facing upward when arm is at 0
+    private final double ENCODER_TO_DEGREES = 360.0 / 368870.0; // degrees
     private final double RAMP_RATE = 0.2; // seconds
     private final double MAX_OUT = 0.5; // percent out
-    private final double MAX_VELOCITY = 13500.0; // talon units per 100ms
-    private final int    CRUISE_VEL = 4000; // talon units per 100ms
-    private final int    CRUISE_ACCEL = 4000; // talon units per 100ms per sec
-    private final double kP = 0.01;
+    private final double MAX_VELOCITY = 20000.0; // talon units per 100ms
+    private final int    CRUISE_VEL = 15000; // talon units per 100ms
+    private final int    CRUISE_ACCEL = 15000; // talon units per 100ms per sec
+    private final double kP = 0.025;
     private final double kI = 0;
-    private final double kD = 0;
+    private final double kD = 0.0;
     private final double kF = 1023 / MAX_VELOCITY;
     private final int    SLOT_ID = 0;
     private final int    TIMEOUT = 10; // ms
@@ -60,8 +59,7 @@ public class Intake extends Subsystem {
         reset();
 
         // Initialize BadLog
-        //initializeBadLog();
-
+        initializeBadLog();
     }
 
     @Override
@@ -73,8 +71,8 @@ public class Intake extends Subsystem {
     /** Prints info to dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Wrist pos", getWristPosition());
-        SmartDashboard.putString("Wrist state", getWristState().toString());
-        SmartDashboard.putString("Intake state", getIntakeState().toString());
+        SmartDashboard.putNumber("Wrist raw pos", getRawWristPosition());
+        SmartDashboard.putNumber("Wrist raw vel", getRawWristVelocity());
     }
 
     /** Runs every loop. */
@@ -111,11 +109,13 @@ public class Intake extends Subsystem {
 
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-        BadLog.createTopic("Wrist Position", "deg", () -> getWristPosition());
-        BadLog.createTopic("Wrist Velocity", "deg/s", () -> getWristVelocity());
-        BadLog.createTopic("Intake Current", "amps", () -> getIntakeCurrent());
-        BadLog.createTopic("Wrist Current", "amps", () -> getWristCurrent());
-    }
+        BadLog.createTopic("Intake/Wrist Position", "degs", () -> getWristPosition());
+        BadLog.createTopic("Intake/Wrist Velocity", "deg/s", () -> getWristVelocity());
+        BadLog.createTopic("Intake/Wrist Current", "amps", () -> getWristCurrent());
+        BadLog.createTopic("Intake/Current", "amps", () -> getIntakeCurrent());
+        BadLog.createTopicStr("Intake/Rear Cargo Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getRearCargoSensor()), "hide", "join:Intake/Cargo Sensor");
+        BadLog.createTopicStr("Intake/Front Cargo Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getFrontCargoSensor()), "hide", "join:Intake/Cargo Sensor");
+   }
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */
     public void spinIntake(double percent) {
@@ -197,8 +197,7 @@ public class Intake extends Subsystem {
 
     /** Returns intake wrist encoder position in degrees. */
     public double getWristPosition() {
-        double angle = wristMotor.getSelectedSensorPosition(0) * ENCODER_TO_DEGREES;
-        return angle;
+        return wristMotor.getSelectedSensorPosition(0) * ENCODER_TO_DEGREES;
     }
 
     /** Returns intake wrist encoder position in native talon units. */
