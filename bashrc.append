@@ -1,0 +1,2 @@
+alias start_cam='exec ~/vision/start_cam.sh'
+alias stop_cam='exec ~/vision/stop_cam.sh'
