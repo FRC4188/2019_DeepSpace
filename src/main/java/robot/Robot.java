@@ -3,11 +3,13 @@ package robot;
 import robot.OI;
 import robot.subsystems.*;
 import robot.utils.*;
+import robot.commands.elevator.ElevatorToHeight;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -53,6 +55,7 @@ public class Robot extends TimedRobot {
         //logger.update();
         brownoutProtection.run();
         tempManager.run();
+        SmartDashboard.putNumber("limelight dist", limelight.getDistance(limelight.getPipeline().getHeight()));
     }
 
     @Override
@@ -75,7 +78,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        autonomousCommand = chooser.getSelected();
+        autonomousCommand = new ElevatorToHeight(0.3, 0.05);
         if (autonomousCommand != null) {
             autonomousCommand.start();
         }

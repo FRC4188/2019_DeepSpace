@@ -9,12 +9,14 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import jaci.pathfinder.Pathfinder;
 import badlog.lib.BadLog;
 
 public class Drivetrain extends Subsystem {
@@ -30,12 +32,14 @@ public class Drivetrain extends Subsystem {
     private CANEncoder rightEncoder = new CANEncoder(rightMotor);
     private CANPIDController leftPidC = leftMotor.getPIDController();
     private CANPIDController rightPidC = rightMotor.getPIDController();
-    private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
+    //private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
+    private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(1);
     private DigitalInput lineSensorRight = new DigitalInput(2);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
+    // Constants
     // Constants
     public final double  MAX_VELOCITY = 9; // ft/s
     public final double  MAX_ACCELERATION = 5; // ft/s^2
@@ -43,18 +47,18 @@ public class Drivetrain extends Subsystem {
     public final double  kP = 5e-5;
     public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kV = 0;
+    public final double  kV = 1 / MAX_VELOCITY;
     public final double  kA = 0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
     public final double  MAX_OUT = 1.0;
-    public final double  WHEELBASE_WIDTH = 2; // ft
+    public final double  WHEELBASE_WIDTH = 2.67; // ft
     public final double  WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double  TICKS_PER_REV = 1.0; // neo
     public final double  LOW_GEAR_RATIO = 15.32;
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  RAMP_RATE = 0.75; // seconds
-    public double        ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV); // ft
+    public double        ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV * LOW_GEAR_RATIO); // ft
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -89,6 +93,7 @@ public class Drivetrain extends Subsystem {
 
     /** Prints necessary info to dashboard. */
     private void updateShuffleboard() {
+        SmartDashboard.putNumber("ENC_TO_FEET", ENCODER_TO_FEET);
         SmartDashboard.putNumber("L Pos", getLeftPosition());
         SmartDashboard.putNumber("R Pos", getRightPosition());
         SmartDashboard.putNumber("L Vel", getLeftVelocity());
@@ -288,17 +293,20 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return ahrs.getYaw();
+        //return ahrs.getYaw();
+        return Pathfinder.boundHalfDegrees(gyro.getAngle());
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        return ahrs.getRate();
+        //return ahrs.getRate();
+        return gyro.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
-        ahrs.reset();
+        //ahrs.reset();
+        gyro.reset();
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
@@ -385,13 +393,11 @@ public class Drivetrain extends Subsystem {
     /** Shifts drivetrain to low gear. */
     public void setLowGear() {
         gearShift.set(Value.kForward);
-        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
     }
 
     /** Shifts drivetrain to high gear. */
     public void setHighGear() {
         gearShift.set(Value.kReverse);
-        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
     }
 
     /** Turns gear shift solenoid off. */

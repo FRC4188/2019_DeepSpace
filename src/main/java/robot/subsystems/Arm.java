@@ -20,10 +20,8 @@ public class Arm extends Subsystem {
     public CANPIDController pidC = shoulderMotor.getPIDController();
 
     // Constants
-    private final double TICKS_PER_REV = 1.0; // neo
-    private final double GEAR_RATIO = 48.0;
-    private final double INITIAL_ANGLE = 90; // degrees, 0 when arm is parallel with ground at front of bot
-    private final double ENCODER_TO_DEGREES = 360.0 / (TICKS_PER_REV * GEAR_RATIO); // degrees
+    private final double INITIAL_ANGLE = 0; // degrees, 0 when arm is parallel with ground at front of bot
+    private final double ENCODER_TO_DEGREES = 180.0 / 35.66; // degrees
     private final double RAMP_RATE = 0.5; // seconds
     private final double FLAT_RATE = 0.035; // percent out
     private final double MAX_VELOCITY = 1000; // rpm
@@ -63,6 +61,7 @@ public class Arm extends Subsystem {
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Shoulder pos", getPosition());
+        SmartDashboard.putNumber("Shoulder raw pos", getRawPosition());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
     }

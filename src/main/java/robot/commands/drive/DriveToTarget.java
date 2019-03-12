@@ -49,6 +49,7 @@ public class DriveToTarget extends Command {
 
         // angle p loop
         double angleErr = limelight.getHorizontalAngle();
+        System.out.println("turning " + angleErr);
         double zTurn = TURN_kP * angleErr;
 
         // command motor output

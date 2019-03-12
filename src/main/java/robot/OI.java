@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.buttons.POVButton;
 import edu.wpi.first.wpilibj.buttons.Trigger;
+import jaci.pathfinder.Pathfinder;
+import jaci.pathfinder.Waypoint;
 
 public class OI {
 
@@ -48,12 +50,12 @@ public class OI {
     // button mappings for rocket box
     public class RocketBox {
         public final static int GROUND = 1;
-        public final static int CARGO_LOW = 2;
-        public final static int CARGO_MID = 3;
-        public final static int CARGO_HIGH = 4;
-        public final static int HATCH_LOW = 5;
-        public final static int HATCH_MID = 6;
-        public final static int HATCH_HIGH = 7;
+        public final static int CARGO_LOW = 3;
+        public final static int CARGO_MID = 5;
+        public final static int CARGO_HIGH = 7;
+        public final static int HATCH_LOW = 2;
+        public final static int HATCH_MID = 4;
+        public final static int HATCH_HIGH = 6;
     }
 
     // Controller initialization
@@ -108,6 +110,11 @@ public class OI {
     private CommandIterator hatchIterator = new CommandIterator((Trigger) copilotLb, copilotLTrig, 160, "Hatch Iterator");
     private CommandIterator cargoIterator = new CommandIterator((Trigger) copilotRb, copilotRTrig, 160, "Cargo Iterator");
 
+    private Waypoint[] testPath = new Waypoint[] {
+        new Waypoint(0, 0, 0),
+        new Waypoint(5, 3, 0)
+    };
+
     /** Constructs new OI object and assigns commands. */
     public OI() {
 
@@ -119,6 +126,7 @@ public class OI {
         pilotRTrig.whileActive(new DriveToTarget(VisionTarget.BAY));
 
         pilotB.whenPressed(new FlipLimelight());
+        pilotX.whenPressed(new FollowPath(testPath, false));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         pilotDpadNorth.whileHeld(new ManualClimb(1.0));
@@ -149,6 +157,9 @@ public class OI {
         cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_MID), 2);
         cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_HIGH), 3);
         cargoIterator.start();
+
+        rbGround.whenPressed(new ToHeight(Height.HOME));
+        rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));
 
     }
 

@@ -19,18 +19,15 @@ public class Elevator extends Subsystem {
     private CANPIDController pidC = elevatorMotor.getPIDController();
 
     // Constants
-    private final double TICKS_PER_REV = 1; // neo
-    private final double SPOOL_DIAMETER = (2.0 / 12.0); //feet
-    private final double GEAR_RATIO = 2.84;
-    private final double ENCODER_TO_FEET = (SPOOL_DIAMETER * Math.PI) / (TICKS_PER_REV * GEAR_RATIO); // feet
+    private final double ENCODER_TO_FEET = 2.0 / 105.64; // feet
     private final double RAMP_RATE = 0.2; // seconds
+    private final double MAX_VELOCITY = 3000; // rpm
     private final double MAX_OUT = 0.5; // percent out
     private final double kP = 5e-5;
     private final double kI = 1e-6;
     private final double kI_ZONE = 0;
     private final double kD = 0;
     private final double kF = 0;
-    private final double MAX_VELOCITY = 1500; // rpm
     private final double MAX_ACCELERATION = 1000;
     private final int    SLOT_ID = 0;
 
@@ -61,6 +58,7 @@ public class Elevator extends Subsystem {
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Elevator Position", getPosition());
+        SmartDashboard.putNumber("Elevator raw pos", getRawPosition());
         SmartDashboard.putNumber("Elevator raw velocity", getRawVelocity());
         SmartDashboard.putNumber("E11 temp", elevatorMotor.getMotorTemperature());
         SmartDashboard.putNumber("E12 temp", elevatorSlave.getMotorTemperature());
