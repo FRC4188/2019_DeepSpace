@@ -9,6 +9,7 @@ import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import badlog.lib.BadLog;
+import badlog.lib.DataInferMode;
 
 public class Elevator extends Subsystem {
 
@@ -45,8 +46,7 @@ public class Elevator extends Subsystem {
         reset();
 
         // Initialize BadLog
-        //initializeBadLog();
-
+        initializeBadLog();
     }
 
     /** Defines default command that will run when object is created. */
@@ -93,10 +93,12 @@ public class Elevator extends Subsystem {
 
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-        BadLog.createTopic("Elevator Position", "ft", () -> getPosition());
-        BadLog.createTopic("Elevator Velocity", "ft/s", () -> getVelocity());
-        BadLog.createTopic("Elevator Current", "amps", () -> getCurrent());
-    }
+        BadLog.createTopic("Elevator/Position", "ft", () -> getPosition());
+        BadLog.createTopic("Elevator/Velocity", "ft/s", () -> getVelocity()); 
+        BadLog.createTopic("Elevator/Current", "amps", () -> getCurrent());
+        BadLog.createTopic("Elevator/E11 Temp", "C", () -> elevatorMotor.getMotorTemperature(), "hide", "join:Elevator/Temperature");
+        BadLog.createTopic("Elevator/E12 Temp", "C", () -> elevatorSlave.getMotorTemperature(), "hide", "join:Elevator/Temperature");
+   }
 
     /** Sets elevator motors to given percentage using velocity controller. */
     public void set(double percent) {

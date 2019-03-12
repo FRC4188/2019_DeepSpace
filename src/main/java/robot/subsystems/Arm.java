@@ -10,6 +10,7 @@ import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import badlog.lib.BadLog;
+import badlog.lib.DataInferMode;
 
 public class Arm extends Subsystem {
 
@@ -48,8 +49,7 @@ public class Arm extends Subsystem {
         reset();
 
         // Initialize BadLog
-        //initializeBadLog();
-
+        initializeBadLog();
     }
 
     /** Defines default command that will run when object is created. */
@@ -187,13 +187,15 @@ public class Arm extends Subsystem {
         return temp;
     }
 
+
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-       BadLog.createTopic("Arm Position", "deg", () -> getPosition()); 
-       BadLog.createTopic("Arm Velocity", "deg/s", () -> getVelocity());
-       BadLog.createTopic("Arm Current", "amps", () -> getCurrent());
-       BadLog.createTopic("Arm 11 Temp", "C", () -> shoulderMotor.getMotorTemperature());
-       BadLog.createTopic("Arm 12 Temp", "C", () -> shoulderSlave.getMotorTemperature());
-    }
-
+        // Create new method
+        BadLog.createTopic("Arm/Position", "deg", () -> getPosition());
+        BadLog.createTopic("Arm/Velocity", "deg/s", () -> getVelocity());
+        BadLog.createTopic("Arm/Current", "amps", () -> getCurrent());
+        BadLog.createTopic("21 Temp", "C", () -> shoulderMotor.getMotorTemperature(), "hide", "join:Arm/Temp");
+        BadLog.createTopic("22 Temp", "C", () -> shoulderSlave.getMotorTemperature(), "hide", "join:Arm/Temp");
+     }
+    
 }
