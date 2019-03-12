@@ -2,6 +2,7 @@ package robot;
 
 import robot.commands.drive.*;
 import robot.commands.drive.FollowObject.Object;
+import robot.commands.drive.FollowPath.Path;
 import robot.commands.drive.TurnToAngle.Angle;
 import robot.commands.groups.DepositToBay;
 import robot.utils.KillAll;
@@ -80,7 +81,7 @@ public class OI {
         pilotA.whenPressed(new FollowPath(Paths.testPath, false));
         pilotB.whenPressed(new TurnToAngle(27, 5, Angle.RELATIVE));
         pilotX.whenPressed(new FollowObject(Object.BAY_HIGH));
-        pilotY.whenPressed(new DepositToBay());
+        pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
         pilotLS.whenPressed(new ShiftGear());
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());

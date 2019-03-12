@@ -142,7 +142,7 @@ public class FollowPath extends Command {
         double gyroHeading = drivetrain.getGyroAngle();
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.8 * (1.0/80.0) * angleDifference;
+        double turn = 0.45 * (1.0/80.0) * angleDifference;
         System.out.println("angleDiff: " + angleDifference + " turn val: " + turn);
 
         // use output
