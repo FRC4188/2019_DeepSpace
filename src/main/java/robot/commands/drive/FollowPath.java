@@ -9,6 +9,7 @@ import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.PathfinderFRC;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
+import jaci.pathfinder.followers.DistanceFollower;
 import jaci.pathfinder.followers.EncoderFollower;
 import jaci.pathfinder.modifiers.TankModifier;
 
@@ -35,8 +36,9 @@ public class FollowPath extends Command {
     LimeLight limelight = Robot.limelight;
 
     boolean isReversed, fromFile;
+    double initialLeftDist, initialRightDist;
     Waypoint[] points;
-    EncoderFollower leftFollower, rightFollower;
+    DistanceFollower leftFollower, rightFollower;
     Path path;
 
     final double kP = 0.1;
@@ -65,6 +67,10 @@ public class FollowPath extends Command {
     @Override
     protected void initialize() {
 
+        // initial vals
+        initialLeftDist = drivetrain.getLeftPosition();
+        initialRightDist = drivetrain.getRightPosition();
+
         // create waypoints if going to perpendicular
         if(path == Path.TO_PERPENDICULAR) {
 
@@ -76,8 +82,6 @@ public class FollowPath extends Command {
             double y = driveDist * Math.sin(turnAngle);
             double targetAngle = Math.toRadians(limelight.solvePerpendicular()[2]);
 
-            SmartDashboard.putNumber("driveDist", driveDist);
-            SmartDashboard.putNumber("current angle", currentAngle);
             SmartDashboard.putNumber("x drive", x);
             SmartDashboard.putNumber("y drive", y);
             SmartDashboard.putNumber("target angle", targetAngle);
@@ -101,8 +105,8 @@ public class FollowPath extends Command {
 
             // create followers
             TankModifier modifier = new TankModifier(trajectory).modify(drivetrain.WHEELBASE_WIDTH);
-            leftFollower = new EncoderFollower(modifier.getLeftTrajectory());
-            rightFollower = new EncoderFollower(modifier.getRightTrajectory());
+            leftFollower = new DistanceFollower(modifier.getLeftTrajectory());
+            rightFollower = new DistanceFollower(modifier.getRightTrajectory());
 
         } else {
 
@@ -111,16 +115,12 @@ public class FollowPath extends Command {
             Trajectory rightTrajectory = PathfinderFRC.getTrajectory(path.getFile() + ".right");
 
             // create followers
-            leftFollower = new EncoderFollower(leftTrajectory);
-            rightFollower = new EncoderFollower(rightTrajectory);
+            leftFollower = new DistanceFollower(leftTrajectory);
+            rightFollower = new DistanceFollower(rightTrajectory);
 
         }
 
         // follower config
-        leftFollower.configureEncoder((int) drivetrain.getRawLeftPosition(),
-                (int) drivetrain.TICKS_PER_REV, drivetrain.WHEEL_DIAMETER);
-        rightFollower.configureEncoder((int) drivetrain.getRawRightPosition(),
-                (int) drivetrain.TICKS_PER_REV, drivetrain.WHEEL_DIAMETER);
         leftFollower.configurePIDVA(kP, kI, kD, kV, kA);
         rightFollower.configurePIDVA(kP, kI, kD, kV, kA);
 
@@ -135,14 +135,14 @@ public class FollowPath extends Command {
         }
 
         // get motor setpoints
-        double l = leftFollower.calculate((int) drivetrain.getRawLeftPosition());
-        double r = rightFollower.calculate((int) drivetrain.getRawRightPosition());
+        double l = leftFollower.calculate(drivetrain.getLeftPosition() - initialLeftDist);
+        double r = rightFollower.calculate(drivetrain.getRightPosition() - initialRightDist);
 
         // turn control loop (kP from 254 presentation)
         double gyroHeading = drivetrain.getGyroAngle();
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.45 * (1.0/80.0) * angleDifference;
+        double turn = 0.5 * (1.0/80.0) * angleDifference;
         System.out.println("angleDiff: " + angleDifference + " turn val: " + turn);
 
         // use output
