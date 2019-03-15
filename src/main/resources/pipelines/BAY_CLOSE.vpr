@@ -20,6 +20,7 @@ desc:BAY_CLOSE
 desired_contour_region:0
 dilation_steps:1
 direction_filter:0
+dual_close_sort_origin:0
 erosion_steps:0
 exposure:2
 hue_max:100
@@ -29,7 +30,7 @@ image_source:0
 img_to_show:0
 intersection_filter:1
 pipeline_led_enabled:1
-pipeline_res:1
+pipeline_res:0
 pipeline_type:0
 red_balance:2059
 sat_max:255
@@ -42,6 +43,7 @@ solve3d_conf:0.990000
 solve3d_error:8
 solve3d_guess:0
 solve3d_iterations:50
+solve3d_precise:0
 val_max:255
 val_min:130
 y_max:1.000000
