@@ -32,7 +32,7 @@ public class Robot extends TimedRobot {
     public void robotInit() {
 
         // initialize subsystems
-        logger = new Logger();
+        //logger = new Logger();
         drivetrain = new Drivetrain();
         arm = new Arm();
         intake = new Intake();
@@ -46,16 +46,16 @@ public class Robot extends TimedRobot {
 
         // start camera stream
         CameraServer.getInstance().startAutomaticCapture();
-        
+
         // finish initialization of BadLog
-        logger.finishInit();
+        //logger.finishInit();
 
     }
 
     @Override
     public void robotPeriodic() {
         // services
-        logger.update();
+        //logger.update();
         brownoutProtection.run();
         tempManager.run();
         SmartDashboard.putNumber("limelight dist", limelight.getDistance(limelight.getPipeline().getHeight()));

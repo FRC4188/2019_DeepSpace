@@ -10,15 +10,15 @@ public class ToHeight extends CommandGroup {
     public enum Height {
 
         HOME(0.2, -5.0, 0.0),
-        CARGO_LOW(0.0, 0.0, 0.0),
-        CARGO_MID(0.0, 0.0, 0.0),
-        CARGO_HIGH(0.0, 0.0, 0.0),
-        CARGO_SHIP(0.0, 0.0, 0.0),
-        CARGO_LOAD(0.0, 0.0, 0.0),
+        CARGO_LOW(2.25, -112.0, 128.0),
+        CARGO_MID(2.25, -55.0, 177.0),
+        CARGO_HIGH(2.46, 7.6, 152.0),
+        CARGO_SHIP(2.25, -75.0, 205.0),
+        CARGO_LOAD(2.25, -112.0, 70.5),
         HATCH_LOW(2.25, -112.0, -19.0),
-        HATCH_MID(0.0, 0.0, 0.0),
-        HATCH_HIGH(0.0, 0.0, 0.0),
-        HATCH_FLOOR(0.0, 0.0, 0.0);
+        HATCH_MID(2.25, -58.0, 20.0),
+        HATCH_HIGH(2.46, 27.0, -68.0),
+        HATCH_FLOOR(0.52, -114.0, 125.0);
 
         double elevatorHeight, shoulderAngle, wristAngle;
         Height(double elevatorHeight, double shoulderAngle, double wristAngle) {

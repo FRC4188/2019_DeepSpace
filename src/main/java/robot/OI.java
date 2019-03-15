@@ -160,6 +160,15 @@ public class OI {
 
         rbGround.whenPressed(new ToHeight(Height.HOME));
         rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));
+        rbHatchMid.whenPressed(new ToHeight(Height.HATCH_MID));
+        rbHatchHigh.whenPressed(new ToHeight(Height.HATCH_HIGH));
+
+        rbCargoLow.whenPressed(new ToHeight(Height.CARGO_LOW));
+        rbCargoMid.whenPressed(new ToHeight(Height.CARGO_MID));
+        rbCargoHigh.whenPressed(new ToHeight(Height.CARGO_HIGH));
+
+        copilotDpadNorth.whenPressed(new ToHeight(Height.CARGO_SHIP));
+        copilotDpadSouth.whenPressed(new ToHeight(Height.CARGO_LOAD));
 
     }
 

@@ -46,7 +46,7 @@ public class Elevator extends Subsystem {
         reset();
 
         // Initialize BadLog
-        initializeBadLog();
+        //initializeBadLog();
     }
 
     /** Defines default command that will run when object is created. */
