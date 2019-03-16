@@ -81,7 +81,6 @@ public class FollowPath extends Command {
 
             SmartDashboard.putNumber("x drive", x);
             SmartDashboard.putNumber("y drive", y);
-            SmartDashboard.putNumber("target angle", targetAngle);
 
             // create points
             points = new Waypoint[] {

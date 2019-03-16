@@ -15,6 +15,7 @@ public class ToHeight extends CommandGroup {
         CARGO_HIGH(2.46, 7.6, 152.0),
         CARGO_SHIP(2.25, -75.0, 205.0),
         CARGO_LOAD(2.25, -112.0, 70.5),
+        CARGO_FLOOR(1.0, -105.0, 230.0),
         HATCH_LOW(2.25, -112.0, -19.0),
         HATCH_MID(2.25, -58.0, 20.0),
         HATCH_HIGH(2.46, 27.0, -68.0),

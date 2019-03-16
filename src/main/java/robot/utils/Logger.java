@@ -17,7 +17,7 @@ public class Logger {
         log = BadLog.init(getLogDir());
         createTopics();
     }
-    
+
     /** Closes the log file in order to be able to write to it */
     public void finishInit() {
         log.finishInitialization();

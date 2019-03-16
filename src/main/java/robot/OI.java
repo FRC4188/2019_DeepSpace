@@ -3,7 +3,6 @@ package robot;
 import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
 import robot.commands.drive.ShiftGear.Gear;
-import robot.commands.drive.DriveToTarget.VisionTarget;
 import robot.commands.groups.*;
 import robot.commands.groups.ToHeight.Height;
 import robot.commands.intake.*;
@@ -18,7 +17,6 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.buttons.POVButton;
 import edu.wpi.first.wpilibj.buttons.Trigger;
-import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Waypoint;
 
 public class OI {
@@ -112,7 +110,7 @@ public class OI {
 
     private Waypoint[] testPath = new Waypoint[] {
         new Waypoint(0, 0, 0),
-        new Waypoint(5, 3, 0)
+        new Waypoint(5, 0, 0)
     };
 
     /** Constructs new OI object and assigns commands. */
@@ -122,8 +120,6 @@ public class OI {
         pilotLS.whenReleased(new ShiftGear(Gear.OFF));
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
-
-        pilotRTrig.whileActive(new DriveToTarget(VisionTarget.BAY));
 
         pilotB.whenPressed(new FlipLimelight());
         pilotX.whenPressed(new FollowPath(testPath, false));
@@ -168,7 +164,9 @@ public class OI {
         rbCargoHigh.whenPressed(new ToHeight(Height.CARGO_HIGH));
 
         copilotDpadNorth.whenPressed(new ToHeight(Height.CARGO_SHIP));
-        copilotDpadSouth.whenPressed(new ToHeight(Height.CARGO_LOAD));
+        copilotDpadSouth.whenPressed(new ToHeight(Height.HATCH_FLOOR));
+        copilotDpadEast.whenPressed(new ToHeight(Height.CARGO_LOAD));
+        copilotDpadWest.whenPressed(new ToHeight(Height.CARGO_FLOOR));
 
     }
 
