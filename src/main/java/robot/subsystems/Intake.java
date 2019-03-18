@@ -19,8 +19,6 @@ public class Intake extends Subsystem {
     private WPI_TalonSRX wristMotor = new WPI_TalonSRX(31);
     private WPI_TalonSRX intakeMotor = new WPI_TalonSRX(32);
     private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(2, 3);
-    private DigitalInput frontCargoSensor = new DigitalInput(3);
-    private DigitalInput rearCargoSensor = new DigitalInput(4);
 
     // Constants
     private final double INITIAL_ANGLE = 0; // degrees, 0 is with bucket facing upward when arm is at 0
@@ -113,8 +111,6 @@ public class Intake extends Subsystem {
         BadLog.createTopic("Intake/Wrist Velocity", "deg/s", () -> getWristVelocity());
         BadLog.createTopic("Intake/Wrist Current", "amps", () -> getWristCurrent());
         BadLog.createTopic("Intake/Current", "amps", () -> getIntakeCurrent());
-        BadLog.createTopicStr("Intake/Rear Cargo Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getRearCargoSensor()), "hide", "join:Intake/Cargo Sensor");
-        BadLog.createTopicStr("Intake/Front Cargo Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getFrontCargoSensor()), "hide", "join:Intake/Cargo Sensor");
    }
 
     /** Sets intake motors to given percentage (-1.0, 1.0) */
@@ -261,16 +257,6 @@ public class Intake extends Subsystem {
     /** Sets intake state variable to empty or full. */
     public void setIntakeState(IntakeState state) {
         intakeState = state;
-    }
-
-    /** Returns true if the front cargo sensor sees an object. */
-    public boolean getFrontCargoSensor() {
-        return frontCargoSensor.get();
-    }
-
-    /** Returns true if the rear cargo sensor sees an object. */
-    public boolean getRearCargoSensor() {
-        return rearCargoSensor.get();
     }
 
 }

@@ -53,7 +53,7 @@ public class TurnToAngle extends Command {
         double output = kP * error + kI * integral + kD * derivative;
         output = CSPMath.constrainKeepSign(output, 0.21, 1.0);
         lastError = error;
-        drivetrain.tank(output, -output, 1.0);
+        drivetrain.tank(output, -output);
         if(Math.abs(error) < tolerance) counter++;
         else counter = 0;
     }
@@ -65,7 +65,7 @@ public class TurnToAngle extends Command {
 
     @Override
     protected void end() {
-        drivetrain.tank(0, 0, 0);
+        drivetrain.tank(0, 0);
     }
 
     @Override

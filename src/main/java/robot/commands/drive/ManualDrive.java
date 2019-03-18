@@ -20,9 +20,6 @@ public class ManualDrive extends Command {
     final double kSTICK_TURN = 0.6;
     final double VISION_kP = 0.01;
 
-    double lastCamVertAngle, lastCamHorizAngle;
-    boolean camTargetJumped;
-
     public ManualDrive() {
         requires(drivetrain);
     }
@@ -51,35 +48,9 @@ public class ManualDrive extends Command {
 
         // if right trigger held, turn to center bay target
         if(pilotRightTrigger) {
-
-            // turn P loop
             limelight.trackBay();
             double camHorizAngle = limelight.getHorizontalAngle();
             zTurn = VISION_kP * camHorizAngle;
-
-            // if change in point too big, zero turn val
-            double camVertAngle = limelight.getVerticalAngle();
-            double deltaVert = camVertAngle - lastCamVertAngle;
-            double deltaHoriz = camHorizAngle - lastCamHorizAngle;
-            double deltaAngle = Math.sqrt(Math.pow(deltaVert, 2) + Math.pow(deltaHoriz, 2));
-            System.out.println(deltaAngle);
-            if(lastCamHorizAngle != 0 && deltaAngle > 10.0) {
-                System.out.println("******JUMP DETECTED******");
-                camTargetJumped = true;
-            }
-            if(camTargetJumped) zTurn = 0;
-
-            // save values for next loop
-            lastCamHorizAngle = camHorizAngle;
-            lastCamVertAngle = camVertAngle;
-
-        } else {
-
-            // reset vals
-            camTargetJumped = false;
-            lastCamHorizAngle = 0;
-            lastCamVertAngle = 0;
-
         }
 
         // command motor output

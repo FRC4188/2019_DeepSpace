@@ -16,21 +16,22 @@ public class Climber extends Subsystem {
     // Device initialization
     private WPI_TalonSRX leftClimberMotor = new WPI_TalonSRX(41);
     private WPI_TalonSRX rightClimberMotor= new WPI_TalonSRX(42);
-    private DigitalInput leftTopSwitch = new DigitalInput(5);
-    private DigitalInput rightTopSwitch = new DigitalInput(6);
-    private DigitalInput leftBottomSwitch = new DigitalInput(7);
-    private DigitalInput rightBottomSwitch = new DigitalInput(8);
+    private DigitalInput leftTopSwitch = new DigitalInput(4);
+    private DigitalInput rightTopSwitch = new DigitalInput(5);
+    private DigitalInput leftBottomSwitch = new DigitalInput(6);
+    private DigitalInput rightBottomSwitch = new DigitalInput(7);
 
     // Constants
     private final double RAMP_RATE = 0.2; // seconds
     private final double MAX_OUT = 1.0; // percent out
-    private final double MAX_VELOCITY = 6000.0; // talon units per 100ms
+    private final double MAX_VELOCITY = 3000.0; // talon units per 100ms
     private final double kP = 0.01;
     private final double kI = 0;
     private final double kD = 0;
     private final double kF = 1023 / MAX_VELOCITY;
     private final int    SLOT_ID = 0;
     private final int    TIMEOUT = 10; // ms
+    private final double ENCODER_TO_FEET = 1.0 / 400000; // ft
 
     // State variables
     private boolean climberInverted;
@@ -63,10 +64,10 @@ public class Climber extends Subsystem {
 
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
-        SmartDashboard.putBoolean("Climber left top switch", getLeftTopSwitch());
-        SmartDashboard.putBoolean("Climber right top switch", getRightTopSwitch());
-        SmartDashboard.putBoolean("Climber left bottom switch", getLeftBottomSwitch());
-        SmartDashboard.putBoolean("Climber right bottom switch", getRightBottomSwitch());
+        SmartDashboard.putNumber("Climber l vel", getRawLeftVelocity());
+        SmartDashboard.putNumber("Climber l pos", getRawLeftPosition());
+        SmartDashboard.putNumber("Climber r vel", getRawRightVelocity());
+        SmartDashboard.putNumber("Climber r pos", getRawRightPosition());
     }
 
     /** Runs every loop. */
@@ -77,6 +78,7 @@ public class Climber extends Subsystem {
 
     /** Resets necessary devices. */
     public void reset() {
+        resetEncoders();
         enableRampRate();
         setBrake();
         climberInverted = true;
@@ -108,13 +110,15 @@ public class Climber extends Subsystem {
     public void setLeft(double percent) {
         double output = percent * MAX_VELOCITY;
         leftClimberMotor.set(ControlMode.Velocity, output);
+        System.out.println("Left: " + output);
     }
 
-    /** Sets right climber motor to given percentage (-1.0, 1.0) 
+    /** Sets right climber motor to given percentage (-1.0, 1.0)
      *  of max velocity. Positive percent extends climbers. */
     public void setRight(double percent) {
         double output = percent * MAX_VELOCITY;
         rightClimberMotor.set(ControlMode.Velocity, output);
+        System.out.println("Right: " + output);
     }
 
     /** Sets left climber motor to given percentage (-1.0, 1.0)
@@ -123,10 +127,22 @@ public class Climber extends Subsystem {
         leftClimberMotor.set(percent);
     }
 
-    /** Sets right climber motor to given percentage (-1.0, 1.0). 
+    /** Sets right climber motor to given percentage (-1.0, 1.0).
      *  Positive percent extends climbers. */
     public void setRightOpenLoop(double percent) {
         rightClimberMotor.set(percent);
+    }
+
+    /** Sets left climber motor to given velocity in feet / sec. */
+    public void setLeftVelocity(double percent) {
+        double output = percent / ENCODER_TO_FEET;
+        leftClimberMotor.set(ControlMode.Velocity, output);
+    }
+
+    /** Sets right climber motor to given velocity in feet / sec. */
+    public void setRightVelocity(double percent) {
+        double output = percent * MAX_VELOCITY;
+        rightClimberMotor.set(ControlMode.Velocity, output);
     }
 
     /** Inverts the the climber. */
@@ -140,6 +156,80 @@ public class Climber extends Subsystem {
     public void setBrake() {
         leftClimberMotor.setNeutralMode(NeutralMode.Brake);
         rightClimberMotor.setNeutralMode(NeutralMode.Brake);
+    }
+
+    /** Resets encoder values to 0 for both climbers. */
+    public void resetEncoders() {
+        leftClimberMotor.setSelectedSensorPosition(0);
+        rightClimberMotor.setSelectedSensorPosition(0);
+    }
+
+    /** Returns left encoder position in feet. */
+    public double getLeftPosition() {
+        return leftClimberMotor.getSelectedSensorPosition() * ENCODER_TO_FEET;
+    }
+
+    /** Returns right encoder position in feet. */
+    public double getRightPosition() {
+        return rightClimberMotor.getSelectedSensorPosition() * ENCODER_TO_FEET;
+    }
+
+    /** Returns encoder position in feet as average of left and right encoders. */
+    public double getPosition() {
+        return (getLeftPosition() + getRightPosition()) / 2;
+    }
+
+    /** Returns left encoder position in native talon units. */
+    public double getRawLeftPosition() {
+        return leftClimberMotor.getSelectedSensorPosition();
+    }
+
+    /** Returns left encoder position in native talon units. */
+    public double getRawRightPosition() {
+        return rightClimberMotor.getSelectedSensorPosition();
+    }
+
+    /** Returns left encoder velocity in feet per second. */
+    public double getLeftVelocity() {
+        return leftClimberMotor.getSelectedSensorVelocity() *
+                ENCODER_TO_FEET * 10; // native is per 100ms
+    }
+
+    /** Returns right encoder velocity in feet per second. */
+    public double getRightVelocity() {
+        return rightClimberMotor.getSelectedSensorVelocity() *
+                ENCODER_TO_FEET * 10; // native is per 100ms
+    }
+
+    /** Returns left encoder velocity in native talon units per 100ms. */
+    public double getRawLeftVelocity() {
+        return leftClimberMotor.getSelectedSensorVelocity();
+    }
+
+    /** Returns right encoder velocity in native talon units per 100ms. */
+    public double getRawRightVelocity() {
+        return rightClimberMotor.getSelectedSensorVelocity();
+    }
+
+    /** Returns average robot velocity in feet per second. */
+    public double getVelocity() {
+        return (getLeftVelocity() + getRightVelocity()) / 2;
+    }
+
+    /** Returns the left motor output as a percentage. */
+    public double getLeftOutput() {
+        return leftClimberMotor.get();
+    }
+
+    /** Returns the right motor output as a percentage. */
+    public double getRightOutput() {
+        return rightClimberMotor.get();
+    }
+
+    /** Returns average motor output current. */
+    public double getMotorCurrent() {
+        return (leftClimberMotor.getOutputCurrent() +
+                rightClimberMotor.getOutputCurrent()) / 2;
     }
 
     /** Returns state of top left climber magnetic limit switch.

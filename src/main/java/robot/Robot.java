@@ -81,7 +81,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        autonomousCommand = new ElevatorToHeight(0.3, 0.05);
+        autonomousCommand = new ElevatorToHeight(1.0, 0.05);
         if (autonomousCommand != null) {
             autonomousCommand.start();
         }

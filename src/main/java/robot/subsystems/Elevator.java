@@ -29,7 +29,7 @@ public class Elevator extends Subsystem {
     private final double kI_ZONE = 0;
     private final double kD = 0;
     private final double kF = 0;
-    private final double MAX_ACCELERATION = 1000;
+    private final double MAX_ACCELERATION = 2500;
     private final int    SLOT_ID = 0;
 
     // State vars

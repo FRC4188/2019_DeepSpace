@@ -41,7 +41,7 @@ public class DriveToDistance extends Command {
 
     @Override
     protected void end() {
-        drivetrain.tank(0, 0, 0);
+        drivetrain.tank(0, 0);
     }
 
     @Override

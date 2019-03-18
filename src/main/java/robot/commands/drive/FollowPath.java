@@ -3,6 +3,7 @@ package robot.commands.drive;
 import robot.Robot;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import jaci.pathfinder.Pathfinder;
@@ -31,8 +32,9 @@ public class FollowPath extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
 
+    private Notifier notif = new Notifier(() -> follow());
     private DistanceFollower leftFollower, rightFollower;
-    private boolean isReversed, fromFile;
+    private boolean isReversed, fromFile, isFinished;
     private double initialLeftDist, initialRightDist;
     private Waypoint[] points;
     private Path path;
@@ -67,6 +69,7 @@ public class FollowPath extends Command {
         // initial vals
         initialLeftDist = drivetrain.getLeftPosition();
         initialRightDist = drivetrain.getRightPosition();
+        isFinished = false;
 
         // create waypoints if going to perpendicular
         if(path == Path.TO_PERPENDICULAR) {
@@ -122,17 +125,21 @@ public class FollowPath extends Command {
 
     }
 
-    @Override
-    protected void execute() {
+    protected void follow() {
+
+        double leftPos = drivetrain.getLeftPosition() - initialLeftDist;
+        double rightPos = drivetrain.getRightPosition() - initialRightDist;
 
         // invert drivetrain if needed
         if(isReversed) {
             drivetrain.setInverted(true);
+            leftPos *= -1;
+            rightPos *= -1;
         }
 
         // get motor setpoints
-        double l = leftFollower.calculate(drivetrain.getLeftPosition() - initialLeftDist);
-        double r = rightFollower.calculate(drivetrain.getRightPosition() - initialRightDist);
+        double l = leftFollower.calculate(leftPos);
+        double r = rightFollower.calculate(rightPos);
 
         // turn control loop (kP from 254 presentation)
         double gyroHeading = drivetrain.getGyroAngle();
@@ -141,19 +148,25 @@ public class FollowPath extends Command {
         double turn = 0.5 * (1.0/80.0) * angleDifference;
 
         // use output
-        drivetrain.tank(l + turn, r - turn, 1.0);
+        drivetrain.tank(l + turn, r - turn);
+
+        // determine if finished
+        if(leftFollower.isFinished() && rightFollower.isFinished() && Math.abs(angleDifference) < 3.0) {
+            isFinished = true;
+        }
 
     }
 
     @Override
     protected boolean isFinished() {
-        return leftFollower.isFinished() && rightFollower.isFinished();
+        return isFinished;
     }
 
     @Override
     protected void end() {
-        drivetrain.tank(0, 0, 0);
+        drivetrain.tank(0, 0);
         drivetrain.setInverted(false);
+        notif.stop();
     }
 
     @Override
