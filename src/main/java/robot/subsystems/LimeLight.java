@@ -122,7 +122,7 @@ public class LimeLight extends Subsystem {
         flipServo = new Servo(0);
         camtranBuffer = new ArrayList<>();
 
-        setServoAngle(-90.0);
+        setServoAngle(90.0);
     }
 
     /**
@@ -345,7 +345,7 @@ public class LimeLight extends Subsystem {
     public void flipCamera(){
         if(isFlipped){
             // unflip
-            setServoAngle(-90.0);
+            setServoAngle(90.0);
             switch (currentPipeline) {
             case CARGO_FLIP:
                 setPipeline(Pipeline.CARGO);
@@ -365,7 +365,7 @@ public class LimeLight extends Subsystem {
             }
         } else{
             // flip
-            setServoAngle(90.0);
+            setServoAngle(-90.0);
             switch (currentPipeline) {
             case CARGO:
                 setPipeline(Pipeline.CARGO_FLIP);

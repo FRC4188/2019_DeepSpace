@@ -110,7 +110,6 @@ public class Climber extends Subsystem {
     public void setLeft(double percent) {
         double output = percent * MAX_VELOCITY;
         leftClimberMotor.set(ControlMode.Velocity, output);
-        System.out.println("Left: " + output);
     }
 
     /** Sets right climber motor to given percentage (-1.0, 1.0)
@@ -118,7 +117,6 @@ public class Climber extends Subsystem {
     public void setRight(double percent) {
         double output = percent * MAX_VELOCITY;
         rightClimberMotor.set(ControlMode.Velocity, output);
-        System.out.println("Right: " + output);
     }
 
     /** Sets left climber motor to given percentage (-1.0, 1.0)
