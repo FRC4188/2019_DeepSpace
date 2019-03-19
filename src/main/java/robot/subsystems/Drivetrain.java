@@ -62,7 +62,7 @@ public class Drivetrain extends Subsystem {
     public final double  LOW_GEAR_RATIO = 15.32;
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
-    public double        NEO_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI); // later divided by gear ratio
+    public double        NEO_ENCODER_TO_FEET;
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -106,17 +106,11 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
         SmartDashboard.putNumber("Target angle", getTargetAngle());
-        SmartDashboard.putNumber("L1 temp", leftMotor.getMotorTemperature());
-        SmartDashboard.putNumber("L2 temp", leftSlave1.getMotorTemperature());
-        SmartDashboard.putNumber("L3 temp", leftSlave2.getMotorTemperature());
-        SmartDashboard.putNumber("R4 temp", rightMotor.getMotorTemperature());
-        SmartDashboard.putNumber("R5 temp", rightSlave1.getMotorTemperature());
-        SmartDashboard.putNumber("R6 temp", rightSlave2.getMotorTemperature());
     }
 
     /** Updates NEO_ENCODER_TO_FEET based on current gear ratio. */
     private void updateNeoEncConstant() {
-        NEO_ENCODER_TO_FEET /= currentGearRatio;
+        NEO_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / currentGearRatio;
     }
 
     /** Runs every loop. */
@@ -251,12 +245,12 @@ public class Drivetrain extends Subsystem {
 
     /** Returns left encoder position in feet. */
     public double getLeftPosition() {
-        return leftSRXEncoder.get() * SRX_ENCODER_TO_FEET;
+        return leftNeoEncoder.getPosition() * NEO_ENCODER_TO_FEET;
     }
 
     /** Returns right encoder position in feet. */
     public double getRightPosition() {
-        return rightSRXEncoder.get() * SRX_ENCODER_TO_FEET;
+        return rightNeoEncoder.getPosition() * NEO_ENCODER_TO_FEET;
     }
 
     /** Returns encoder position in feet as average of left and right encoders. */
@@ -266,22 +260,22 @@ public class Drivetrain extends Subsystem {
 
     /** Returns left encoder position in native talon units. */
     public double getRawLeftPosition() {
-        return leftSRXEncoder.get();
+        return leftNeoEncoder.getPosition();
     }
 
     /** Returns left encoder position in native talon units. */
     public double getRawRightPosition() {
-        return rightSRXEncoder.get();
+        return rightNeoEncoder.getPosition();
     }
 
     /** Returns left encoder velocity in feet per second. */
     public double getLeftVelocity() {
-        return leftSRXEncoder.getRate() * SRX_ENCODER_TO_FEET; // native is units/sec
+        return leftNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET; // native is units/sec
     }
 
     /** Returns right encoder velocity in feet per second. */
     public double getRightVelocity() {
-        return rightSRXEncoder.get() * SRX_ENCODER_TO_FEET; // native is units/sec
+        return rightNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET; // native is units/sec
     }
 
     /** Returns average robot velocity in feet per second. */

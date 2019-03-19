@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 
 public class ToHeight extends CommandGroup {
 
+    boolean lastOnFront = true;
+
     public enum Height {
 
         HOME(0.0, 0.0, 0.0),
@@ -50,9 +52,9 @@ public class ToHeight extends CommandGroup {
         double shoulderAngle = height.getShoulderAngle();
         double wristAngle = height.getWristAngle();
 
-        addParallel(new ElevatorToHeight(elevatorHeight, 0.05));
-        addParallel(new WristToAngle(wristAngle, 1.0));
-        addSequential(new ShoulderToAngle(shoulderAngle, 1.0));
+        addParallel(new ElevatorToHeight(elevatorHeight, 0.1));
+        addParallel(new WristToAngle(wristAngle, 2.0));
+        addSequential(new ShoulderToAngle(shoulderAngle, 2.0));
 
     }
 

@@ -84,7 +84,7 @@ public class LimeLight extends Subsystem {
 
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new TrackPipeline(Pipeline.BAY_CLOSE));
+        setDefaultCommand(new TrackPipeline(Pipeline.OFF));
     }
 
     @Override

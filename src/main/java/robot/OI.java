@@ -110,7 +110,7 @@ public class OI {
 
     private Waypoint[] testPath = new Waypoint[] {
         new Waypoint(0, 0, 0),
-        new Waypoint(5, 0, 0)
+        new Waypoint(5, 3, 0)
     };
 
     /** Constructs new OI object and assigns commands. */
@@ -120,6 +120,8 @@ public class OI {
         pilotLS.whenReleased(new ShiftGear(Gear.OFF));
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
+
+        pilotRTrig.whileActive(new CenterBay());
 
         pilotB.whenPressed(new FlipLimelight());
         pilotX.whenPressed(new FollowPath(testPath, false));
@@ -144,21 +146,10 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
-        hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_LOW), 1);
-        hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_MID), 2);
-        hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_HIGH), 3);
-        hatchIterator.start();
-
-        cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_LOW), 1);
-        cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_MID), 2);
-        cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_HIGH), 3);
-        cargoIterator.start();
-
         rbGround.whenPressed(new ToHeight(Height.HOME));
         rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));
         rbHatchMid.whenPressed(new ToHeight(Height.HATCH_MID));
         rbHatchHigh.whenPressed(new ToHeight(Height.HATCH_HIGH));
-
         rbCargoLow.whenPressed(new ToHeight(Height.CARGO_LOW));
         rbCargoMid.whenPressed(new ToHeight(Height.CARGO_MID));
         rbCargoHigh.whenPressed(new ToHeight(Height.CARGO_HIGH));

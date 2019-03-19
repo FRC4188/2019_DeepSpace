@@ -32,7 +32,7 @@ public class ElevatorToHeight extends Command {
 
     @Override
     protected boolean isFinished() {
-        return counter > 5;
+        return counter > 10;
     }
 
     @Override
