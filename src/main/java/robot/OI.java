@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.buttons.POVButton;
 import edu.wpi.first.wpilibj.buttons.Trigger;
@@ -178,7 +179,27 @@ public class OI {
         TESSERACTED,
         SINE
     }
-
+    //A method which sets independent intensity for the left and right for pilot//
+    public void setPilotRumble(double leftIntensity, double rightIntensity) {
+        pilot.setRumble(RumbleType.kLeftRumble, leftIntensity);
+        pilot.setRumble(RumbleType.kRightRumble, rightIntensity);
+    }
+    //Created a method to set the intensity for both sides for pilot//
+    public void setPilotRumble(double intensity) {
+        pilot.setRumble(RumbleType.kLeftRumble, intensity);
+        pilot.setRumble(RumbleType.kRightRumble, intensity);
+    }
+    //A method which sets independent intensity for the left and right for copilot//
+    public void setCopilotRumble(double leftIntensity, double rightIntensity) {
+        copilot.setRumble(RumbleType.kLeftRumble, leftIntensity);
+        copilot.setRumble(RumbleType.kRightRumble, rightIntensity);
+    }
+    //Created a method to set the intensity for both sides for copilot//
+    public void setCopilotRumble(double intensity) {
+        copilot.setRumble(RumbleType.kLeftRumble, intensity);
+        copilot.setRumble(RumbleType.kRightRumble, intensity);
+    }
+    
     /** Returns value scaled to proper sensitivity based on current JoystickSens. */
     private double scaleJoystick(double val, JoystickSens sens) {
         if(sens == JoystickSens.LINEAR) return val;
