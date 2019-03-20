@@ -3,7 +3,6 @@ package robot;
 import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
 import robot.commands.drive.ShiftGear.Gear;
-import robot.commands.drive.DriveToTarget.VisionTarget;
 import robot.commands.groups.*;
 import robot.commands.groups.ToHeight.Height;
 import robot.commands.intake.*;
@@ -15,9 +14,11 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.buttons.POVButton;
 import edu.wpi.first.wpilibj.buttons.Trigger;
+import jaci.pathfinder.Waypoint;
 
 public class OI {
 
@@ -48,12 +49,12 @@ public class OI {
     // button mappings for rocket box
     public class RocketBox {
         public final static int GROUND = 1;
-        public final static int CARGO_LOW = 2;
-        public final static int CARGO_MID = 3;
-        public final static int CARGO_HIGH = 4;
-        public final static int HATCH_LOW = 5;
-        public final static int HATCH_MID = 6;
-        public final static int HATCH_HIGH = 7;
+        public final static int CARGO_LOW = 3;
+        public final static int CARGO_MID = 5;
+        public final static int CARGO_HIGH = 7;
+        public final static int HATCH_LOW = 2;
+        public final static int HATCH_MID = 4;
+        public final static int HATCH_HIGH = 6;
     }
 
     // Controller initialization
@@ -108,6 +109,11 @@ public class OI {
     private CommandIterator hatchIterator = new CommandIterator((Trigger) copilotLb, copilotLTrig, 160, "Hatch Iterator");
     private CommandIterator cargoIterator = new CommandIterator((Trigger) copilotRb, copilotRTrig, 160, "Cargo Iterator");
 
+    private Waypoint[] testPath = new Waypoint[] {
+        new Waypoint(0, 0, 0),
+        new Waypoint(5, 3, 0)
+    };
+
     /** Constructs new OI object and assigns commands. */
     public OI() {
 
@@ -116,9 +122,10 @@ public class OI {
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
 
-        pilotRTrig.whileActive(new DriveToTarget(VisionTarget.BAY));
+        pilotRTrig.whileActive(new CenterBay());
 
         pilotB.whenPressed(new FlipLimelight());
+        pilotX.whenPressed(new FollowPath(testPath, false));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         pilotDpadNorth.whileHeld(new ManualClimb(1.0));
@@ -140,15 +147,18 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
-        hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_LOW), 1);
-        hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_MID), 2);
-        hatchIterator.runCmdWhenValue(new ToHeight(Height.HATCH_HIGH), 3);
-        hatchIterator.start();
+        rbGround.whenPressed(new ToHeight(Height.HOME));
+        rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));
+        rbHatchMid.whenPressed(new ToHeight(Height.HATCH_MID));
+        rbHatchHigh.whenPressed(new ToHeight(Height.HATCH_HIGH));
+        rbCargoLow.whenPressed(new ToHeight(Height.CARGO_LOW));
+        rbCargoMid.whenPressed(new ToHeight(Height.CARGO_MID));
+        rbCargoHigh.whenPressed(new ToHeight(Height.CARGO_HIGH));
 
-        cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_LOW), 1);
-        cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_MID), 2);
-        cargoIterator.runCmdWhenValue(new ToHeight(Height.CARGO_HIGH), 3);
-        cargoIterator.start();
+        copilotDpadNorth.whenPressed(new ToHeight(Height.CARGO_SHIP));
+        copilotDpadSouth.whenPressed(new ToHeight(Height.HATCH_FLOOR));
+        copilotDpadEast.whenPressed(new ToHeight(Height.CARGO_LOAD));
+        copilotDpadWest.whenPressed(new ToHeight(Height.CARGO_FLOOR));
 
     }
 
@@ -160,7 +170,27 @@ public class OI {
         TESSERACTED,
         SINE
     }
-
+    //A method which sets independent intensity for the left and right for pilot//
+    public void setPilotRumble(double leftIntensity, double rightIntensity) {
+        pilot.setRumble(RumbleType.kLeftRumble, leftIntensity);
+        pilot.setRumble(RumbleType.kRightRumble, rightIntensity);
+    }
+    //Created a method to set the intensity for both sides for pilot//
+    public void setPilotRumble(double intensity) {
+        pilot.setRumble(RumbleType.kLeftRumble, intensity);
+        pilot.setRumble(RumbleType.kRightRumble, intensity);
+    }
+    //A method which sets independent intensity for the left and right for copilot//
+    public void setCopilotRumble(double leftIntensity, double rightIntensity) {
+        copilot.setRumble(RumbleType.kLeftRumble, leftIntensity);
+        copilot.setRumble(RumbleType.kRightRumble, rightIntensity);
+    }
+    //Created a method to set the intensity for both sides for copilot//
+    public void setCopilotRumble(double intensity) {
+        copilot.setRumble(RumbleType.kLeftRumble, intensity);
+        copilot.setRumble(RumbleType.kRightRumble, intensity);
+    }
+    
     /** Returns value scaled to proper sensitivity based on current JoystickSens. */
     private double scaleJoystick(double val, JoystickSens sens) {
         if(sens == JoystickSens.LINEAR) return val;

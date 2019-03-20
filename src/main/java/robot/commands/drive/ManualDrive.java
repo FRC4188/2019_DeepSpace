@@ -42,6 +42,7 @@ public class ManualDrive extends Command {
         if(pilotLeftBumper) zTurn = pilotRightX * kSLOW_TURN;
         else if(pilotRightBumper) zTurn = pilotRightX * kFAST_TURN;
 
+        // command motor output
         drivetrain.arcade(xSpeed * brownoutVar, zTurn * brownoutVar);
 
     }

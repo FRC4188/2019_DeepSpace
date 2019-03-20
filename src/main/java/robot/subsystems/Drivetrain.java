@@ -9,13 +9,17 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import jaci.pathfinder.Pathfinder;
 import badlog.lib.BadLog;
+import robot.utils.Logger; 
 
 public class Drivetrain extends Subsystem {
 
@@ -26,14 +30,17 @@ public class Drivetrain extends Subsystem {
     private CANSparkMax rightMotor = new CANSparkMax(4, MotorType.kBrushless);
     private CANSparkMax rightSlave1 = new CANSparkMax(5, MotorType.kBrushless);
     private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
-    private CANEncoder leftEncoder = new CANEncoder(leftMotor);
-    private CANEncoder rightEncoder = new CANEncoder(rightMotor);
+    private CANEncoder leftNeoEncoder = leftMotor.getEncoder();
+    private CANEncoder rightNeoEncoder = rightMotor.getEncoder();
+    private Encoder leftSRXEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
+    private Encoder rightSRXEncoder = new Encoder(2, 3, false, Encoder.EncodingType.k4X);
     private CANPIDController leftPidC = leftMotor.getPIDController();
     private CANPIDController rightPidC = rightMotor.getPIDController();
     private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
-    private DigitalInput lineSensorLeft = new DigitalInput(0); // yellow wire up
-    private DigitalInput lineSensorMid = new DigitalInput(1);
-    private DigitalInput lineSensorRight = new DigitalInput(2);
+    private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
+    private DigitalInput lineSensorLeft = new DigitalInput(8); // yellow wire up
+    private DigitalInput lineSensorMid = new DigitalInput(9);
+    private DigitalInput lineSensorRight = new DigitalInput(10);
     private DoubleSolenoid gearShift = new DoubleSolenoid(0, 1);
 
     // Constants
@@ -43,18 +50,21 @@ public class Drivetrain extends Subsystem {
     public final double  kP = 5e-5;
     public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kV = 0;
+    public final double  kV = 1 / MAX_VELOCITY;
     public final double  kA = 0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
     public final double  MAX_OUT = 1.0;
-    public final double  WHEELBASE_WIDTH = 2; // ft
+    public final double  WHEELBASE_WIDTH = 2.67; // ft
     public final double  WHEEL_DIAMETER = (6.0 / 12.0); // ft
-    public final double  TICKS_PER_REV = 1.0; // neo
+    public final double  SRX_TICKS_PER_REV = 4096.0; // ctre mag encoder
+    public final double  RAMP_RATE = 0.75; // seconds
     public final double  LOW_GEAR_RATIO = 15.32;
     public final double  HIGH_GEAR_RATIO = 7.08;
-    public final double  RAMP_RATE = 0.75; // seconds
-    public double        ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (TICKS_PER_REV); // ft
+    public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
+    public double        NEO_ENCODER_TO_FEET;
+    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET = 10.0 / 90.2896;
+    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET = 10.0 / 41.2614;
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -97,12 +107,6 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
         SmartDashboard.putNumber("Target angle", getTargetAngle());
-        SmartDashboard.putNumber("L1 temp", leftMotor.getMotorTemperature());
-        SmartDashboard.putNumber("L2 temp", leftSlave1.getMotorTemperature());
-        SmartDashboard.putNumber("L3 temp", leftSlave2.getMotorTemperature());
-        SmartDashboard.putNumber("R4 temp", rightMotor.getMotorTemperature());
-        SmartDashboard.putNumber("R5 temp", rightSlave1.getMotorTemperature());
-        SmartDashboard.putNumber("R6 temp", rightSlave2.getMotorTemperature());
     }
 
     /** Runs every loop. */
@@ -146,17 +150,18 @@ public class Drivetrain extends Subsystem {
 
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-        BadLog.createTopic("Drivetrain Position", "ft", () -> getPosition());
-        BadLog.createTopic("Drivetrain Velocity", "ft/s", () -> getVelocity());
-        BadLog.createTopic("Drivetrain Left Output", "%", () -> getLeftOutput());
-        BadLog.createTopic("Drivetrain Right Output", "%", () -> getRightOutput());
-        BadLog.createTopic("Drivetrain Gyro Angle", "deg", () -> getGyroAngle());
-        BadLog.createTopic("Drivetrain Current", "amps", () -> getMotorCurrent());
-        // BadLog.createTopic("Left Line Sensor", BadLog.UNITLESS, () -> getLeftLineSensor());
-        // BadLog.createTopic("Mid Line Sensor", BadLog.UNITLESS, () -> getMidLineSensor());
-        // BadLog.createTopic("Right Line Sensor", BadLog.UNITLESS, () -> getRightLineSensor());
-        BadLog.createTopic("Field Pos X", "ft", () -> getFieldPosX());
-        BadLog.createTopic("Field Pos Y", "ft", () -> getFieldPosY());
+        BadLog.createTopicStr("Left Line Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getLeftLineSensor()), "hide", "join:Drivetrain/Line Sensors");
+        BadLog.createTopicStr("Mid Line Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getMidLineSensor()), "hide", "join:Drivetrain/Line Sensors");
+        BadLog.createTopicStr("Right Line Sensor", BadLog.UNITLESS, () -> Logger.useBoolean(getRightLineSensor()), "hide", "join:Drivetrain/Line Sensors");
+        BadLog.createTopic("Drivetrain/Position", "ft", () -> getPosition());
+        BadLog.createTopic("Drivetrain/Velocity", "ft/s", () -> getVelocity());;
+        BadLog.createTopic("Drivetrain/Gyro Angle", "deg", () -> getGyroAngle());
+        BadLog.createTopic("Drivetrain/Current", "amps", () -> getMotorCurrent());
+        BadLog.createTopic("Drivetrain/Field Pos X", "ft", () -> getFieldPosX(), "hide", "join:Drivetrain/Field Pos");
+        BadLog.createTopic("Drivetrain/Field Pos Y", "ft", () -> getFieldPosY(), "hide", "join:Drivetrain/Field Pos");
+        BadLog.createTopic("Drivetrain/Left Output", "%", () -> getLeftOutput(), "hide", "join:Drivetrain/Output");
+        BadLog.createTopic("Drivetrain/Right Output", "%", () -> getRightOutput(), "hide", "join:Drivetrain/Output");
+
     }
 
     /** Sets left motors to given percentage (-1.0, 1.0). */
@@ -172,8 +177,8 @@ public class Drivetrain extends Subsystem {
     /** Drives forward a given distance in feet. */
     public void driveToDistance(double distance, double tolerance) {
         // convert from feet to rotations (Spark units)
-        distance /= ENCODER_TO_FEET;
-        tolerance /= ENCODER_TO_FEET;
+        distance /= NEO_ENCODER_TO_FEET;
+        tolerance /= NEO_ENCODER_TO_FEET;
         leftPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
         rightPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
         leftPidC.setReference(distance, ControlType.kSmartMotion);
@@ -227,18 +232,20 @@ public class Drivetrain extends Subsystem {
 
     /** Resets encoder values to 0 for both sides of drivetrain. */
     public void resetEncoders() {
-        leftEncoder.setPosition(0);
-        rightEncoder.setPosition(0);
+        leftSRXEncoder.reset();
+        rightSRXEncoder.reset();
+        leftNeoEncoder.setPosition(0);
+        rightNeoEncoder.setPosition(0);
     }
 
     /** Returns left encoder position in feet. */
     public double getLeftPosition() {
-        return leftEncoder.getPosition() * ENCODER_TO_FEET;
+        return leftNeoEncoder.getPosition() * NEO_ENCODER_TO_FEET;
     }
 
     /** Returns right encoder position in feet. */
     public double getRightPosition() {
-        return rightEncoder.getPosition() * ENCODER_TO_FEET;
+        return rightNeoEncoder.getPosition() * NEO_ENCODER_TO_FEET;
     }
 
     /** Returns encoder position in feet as average of left and right encoders. */
@@ -246,24 +253,24 @@ public class Drivetrain extends Subsystem {
         return (getLeftPosition() + getRightPosition()) / 2;
     }
 
-    /** Returns left encoder position in native Spark units (revolutions) */
+    /** Returns left encoder position in native talon units. */
     public double getRawLeftPosition() {
-        return leftEncoder.getPosition() / LOW_GEAR_RATIO;
+        return leftNeoEncoder.getPosition();
     }
 
-    /** Returns left encoder position in native Spark units (revolutions) */
+    /** Returns left encoder position in native talon units. */
     public double getRawRightPosition() {
-        return rightEncoder.getPosition() / LOW_GEAR_RATIO;
+        return rightNeoEncoder.getPosition();
     }
 
     /** Returns left encoder velocity in feet per second. */
     public double getLeftVelocity() {
-        return leftEncoder.getVelocity() * ENCODER_TO_FEET / 60.0; // native is rpm
+        return leftNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET; // native is units/sec
     }
 
     /** Returns right encoder velocity in feet per second. */
     public double getRightVelocity() {
-        return rightEncoder.getVelocity() * ENCODER_TO_FEET / 60.0; // native is rpm
+        return rightNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET; // native is units/sec
     }
 
     /** Returns average robot velocity in feet per second. */
@@ -288,17 +295,20 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return ahrs.getYaw();
+        //return ahrs.getYaw();
+        return Pathfinder.boundHalfDegrees(gyro.getAngle());
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        return ahrs.getRate();
+        //return ahrs.getRate();
+        return gyro.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
-        ahrs.reset();
+        //ahrs.reset();
+        gyro.reset();
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
@@ -385,13 +395,13 @@ public class Drivetrain extends Subsystem {
     /** Shifts drivetrain to low gear. */
     public void setLowGear() {
         gearShift.set(Value.kForward);
-        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
+        NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
     }
 
     /** Shifts drivetrain to high gear. */
     public void setHighGear() {
         gearShift.set(Value.kReverse);
-        ENCODER_TO_FEET /= LOW_GEAR_RATIO;
+        NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
     }
 
     /** Turns gear shift solenoid off. */
@@ -403,14 +413,8 @@ public class Drivetrain extends Subsystem {
      *  and positive zTurn turning right. */
     public void arcade(double xSpeed, double zTurn) {
 
-        final double kQUICKSTOP = 1.5;
         final double MAX_INPUT = 1.0;
         double turnRatio;
-        double quickStop = 0;
-
-        quickStop += -kQUICKSTOP * zTurn * DELTA_T;
-        //if(zTurn == 0) zTurn = quickStop;
-
         double leftInput = xSpeed + zTurn;
         double rightInput = xSpeed - zTurn;
 
@@ -445,10 +449,10 @@ public class Drivetrain extends Subsystem {
     }
 
     /** Controls drivetrain with tank model, individually moving left and
-     *  right sides. Output multiplied by throttle. */
-    public void tank(double leftSpeed, double rightSpeed, double throttle) {
-        setLeft(leftSpeed * throttle);
-        setRight(rightSpeed * throttle);
+     *  right sides. */
+    public void tank(double leftSpeed, double rightSpeed) {
+        setLeft(leftSpeed);
+        setRight(rightSpeed);
     }
 
     /** Returns temperature of motor based off CAN ID. */

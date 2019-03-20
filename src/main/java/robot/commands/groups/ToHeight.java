@@ -7,17 +7,21 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 
 public class ToHeight extends CommandGroup {
 
+    boolean lastOnFront = true;
+
     public enum Height {
 
-        CARGO_LOW(0.0, 0.0, 0.0),
-        CARGO_MID(0.0, 0.0, 0.0),
-        CARGO_HIGH(0.0, 0.0, 0.0),
-        CARGO_SHIP(0.0, 0.0, 0.0),
-        CARGO_LOAD(0.0, 0.0, 0.0),
-        HATCH_LOW(0.0, 0.0, 0.0),
-        HATCH_MID(0.0, 0.0, 0.0),
-        HATCH_HIGH(0.0, 0.0, 0.0),
-        HATCH_FLOOR(0.0, 0.0, 0.0);
+        HOME(0.0, 0.0, 0.0),
+        CARGO_LOW(2.25, -112.0, 128.0),
+        CARGO_MID(2.25, -55.0, 177.0),
+        CARGO_HIGH(2.46, 7.6, 152.0),
+        CARGO_SHIP(2.25, -75.0, 205.0),
+        CARGO_LOAD(2.25, -112.0, 70.5),
+        CARGO_FLOOR(1.0, -105.0, 225.0),
+        HATCH_LOW(2.25, -112.0, -19.0),
+        HATCH_MID(2.25, -58.0, 20.0),
+        HATCH_HIGH(2.46, 27.0, -68.0),
+        HATCH_FLOOR(0.52, -114.0, 125.0);
 
         double elevatorHeight, shoulderAngle, wristAngle;
         Height(double elevatorHeight, double shoulderAngle, double wristAngle) {
@@ -48,9 +52,9 @@ public class ToHeight extends CommandGroup {
         double shoulderAngle = height.getShoulderAngle();
         double wristAngle = height.getWristAngle();
 
-        addParallel(new ElevatorToHeight(elevatorHeight, 3/12));
-        addParallel(new ShoulderToAngle(shoulderAngle, 3));
-        addParallel(new WristToAngle(wristAngle, 3));
+        addParallel(new ElevatorToHeight(elevatorHeight, 0.1));
+        addParallel(new WristToAngle(wristAngle, 2.0));
+        addSequential(new ShoulderToAngle(shoulderAngle, 2.0));
 
     }
 

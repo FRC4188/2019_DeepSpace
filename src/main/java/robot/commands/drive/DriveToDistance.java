@@ -36,12 +36,12 @@ public class DriveToDistance extends Command {
 
     @Override
     protected boolean isFinished() {
-        return counter > 5;
+        return counter > 10;
     }
 
     @Override
     protected void end() {
-        drivetrain.tank(0, 0, 0);
+        drivetrain.tank(0, 0);
     }
 
     @Override

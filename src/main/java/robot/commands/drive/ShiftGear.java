@@ -24,9 +24,16 @@ public class ShiftGear extends Command {
 
     @Override
     protected void execute() {
-        if(gear == Gear.HIGH) drivetrain.setHighGear();
-        else if(gear == Gear.LOW) drivetrain.setLowGear();
-        else if(gear == Gear.OFF) drivetrain.setGearShiftOff();
+        if(gear == Gear.HIGH) {
+            drivetrain.setHighGear();
+            System.out.println("high gear");
+        } else if(gear == Gear.LOW) {
+            drivetrain.setLowGear();
+            System.out.println("low gear");
+        } else if(gear == Gear.OFF) {
+            drivetrain.setGearShiftOff();
+            System.out.println("off");
+        }
     }
 
     @Override

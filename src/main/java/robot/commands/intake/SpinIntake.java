@@ -12,7 +12,6 @@ public class SpinIntake extends Command {
     double speed;
 
     public SpinIntake(double speed) {
-        requires(intake);
         setName("SpinIntake: " + speed);
         this.speed = speed;
     }
@@ -23,7 +22,7 @@ public class SpinIntake extends Command {
 
     @Override
     protected void execute() {
-        intake.spinIntake(-speed);
+        intake.spinIntake(speed);
     }
 
     @Override

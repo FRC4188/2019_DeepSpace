@@ -1,6 +1,5 @@
 package robot.commands.drive;
 
-import robot.OI;
 import robot.Robot;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
@@ -8,37 +7,22 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
 /** Drives forward using pilot left joystick while
- *  turning to keep given vision target centered. */
-public class DriveToTarget extends Command {
-
-    public enum VisionTarget {
-        CARGO, BAY, BAY_3D
-    }
+ *  turning to keep bay centered. */
+public class CenterBay extends Command {
 
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
 
-    VisionTarget target;
     final double TURN_kP = 0.01;
 
-    public DriveToTarget(VisionTarget target) {
-        requires(Robot.drivetrain);
-        requires(Robot.limelight);
-        setName("DriveToTarget: " + target.toString());
-        this.target = target;
+    public CenterBay() {
+        requires(drivetrain);
+        requires(limelight);
     }
 
     @Override
     protected void initialize() {
-
-        if(target == VisionTarget.CARGO) {
-            limelight.trackCargo();
-        } else if(target == VisionTarget.BAY) {
-            limelight.trackBay();
-        } else if(target == VisionTarget.BAY_3D) {
-            limelight.trackBay3D();
-        }
-
+        limelight.trackBay();
     }
 
     @Override
@@ -53,7 +37,6 @@ public class DriveToTarget extends Command {
 
         // command motor output
         drivetrain.arcade(xSpeed, zTurn);
-        System.out.println("driving to target");
 
     }
 

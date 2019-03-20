@@ -9,13 +9,11 @@ public class FlipLimelight extends Command {
     LimeLight limelight = Robot.limelight;
 
     public FlipLimelight() {
-        requires(limelight);
     }
 
     @Override
     protected void initialize() {
         limelight.flipCamera();
-        System.out.println("flipping");
     }
 
     @Override

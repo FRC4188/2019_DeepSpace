@@ -1,7 +1,7 @@
 package robot.subsystems;
 
 import robot.Robot;
-import robot.commands.vision.LimeLightDefault;
+import robot.commands.vision.*;
 import robot.utils.CSPMath;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Servo;
@@ -84,7 +84,7 @@ public class LimeLight extends Subsystem {
 
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new LimeLightDefault());
+        setDefaultCommand(new TrackPipeline(Pipeline.OFF));
     }
 
     @Override
@@ -188,7 +188,7 @@ public class LimeLight extends Subsystem {
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r; // fudge boy
+        return r - 2.5; // from front of bot
     }
 
     /**
@@ -201,7 +201,7 @@ public class LimeLight extends Subsystem {
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
         double r = objectHeight / boxDegree; // feet
-        return r; // fudge lad
+        return r - 2.5; // from front of bot
     }
 
     /**

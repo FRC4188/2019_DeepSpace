@@ -61,8 +61,8 @@ public class ManualClimb extends Command {
         }
 
         // command motor output
-        climber.setLeftOpenLoop(leftPercent);
-        climber.setRightOpenLoop(rightPercent);
+        climber.setLeft(leftPercent);
+        climber.setRight(rightPercent);
 
     }
 

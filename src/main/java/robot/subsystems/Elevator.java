@@ -9,6 +9,7 @@ import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import badlog.lib.BadLog;
+import badlog.lib.DataInferMode;
 
 public class Elevator extends Subsystem {
 
@@ -19,19 +20,16 @@ public class Elevator extends Subsystem {
     private CANPIDController pidC = elevatorMotor.getPIDController();
 
     // Constants
-    private final double TICKS_PER_REV = 1; // neo
-    private final double SPOOL_DIAMETER = (2.0 / 12.0); //feet
-    private final double GEAR_RATIO = 2.84;
-    private final double ENCODER_TO_FEET = (SPOOL_DIAMETER * Math.PI) / (TICKS_PER_REV * GEAR_RATIO); // feet
+    private final double ENCODER_TO_FEET = 2.0 / 36.047279; // feet
     private final double RAMP_RATE = 0.2; // seconds
+    private final double MAX_VELOCITY = 3000; // rpm
     private final double MAX_OUT = 0.5; // percent out
     private final double kP = 5e-5;
     private final double kI = 1e-6;
     private final double kI_ZONE = 0;
     private final double kD = 0;
     private final double kF = 0;
-    private final double MAX_VELOCITY = 1500; // rpm
-    private final double MAX_ACCELERATION = 1000;
+    private final double MAX_ACCELERATION = 2500;
     private final int    SLOT_ID = 0;
 
     // State vars
@@ -49,7 +47,6 @@ public class Elevator extends Subsystem {
 
         // Initialize BadLog
         //initializeBadLog();
-
     }
 
     /** Defines default command that will run when object is created. */
@@ -61,6 +58,7 @@ public class Elevator extends Subsystem {
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
         SmartDashboard.putNumber("Elevator Position", getPosition());
+        SmartDashboard.putNumber("Elevator raw pos", getRawPosition());
         SmartDashboard.putNumber("Elevator raw velocity", getRawVelocity());
         SmartDashboard.putNumber("E11 temp", elevatorMotor.getMotorTemperature());
         SmartDashboard.putNumber("E12 temp", elevatorSlave.getMotorTemperature());
@@ -95,10 +93,12 @@ public class Elevator extends Subsystem {
 
     /** Creates topics for BadLog. */
     public void initializeBadLog() {
-        BadLog.createTopic("Elevator Position", "ft", () -> getPosition());
-        BadLog.createTopic("Elevator Velocity", "ft/s", () -> getVelocity());
-        BadLog.createTopic("Elevator Current", "amps", () -> getCurrent());
-    }
+        BadLog.createTopic("Elevator/Position", "ft", () -> getPosition());
+        BadLog.createTopic("Elevator/Velocity", "ft/s", () -> getVelocity()); 
+        BadLog.createTopic("Elevator/Current", "amps", () -> getCurrent());
+        BadLog.createTopic("Elevator/E11 Temp", "C", () -> elevatorMotor.getMotorTemperature(), "hide", "join:Elevator/Temperature");
+        BadLog.createTopic("Elevator/E12 Temp", "C", () -> elevatorSlave.getMotorTemperature(), "hide", "join:Elevator/Temperature");
+   }
 
     /** Sets elevator motors to given percentage using velocity controller. */
     public void set(double percent) {
