@@ -147,6 +147,8 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
+        copilotRb.whenPressed(new ZeroShoulder());
+
         rbGround.whenPressed(new ToHeight(Height.HOME));
         rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));
         rbHatchMid.whenPressed(new ToHeight(Height.HATCH_MID));

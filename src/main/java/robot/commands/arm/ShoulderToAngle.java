@@ -3,7 +3,6 @@ package robot.commands.arm;
 import robot.Robot;
 import robot.subsystems.Arm;
 import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Sets shoulder on arm to given angle in degrees. */
 public class ShoulderToAngle extends Command {
@@ -21,13 +20,11 @@ public class ShoulderToAngle extends Command {
     @Override
     protected void initialize() {
         counter = 0;
-        SmartDashboard.putNumber("Arm height trim", 0);
     }
 
     @Override
     protected void execute() {
-        double trim = SmartDashboard.getNumber("Arm height trim", 0);
-        arm.shoulderToAngle(angle + trim, tolerance);
+        arm.shoulderToAngle(angle, tolerance);
         double error = angle - arm.getPosition();
         if(Math.abs(error) < tolerance) counter++;
         else counter = 0;

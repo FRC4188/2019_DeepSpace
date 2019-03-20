@@ -13,7 +13,7 @@ public class CenterBay extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
 
-    final double TURN_kP = 0.01;
+    final double TURN_kP = 0.007;
 
     public CenterBay() {
         requires(drivetrain);
