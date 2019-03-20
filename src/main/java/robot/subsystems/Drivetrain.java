@@ -63,12 +63,13 @@ public class Drivetrain extends Subsystem {
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
     public double        NEO_ENCODER_TO_FEET;
+    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET = 10.0 / 90.2896;
+    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET = 10.0 / 41.2614;
     private final double DELTA_T = 0.2;
 
     // State vars
     private double fieldPosX, fieldPosY = 0;
     private boolean leftInverted, rightInverted;
-    private double currentGearRatio = LOW_GEAR_RATIO;
 
     /** Constructs new Drivetrain object and configures devices. */
     public Drivetrain() {
@@ -108,17 +109,11 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Target angle", getTargetAngle());
     }
 
-    /** Updates NEO_ENCODER_TO_FEET based on current gear ratio. */
-    private void updateNeoEncConstant() {
-        NEO_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / currentGearRatio;
-    }
-
     /** Runs every loop. */
     @Override
     public void periodic() {
         trackFieldPosition();
         updateShuffleboard();
-        updateNeoEncConstant();
     }
 
     /** Resets necessary drive devices. */
@@ -400,13 +395,13 @@ public class Drivetrain extends Subsystem {
     /** Shifts drivetrain to low gear. */
     public void setLowGear() {
         gearShift.set(Value.kForward);
-        currentGearRatio = LOW_GEAR_RATIO;
+        NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
     }
 
     /** Shifts drivetrain to high gear. */
     public void setHighGear() {
         gearShift.set(Value.kReverse);
-        currentGearRatio = HIGH_GEAR_RATIO;
+        NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
     }
 
     /** Turns gear shift solenoid off. */

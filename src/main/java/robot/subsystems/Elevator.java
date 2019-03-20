@@ -20,7 +20,7 @@ public class Elevator extends Subsystem {
     private CANPIDController pidC = elevatorMotor.getPIDController();
 
     // Constants
-    private final double ENCODER_TO_FEET = 2.0 / 105.64; // feet
+    private final double ENCODER_TO_FEET = 2.0 / 36.047279; // feet
     private final double RAMP_RATE = 0.2; // seconds
     private final double MAX_VELOCITY = 3000; // rpm
     private final double MAX_OUT = 0.5; // percent out
