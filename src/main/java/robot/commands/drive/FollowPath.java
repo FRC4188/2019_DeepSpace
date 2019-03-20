@@ -110,8 +110,6 @@ public class FollowPath extends Command {
 
             // create points
             points = new Waypoint[] {
-                    // new Waypoint(0, 0, currentAngle),
-                    // new Waypoint(x, y, targetAngle)
                     new Waypoint(0, 0, 0),
                     new Waypoint(forwardDistance, horizontalDistance, Math.toRadians(robotAngle)) };
 
