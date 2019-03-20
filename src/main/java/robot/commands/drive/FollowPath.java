@@ -75,6 +75,7 @@ public class FollowPath extends Command {
         // create waypoints if going to perpendicular
         if(path == Path.TO_PERPENDICULAR) {
 
+            /*
             // get necessary info from camera
             double initialAngleInRad = Math.toRadians(initialAngle);
             double turnAngle = Math.toRadians(limelight.solvePerpendicular()[0]);
@@ -90,7 +91,30 @@ public class FollowPath extends Command {
             points = new Waypoint[] {
                 new Waypoint(0, 0, initialAngleInRad),
                 new Waypoint(x, y, targetAngle)
-            };
+            };*/
+            final double PERP_LENGTH = 4.0;
+            double[] distances = limelight.getDistance3d();
+            double robotAngle = limelight.getRobotAngle();
+            SmartDashboard.putNumber("robot angle", robotAngle);
+            double X = distances[0];
+            double Y = distances[1];
+            double diag = Math.sqrt(X * X + Y * Y);
+            double relAngleRad = Math.toRadians(limelight.getHorizontalAngle());
+            double horizontalDistance = (diag - PERP_LENGTH * (X / Math.tan(relAngleRad) + Y) / diag)
+                    * Math.sin(relAngleRad);
+            double forwardDistance = -horizontalDistance
+                    * Math.tan(Math.PI / 2 - Math.atan2(Y, X) + Math.atan2(Y - PERP_LENGTH, X) + relAngleRad);
+            SmartDashboard.putNumber("global forward distance", Y);
+            SmartDashboard.putNumber("global side distance", X);
+            SmartDashboard.putNumber("forward distance", forwardDistance);
+            SmartDashboard.putNumber("side distance", horizontalDistance);
+
+            // create points
+            points = new Waypoint[] {
+                    // new Waypoint(0, 0, currentAngle),
+                    // new Waypoint(x, y, targetAngle)
+                    new Waypoint(0, 0, 0),
+                    new Waypoint(forwardDistance, horizontalDistance, Math.toRadians(robotAngle)) };
 
         }
 
