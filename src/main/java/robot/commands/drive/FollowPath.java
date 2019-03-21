@@ -19,14 +19,22 @@ public class FollowPath extends Command {
 
     public enum Path {
         TO_PERPENDICULAR,
-        L_TO_L_FAR_ROCKET,
-        L_TO_L_FAR_SHIP,
+        L_TO_L_FAR_ROCKET_HAB1,
+        L_TO_L_FAR_ROCKET_HAB2,
+        L_TO_L_NEAR_ROCKET_HAB1,
+        L_TO_L_NEAR_ROCKET_HAB2,
+        L_TO_L_NEAR_SHIP_HAB1,
+        L_TO_L_NEAR_SHIP_HAB2,
         M_TO_L_FAR_ROCKET,
-        M_TO_L_FAR_SHIP,
+        M_TO_L_NEAR_SHIP,
         M_TO_R_FAR_ROCKET,
-        M_TO_R_FAR_SHIP,
-        R_TO_R_FAR_ROCKET,
-        R_TO_R_FAR_SHIP
+        M_TO_R_NEAR_SHIP,
+        R_TO_R_FAR_ROCKET_HAB1,
+        R_TO_R_FAR_ROCKET_HAB2,
+        R_TO_R_NEAR_ROCKET_HAB1,
+        R_TO_R_NEAR_ROCKET_HAB2,
+        R_TO_R_NEAR_SHIP_HAB1,
+        R_TO_R_NEAR_SHIP_HAB2,
     }
 
     Drivetrain drivetrain = Robot.drivetrain;
