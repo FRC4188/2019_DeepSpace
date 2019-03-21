@@ -3,13 +3,10 @@ package robot;
 import robot.OI;
 import robot.subsystems.*;
 import robot.utils.*;
-import robot.commands.elevator.ElevatorToHeight;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -23,10 +20,10 @@ public class Robot extends TimedRobot {
     public static Logger logger;
     public static BrownoutProtection brownoutProtection;
     public static TemperatureManager tempManager;
+    public static AutoChooser autoChooser;
     public static OI oi;
 
     Command autonomousCommand;
-    SendableChooser<Command> chooser = new SendableChooser<>();
 
     @Override
     public void robotInit() {
@@ -42,6 +39,7 @@ public class Robot extends TimedRobot {
         led = new LED();
         brownoutProtection = new BrownoutProtection();
         tempManager = new TemperatureManager();
+        autoChooser = new AutoChooser();
         oi = new OI();
 
         // start camera stream
@@ -58,7 +56,6 @@ public class Robot extends TimedRobot {
         //logger.update();
         brownoutProtection.run();
         tempManager.run();
-        SmartDashboard.putNumber("limelight dist", limelight.getDistance(limelight.getPipeline().getHeight()));
     }
 
     @Override
@@ -74,14 +71,11 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         Scheduler.getInstance().run();
-        // hold position
-        arm.set(0);
-        elevator.set(0);
     }
 
     @Override
     public void autonomousInit() {
-        autonomousCommand = new ElevatorToHeight(1.0, 0.05);
+        autonomousCommand = autoChooser.getSelectedCommand();
         if (autonomousCommand != null) {
             autonomousCommand.start();
         }
