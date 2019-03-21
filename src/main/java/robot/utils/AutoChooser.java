@@ -4,6 +4,7 @@ import robot.commands.drive.*;
 import robot.commands.drive.FollowPath.Path;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoChooser {
 
@@ -29,6 +30,8 @@ public class AutoChooser {
         chooser.addOption("R2 Far Rocket", 14);
         chooser.addOption("R2 Near Rocket", 15);
         chooser.addOption("R2 Near Ship", 16);
+
+        SmartDashboard.putData("Auto Chooser", chooser);
 
     }
 
