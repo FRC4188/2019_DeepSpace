@@ -146,7 +146,7 @@ public class Climber extends Subsystem {
     /** Inverts the the climber. */
     public void setInverted(boolean isInverted) {
         if(climberInverted) isInverted = !isInverted;
-        leftClimberMotor.setInverted(!isInverted);
+        leftClimberMotor.setInverted(isInverted);
         rightClimberMotor.setInverted(isInverted);
     }
 

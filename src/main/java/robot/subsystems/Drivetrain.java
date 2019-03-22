@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import jaci.pathfinder.Pathfinder;
 import badlog.lib.BadLog;
 import robot.utils.Logger; 
 
@@ -37,7 +36,6 @@ public class Drivetrain extends Subsystem {
     private CANPIDController leftPidC = leftMotor.getPIDController();
     private CANPIDController rightPidC = rightMotor.getPIDController();
     private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
-    private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(8); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(9);
     private DigitalInput lineSensorRight = new DigitalInput(10);
@@ -295,20 +293,17 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        //return ahrs.getYaw();
-        return Pathfinder.boundHalfDegrees(gyro.getAngle());
+        return ahrs.getYaw();
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        //return ahrs.getRate();
-        return gyro.getRate();
+        return ahrs.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
-        //ahrs.reset();
-        gyro.reset();
+        ahrs.reset();
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
