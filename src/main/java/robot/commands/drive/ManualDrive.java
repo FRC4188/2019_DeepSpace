@@ -13,9 +13,9 @@ public class ManualDrive extends Command {
     OI oi = Robot.oi;
     Drivetrain drivetrain = Robot.drivetrain;
 
-    final double kSLOW_TURN = 0.25;
-    final double kFAST_TURN = 0.5;
-    final double kSTICK_TURN = 0.6;
+    final double kSLOW_TURN = 0.2;
+    final double kFAST_TURN = 0.4;
+    final double kSTICK_TURN = 0.5;
 
     public ManualDrive() {
         requires(drivetrain);

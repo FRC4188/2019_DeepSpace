@@ -1,13 +1,16 @@
 package robot.commands.arm;
 
 import robot.Robot;
+import robot.commands.elevator.ElevatorToHeight;
 import robot.subsystems.Arm;
+import robot.subsystems.Elevator;
 import edu.wpi.first.wpilibj.command.Command;
 
 /** Sets shoulder on arm to given angle in degrees. */
 public class ShoulderToAngle extends Command {
 
     Arm arm = Robot.arm;
+    Elevator elevator = Robot.elevator;
     double angle, tolerance, counter;
 
     public ShoulderToAngle(double angle, double tolerance) {

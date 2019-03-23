@@ -128,8 +128,8 @@ public class OI {
         pilotX.whenPressed(new FollowPath(testPath, false));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
-        pilotDpadNorth.whileHeld(new ManualClimb(1.0));
-        pilotDpadSouth.whileHeld(new ManualClimb(-1.0));
+        pilotDpadNorth.whileHeld(new ManualClimb(0.8));
+        pilotDpadSouth.whileHeld(new ManualClimb(-0.8));
 
         pilotDpadEast.whileHeld(new ClimbWithoutSwitches(1.0));
         pilotDpadWest.whileHeld(new ClimbWithoutSwitches(-1.0));

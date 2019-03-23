@@ -14,6 +14,7 @@ public class AutoChooser {
 
         chooser = new SendableChooser<Integer>();
 
+        chooser.addOption("Do Nothing", 0);
         chooser.addOption("L1 Far Rocket", 1);
         chooser.addOption("L1 Near Rocket", 2);
         chooser.addOption("L1 Near Ship", 3);
@@ -40,6 +41,8 @@ public class AutoChooser {
         int selectedOption = chooser.getSelected();
 
         switch(selectedOption) {
+            case 0:
+                return null;
             case 1:
                 return new FollowPath(Path.L_TO_L_FAR_ROCKET_HAB1, false);
             case 2:
