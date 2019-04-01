@@ -48,8 +48,8 @@ public class TankClimb extends Command {
             rightCanRetract = true;
         }
 
-        double leftPercent = Robot.oi.getPilotTrigger(Hand.kLeft);
-        double rightPercent = Robot.oi.getPilotTrigger(Hand.kRight);
+        double leftPercent = Robot.oi.getPilotTrigger(Hand.kLeft) * 0.75;
+        double rightPercent = Robot.oi.getPilotTrigger(Hand.kRight) * 0.75;
         double leftOutput = 0;
         double rightOutput = 0;
         if(leftPercent > 0 && leftCanExtend) leftOutput = leftPercent;

@@ -1,11 +1,13 @@
 package robot.subsystems;
 
-import robot.commands.climb.ManualClimb;
+import robot.commands.climb.*;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import badlog.lib.BadLog;
@@ -47,6 +49,14 @@ public class Climber extends Subsystem {
         leftClimberMotor.setSensorPhase(true);
         rightClimberMotor.setSensorPhase(true);
 
+        // Limit Switches
+        leftClimberMotor.overrideLimitSwitchesEnable(true);
+        leftClimberMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, TIMEOUT);
+        leftClimberMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, TIMEOUT);
+        rightClimberMotor.overrideLimitSwitchesEnable(true);
+        rightClimberMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, TIMEOUT);
+        rightClimberMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, TIMEOUT);
+
         // Reset
         controllerInit();
         reset();
@@ -59,7 +69,7 @@ public class Climber extends Subsystem {
     /** Defines default command that will run when object is created. */
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new ManualClimb(0));
+        setDefaultCommand(new TankClimb());
     }
 
     /** Prints necessary info to the dashboard. */
@@ -143,10 +153,20 @@ public class Climber extends Subsystem {
         rightClimberMotor.set(ControlMode.Velocity, output);
     }
 
+    /** Sets both climbers to given height in feet. */
+    public void climberToHeight(double heightInFt, double toleranceInFt) {
+        double targetPos = heightInFt / ENCODER_TO_FEET;
+        int tolerance = (int) (toleranceInFt / ENCODER_TO_FEET);
+        leftClimberMotor.configAllowableClosedloopError(SLOT_ID, tolerance, TIMEOUT);
+        leftClimberMotor.set(ControlMode.MotionMagic, targetPos);
+        rightClimberMotor.configAllowableClosedloopError(SLOT_ID, tolerance, TIMEOUT);
+        rightClimberMotor.set(ControlMode.MotionMagic, targetPos);
+    }
+
     /** Inverts the the climber. */
     public void setInverted(boolean isInverted) {
         if(climberInverted) isInverted = !isInverted;
-        leftClimberMotor.setInverted(isInverted);
+        leftClimberMotor.setInverted(!isInverted);
         rightClimberMotor.setInverted(isInverted);
     }
 
@@ -174,7 +194,7 @@ public class Climber extends Subsystem {
 
     /** Returns encoder position in feet as average of left and right encoders. */
     public double getPosition() {
-        return (getLeftPosition() + getRightPosition()) / 2;
+        return (getLeftPosition() + getRightPosition()) / 2.0;
     }
 
     /** Returns left encoder position in native talon units. */
@@ -211,7 +231,7 @@ public class Climber extends Subsystem {
 
     /** Returns average robot velocity in feet per second. */
     public double getVelocity() {
-        return (getLeftVelocity() + getRightVelocity()) / 2;
+        return (getLeftVelocity() + getRightVelocity()) / 2.0;
     }
 
     /** Returns the left motor output as a percentage. */
@@ -227,7 +247,7 @@ public class Climber extends Subsystem {
     /** Returns average motor output current. */
     public double getMotorCurrent() {
         return (leftClimberMotor.getOutputCurrent() +
-                rightClimberMotor.getOutputCurrent()) / 2;
+                rightClimberMotor.getOutputCurrent()) / 2.0;
     }
 
     /** Returns state of top left climber magnetic limit switch.

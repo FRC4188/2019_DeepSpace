@@ -1,6 +1,7 @@
 package robot.commands.climb;
 
 import robot.Robot;
+import robot.subsystems.Arm;
 import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -9,10 +10,12 @@ import edu.wpi.first.wpilibj.command.Command;
 public class ClimbWithoutSwitches extends Command {
 
     Climber climber = Robot.climber;
+    Arm arm = Robot.arm;
     double percent;
 
     public ClimbWithoutSwitches(double percent) {
         this.percent = percent;
+        requires(arm);
     }
 
     @Override
@@ -21,8 +24,7 @@ public class ClimbWithoutSwitches extends Command {
 
     @Override
     protected void execute() {
-        climber.setLeftOpenLoop(percent);
-        climber.setRightOpenLoop(percent);
+        arm.setOpenLoop(0.39, false);
     }
 
     @Override

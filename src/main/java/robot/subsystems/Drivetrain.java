@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import badlog.lib.BadLog;
 import robot.utils.Logger; 
@@ -33,9 +34,11 @@ public class Drivetrain extends Subsystem {
     private CANEncoder rightNeoEncoder = rightMotor.getEncoder();
     private Encoder leftSRXEncoder = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
     private Encoder rightSRXEncoder = new Encoder(2, 3, false, Encoder.EncodingType.k4X);
+    private DifferentialDrive drive = new DifferentialDrive(leftMotor, rightMotor);
     private CANPIDController leftPidC = leftMotor.getPIDController();
     private CANPIDController rightPidC = rightMotor.getPIDController();
     private AHRS ahrs = new AHRS(SerialPort.Port.kMXP);
+    private ADXRS450_Gyro gyro = new ADXRS450_Gyro();
     private DigitalInput lineSensorLeft = new DigitalInput(8); // yellow wire up
     private DigitalInput lineSensorMid = new DigitalInput(9);
     private DigitalInput lineSensorRight = new DigitalInput(10);
@@ -48,7 +51,7 @@ public class Drivetrain extends Subsystem {
     public final double  kP = 5e-5;
     public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kV = 0.1;
+    public final double  kV = /*0.1;*/ 0.095;
     public final double  kA = 0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
@@ -61,8 +64,8 @@ public class Drivetrain extends Subsystem {
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
     public double        NEO_ENCODER_TO_FEET;
-    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET = 10.0 / 90.2896;
-    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET = 10.0 / 41.2614;
+    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET = /* 10.0 / 90.2896; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 15.32;
+    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET = /* 10.0 / 41.2614; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 7.08;
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -122,7 +125,7 @@ public class Drivetrain extends Subsystem {
         enableRampRate();
         setBrake();
         leftInverted = true;
-        rightInverted = false;
+        rightInverted = true;
         setInverted(false);
     }
 
@@ -160,16 +163,6 @@ public class Drivetrain extends Subsystem {
         BadLog.createTopic("Drivetrain/Left Output", "%", () -> getLeftOutput(), "hide", "join:Drivetrain/Output");
         BadLog.createTopic("Drivetrain/Right Output", "%", () -> getRightOutput(), "hide", "join:Drivetrain/Output");
 
-    }
-
-    /** Sets left motors to given percentage (-1.0, 1.0). */
-    public void setLeft(double percent) {
-        leftMotor.set(percent);
-    }
-
-    /** Sets right motors to given percentage (-1.0, 1.0). */
-    public void setRight(double percent) {
-        rightMotor.set(percent);
     }
 
     /** Drives forward a given distance in feet. */
@@ -248,7 +241,7 @@ public class Drivetrain extends Subsystem {
 
     /** Returns encoder position in feet as average of left and right encoders. */
     public double getPosition() {
-        return (getLeftPosition() + getRightPosition()) / 2;
+        return (getLeftPosition() + getRightPosition()) / 2.0;
     }
 
     /** Returns left encoder position in native talon units. */
@@ -273,7 +266,7 @@ public class Drivetrain extends Subsystem {
 
     /** Returns average robot velocity in feet per second. */
     public double getVelocity() {
-        return (getLeftVelocity() + getRightVelocity()) / 2;
+        return (getLeftVelocity() + getRightVelocity()) / 2.0;
     }
 
     /** Returns the left motor output as a percentage. */
@@ -288,22 +281,25 @@ public class Drivetrain extends Subsystem {
 
     /** Returns average motor output current. */
     public double getMotorCurrent() {
-        return (leftMotor.getOutputCurrent() + rightMotor.getOutputCurrent()) / 2;
+        return (leftMotor.getOutputCurrent() + rightMotor.getOutputCurrent()) / 2.0;
     }
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return ahrs.getYaw();
+        return gyro.getAngle();
+        //return ahrs.getYaw();
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        return ahrs.getRate();
+        return gyro.getRate();
+        //return ahrs.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
-        ahrs.reset();
+        gyro.reset();
+        //ahrs.reset();
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
@@ -407,47 +403,13 @@ public class Drivetrain extends Subsystem {
     /** Controls drivetrain with arcade model, with positive xSpeed going forward
      *  and positive zTurn turning right. */
     public void arcade(double xSpeed, double zTurn) {
-
-        final double MAX_INPUT = 1.0;
-        double turnRatio;
-        double leftInput = xSpeed + zTurn;
-        double rightInput = xSpeed - zTurn;
-
-        // ensure that input does not exceed 1.0
-        // if it does, reduce greatest input to 1.0 and reduce other proportionately
-        if(leftInput > MAX_INPUT || rightInput > MAX_INPUT) {
-            if(rightInput > leftInput) {
-                turnRatio = leftInput / rightInput;
-                rightInput = MAX_INPUT;
-                leftInput = MAX_INPUT * turnRatio;
-            } else if (leftInput > rightInput) {
-                turnRatio = rightInput / leftInput;
-                leftInput = MAX_INPUT;
-                rightInput = MAX_INPUT * turnRatio;
-            }
-        } else if(leftInput < -MAX_INPUT || rightInput < -MAX_INPUT) {
-            if(rightInput < leftInput) {
-                turnRatio = leftInput / rightInput;
-                rightInput = -MAX_INPUT;
-                leftInput = -MAX_INPUT * turnRatio;
-            } else if (leftInput < rightInput) {
-                turnRatio = rightInput / leftInput;
-                leftInput = -MAX_INPUT;
-                rightInput = -MAX_INPUT * turnRatio;
-            }
-        }
-
-        // command motor output
-        setLeft(leftInput);
-        setRight(rightInput);
-
+        drive.arcadeDrive(xSpeed, zTurn, false);
     }
 
     /** Controls drivetrain with tank model, individually moving left and
      *  right sides. */
     public void tank(double leftSpeed, double rightSpeed) {
-        setLeft(leftSpeed);
-        setRight(rightSpeed);
+        drive.tankDrive(leftSpeed, rightSpeed, false);
     }
 
     /** Returns temperature of motor based off CAN ID. */

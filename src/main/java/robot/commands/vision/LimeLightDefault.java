@@ -23,7 +23,7 @@ public class LimeLightDefault extends Command {
 
     @Override
     protected boolean isFinished() {
-        return false;
+        return true;
     }
 
     @Override
@@ -32,6 +32,7 @@ public class LimeLightDefault extends Command {
 
     @Override
     protected void interrupted() {
+        limelight.trackBay();
     }
 
 }

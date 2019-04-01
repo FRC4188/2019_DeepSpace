@@ -12,6 +12,7 @@ public class ToHeight extends CommandGroup {
     public enum Height {
 
         HOME(0.0, 0.0, 0.0),
+        CLIMB(2.46, 120.0, 170.0),
         CARGO_LOW(2.25, -112.0, 108.0),
         CARGO_MID(2.25, -55.0, 169.0),
         CARGO_HIGH(2.46, 7.6, 132.0),

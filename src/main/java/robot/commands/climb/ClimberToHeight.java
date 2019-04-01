@@ -1,18 +1,18 @@
-package robot.commands.elevator;
+package robot.commands.climb;
 
 import robot.Robot;
-import robot.subsystems.Elevator;
+import robot.subsystems.Climber;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Sets elevator to a given height in feet. */
-public class ElevatorToHeight extends Command {
+/** Sets climbers to a given height in feet. */
+public class ClimberToHeight extends Command {
 
-    Elevator elevator = Robot.elevator;
+    Climber climber = Robot.climber;
     double height, tolerance, counter;
 
-    public ElevatorToHeight(double height, double tolerance) {
-        requires(elevator);
-        setName("ElevatorToHeight: " + height);
+    public ClimberToHeight(double height, double tolerance) {
+        requires(climber);
+        setName("ClimberToHeight: " + height);
         this.height = height;
         this.tolerance = tolerance;
     }
@@ -24,8 +24,8 @@ public class ElevatorToHeight extends Command {
 
     @Override
     protected void execute() {
-        elevator.elevatorToHeight(height, tolerance);
-        double error = height - elevator.getPosition();
+        climber.climberToHeight(height, tolerance);
+        double error = height - climber.getPosition();
         if(Math.abs(error) < tolerance) counter++;
         else counter = 0;
     }
@@ -37,7 +37,8 @@ public class ElevatorToHeight extends Command {
 
     @Override
     protected void end() {
-        elevator.set(0);
+        climber.setRightOpenLoop(0);
+        climber.setLeftOpenLoop(0);
     }
 
     @Override

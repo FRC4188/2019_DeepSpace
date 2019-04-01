@@ -21,12 +21,12 @@ public class Arm extends Subsystem {
     public CANPIDController pidC = shoulderMotor.getPIDController();
 
     // Constants
-    private final double INITIAL_ANGLE = 0; // degrees, 0 when arm is parallel with ground at front of bot
-    private final double ENCODER_TO_DEGREES = 180.0 / 35.66; // degrees
+    private final double INITIAL_ANGLE = 0; // degrees
+    private final double ENCODER_TO_DEGREES = 180.0 / 69.8936; // degrees
     private final double RAMP_RATE = 0.5; // seconds
     private final double FLAT_RATE = 0.035; // percent out
-    private final double MAX_VELOCITY = 1000; // rpm
-    private final double MAX_ACCELERATION = 1500;
+    private final double MAX_VELOCITY = 2000; // rpm
+    private final double MAX_ACCELERATION = 3000;
     private final double kP = 5e-5;
     private final double kI = 1e-6;
     private final double kD = 0;
@@ -62,6 +62,10 @@ public class Arm extends Subsystem {
     private void updateShufleboard() {
         SmartDashboard.putNumber("Shoulder pos", getPosition());
         SmartDashboard.putNumber("Shoulder raw pos", getRawPosition());
+        SmartDashboard.putNumber("Shoulder raw vel", getRawVelocity());
+        SmartDashboard.putNumber("Shoulder output", getOutput());
+        SmartDashboard.putNumber("Shoulder voltage", shoulderMotor.getBusVoltage() * shoulderMotor.get());
+        SmartDashboard.putNumber("Shoulder get", shoulderMotor.get());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
     }
@@ -117,6 +121,13 @@ public class Arm extends Subsystem {
         pidC.setReference(angle, ControlType.kSmartMotion);
     }
 
+    /** Holds current arm angle using P loop to drive velocity to 0. */
+    public void holdPosition() {
+        final double HOLD_kP = 0.0075;
+        double output = HOLD_kP * -getRawVelocity();
+        setOpenLoop(output, false);
+    }
+
     /** Inverts the the arm. */
     public void setInverted(boolean isInverted) {
         if(shoulderInverted) isInverted = !isInverted;
@@ -157,7 +168,7 @@ public class Arm extends Subsystem {
 
     /** Returns shoulder motor output as a percentage. */
     public double getOutput() {
-        return shoulderMotor.get();
+        return shoulderMotor.getAppliedOutput();
     }
 
     /** Returns shoulder motor output current. */
@@ -197,5 +208,5 @@ public class Arm extends Subsystem {
         BadLog.createTopic("21 Temp", "C", () -> shoulderMotor.getMotorTemperature(), "hide", "join:Arm/Temp");
         BadLog.createTopic("22 Temp", "C", () -> shoulderSlave.getMotorTemperature(), "hide", "join:Arm/Temp");
      }
-    
+
 }

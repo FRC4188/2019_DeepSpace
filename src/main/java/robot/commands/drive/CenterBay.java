@@ -13,7 +13,7 @@ public class CenterBay extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
 
-    final double TURN_kP = 0.007;
+    final double TURN_kP = 0.013;
 
     public CenterBay() {
         requires(drivetrain);
@@ -32,7 +32,7 @@ public class CenterBay extends Command {
         double xSpeed = Robot.oi.getPilotY(Hand.kLeft);
 
         // angle p loop
-        double angleErr = limelight.getHorizontalAngle();
+        double angleErr = limelight.getHorizontalAngle() - 2.5;
         double zTurn = TURN_kP * angleErr;
 
         // command motor output

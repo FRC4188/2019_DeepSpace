@@ -122,17 +122,18 @@ public class OI {
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
 
-        pilotRTrig.whileActive(new CenterBay());
+        //pilotRTrig.whileActive(new CenterBay());
 
+        pilotA.toggleWhenPressed(new LimeLightDefault());
         pilotB.whenPressed(new FlipLimelight());
         pilotX.whenPressed(new FollowPath(testPath, false));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
-        pilotDpadNorth.whileHeld(new ManualClimb(0.8));
-        pilotDpadSouth.whileHeld(new ManualClimb(-0.8));
+        pilotDpadNorth.whileHeld(new ManualClimb(0.4));
+        pilotDpadSouth.whileHeld(new ManualClimb(-0.4));
 
-        pilotDpadEast.whileHeld(new ClimbWithoutSwitches(1.0));
-        pilotDpadWest.whileHeld(new ClimbWithoutSwitches(-1.0));
+        pilotDpadEast.whileHeld(new ClimbWithoutSwitches(0.43));
+        pilotDpadWest.whileHeld(new ClimbWithoutSwitches(-0.43));
 
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());
@@ -147,6 +148,7 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
+        copilotLb.whenPressed(new ToHeight(Height.CLIMB));
         copilotRb.whenPressed(new ZeroShoulder());
 
         rbGround.whenPressed(new ToHeight(Height.HOME));

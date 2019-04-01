@@ -21,7 +21,7 @@ public class Intake extends Subsystem {
     private DoubleSolenoid hatchSolenoid = new DoubleSolenoid(2, 3);
 
     // Constants
-    private final double INITIAL_ANGLE = 0; // degrees, 0 is with bucket facing upward when arm is at 0
+    private final double INITIAL_ANGLE = 0; // degrees
     private final double ENCODER_TO_DEGREES = 360.0 / 368870.0; // degrees
     private final double RAMP_RATE = 0.2; // seconds
     private final double MAX_OUT = 0.5; // percent out

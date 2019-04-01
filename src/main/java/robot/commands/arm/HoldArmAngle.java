@@ -4,12 +4,12 @@ import robot.Robot;
 import robot.subsystems.Arm;
 import edu.wpi.first.wpilibj.command.Command;
 
-/** Sets shoulder encoders to 0. */
-public class ZeroShoulder extends Command {
+/** Holds arm angle at current position. */
+public class HoldArmAngle extends Command {
 
     Arm arm = Robot.arm;
 
-    public ZeroShoulder() {
+    public HoldArmAngle() {
     }
 
     @Override
@@ -18,12 +18,12 @@ public class ZeroShoulder extends Command {
 
     @Override
     protected void execute() {
-        arm.resetEncoders();
+        arm.holdPosition();
     }
 
     @Override
     protected boolean isFinished() {
-        return true;
+        return false;
     }
 
     @Override

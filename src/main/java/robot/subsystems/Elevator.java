@@ -20,7 +20,7 @@ public class Elevator extends Subsystem {
     private CANPIDController pidC = elevatorMotor.getPIDController();
 
     // Constants
-    private final double ENCODER_TO_FEET = 2.0 / 36.047279; // feet
+    private final double ENCODER_TO_FEET = /* 2.0 / 36.047279; // feet, Phobos: */ 2.0 / 105.64;
     private final double RAMP_RATE = 0.2; // seconds
     private final double MAX_VELOCITY = 3000; // rpm
     private final double MAX_OUT = 0.5; // percent out
@@ -111,13 +111,19 @@ public class Elevator extends Subsystem {
         elevatorMotor.set(percent);
     }
 
-    /** Drives shoulder motor to given angle in degrees. */
+    /** Drives elevator motor to a given height in feet. */
     public void elevatorToHeight(double height, double tolerance) {
         // convert from degrees to rotations (Spark units)
         height /= ENCODER_TO_FEET;
         tolerance /= ENCODER_TO_FEET;
         pidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
         pidC.setReference(height, ControlType.kSmartMotion);
+    }
+
+    /** Sets elevator motor to given velocity in feet / sec. */
+    public void setVelocity(double velocity) {
+        velocity /= ENCODER_TO_FEET;
+        pidC.setReference(velocity, ControlType.kVelocity);
     }
 
     /** Inverts the the elevator. */
