@@ -27,6 +27,9 @@ public class TrackPipeline extends Command {
         case CARGO:
             limelight.trackCargo();
             break;
+        case OFF:
+            limelight.useAsCamera();
+            break;
         default:
             break;
         }

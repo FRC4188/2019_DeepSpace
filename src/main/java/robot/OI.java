@@ -7,6 +7,7 @@ import robot.commands.groups.*;
 import robot.commands.groups.ToHeight.Height;
 import robot.commands.intake.*;
 import robot.commands.vision.*;
+import robot.subsystems.LimeLight.Pipeline;
 import robot.commands.arm.*;
 import robot.commands.climb.*;
 import robot.utils.*;
@@ -122,11 +123,10 @@ public class OI {
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
         pilotRS.whenPressed(new ShiftGear(Gear.OFF));
 
-        //pilotRTrig.whileActive(new CenterBay());
+        pilotRTrig.whileActive(new CenterBay());
 
-        pilotA.toggleWhenPressed(new LimeLightDefault());
+        pilotA.whenPressed(new TrackPipeline(Pipeline.OFF));
         pilotB.whenPressed(new FlipLimelight());
-        pilotX.whenPressed(new FollowPath(testPath, false));
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         pilotDpadNorth.whileHeld(new ManualClimb(0.4));

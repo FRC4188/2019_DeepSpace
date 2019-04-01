@@ -32,7 +32,7 @@ public class CenterBay extends Command {
         double xSpeed = Robot.oi.getPilotY(Hand.kLeft);
 
         // angle p loop
-        double angleErr = limelight.getHorizontalAngle() - 2.5;
+        double angleErr = limelight.getHorizontalAngle();
         double zTurn = TURN_kP * angleErr;
 
         // command motor output

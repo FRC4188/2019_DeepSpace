@@ -84,7 +84,7 @@ public class LimeLight extends Subsystem {
 
     @Override
     public void initDefaultCommand() {
-        setDefaultCommand(new TrackPipeline(Pipeline.OFF));
+        setDefaultCommand(new LimeLightDefault());
     }
 
     @Override
@@ -181,7 +181,7 @@ public class LimeLight extends Subsystem {
     /** Returns distance in feet from object of height s (feet). 
      *  Uses s = r(theta). */
     public double getDistance(double objectHeight) {
-        final double CAMERA_HEIGHT = 720; // pixels
+        final double CAMERA_HEIGHT = 240; // pixels
         final double CAMERA_FOV = Math.toRadians(49.7); // rads
         double boxHeight = limelightTable.getEntry("tvert").getDouble(0.0); // pixels
         if(boxHeight == 0) return 0;
@@ -196,7 +196,7 @@ public class LimeLight extends Subsystem {
      */
     public double getDistance(double objectHeight, double boxHeight) {
         if(boxHeight == 0) return 0;
-        final double CAMERA_HEIGHT = 720; // pixels
+        final double CAMERA_HEIGHT = 240; // pixels
         final double CAMERA_FOV = Math.toRadians(49.7); // rads
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
@@ -449,6 +449,6 @@ public class LimeLight extends Subsystem {
     public void useAsCamera() {
         setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.CAMERA);
-        setPipeline(Pipeline.OFF);
+        //setPipeline(Pipeline.OFF);
     }
 }

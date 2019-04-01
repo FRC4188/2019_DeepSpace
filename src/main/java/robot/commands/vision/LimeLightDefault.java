@@ -2,6 +2,8 @@ package robot.commands.vision;
 
 import robot.Robot;
 import robot.subsystems.LimeLight;
+import robot.subsystems.LimeLight.CameraMode;
+import robot.subsystems.LimeLight.Pipeline;
 import edu.wpi.first.wpilibj.command.Command;
 
 public class LimeLightDefault extends Command {
@@ -14,7 +16,6 @@ public class LimeLightDefault extends Command {
 
     @Override
     protected void initialize() {
-        limelight.useAsCamera();
     }
 
     @Override
@@ -32,7 +33,6 @@ public class LimeLightDefault extends Command {
 
     @Override
     protected void interrupted() {
-        limelight.trackBay();
     }
 
 }
