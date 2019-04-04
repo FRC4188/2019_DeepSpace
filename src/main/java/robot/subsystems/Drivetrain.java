@@ -64,8 +64,8 @@ public class Drivetrain extends Subsystem {
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
     public double        NEO_ENCODER_TO_FEET;
-    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET = /* 10.0 / 90.2896; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 15.32;
-    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET = /* 10.0 / 41.2614; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 7.08;
+    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET = 10.0 / 90.2896; // Phobos is (WHEEL_DIAMETER * Math.PI) / 15.32;
+    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET = 10.0 / 41.2614; // Phobos is (WHEEL_DIAMETER * Math.PI) / 7.08;
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -286,20 +286,20 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return gyro.getAngle();
-        //return ahrs.getYaw();
+        //return gyro.getAngle();
+        return ahrs.getYaw();
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        return gyro.getRate();
-        //return ahrs.getRate();
+        //return gyro.getRate();
+        return ahrs.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
-        gyro.reset();
-        //ahrs.reset();
+        //gyro.reset();
+        ahrs.reset();
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */
