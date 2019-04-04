@@ -51,7 +51,7 @@ public class Drivetrain extends Subsystem {
     public final double  kP = 5e-5;
     public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kV = /*0.1;*/ 0.095;
+    public final double  kV = 0.1; // Phobos: 0.095;
     public final double  kA = 0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
