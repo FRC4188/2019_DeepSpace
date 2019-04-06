@@ -26,14 +26,14 @@ public class Climber extends Subsystem {
     // Constants
     private final double RAMP_RATE = 0.2; // seconds
     private final double MAX_OUT = 1.0; // percent out
-    private final double MAX_VELOCITY = 3000.0; // talon units per 100ms
-    private final double kP = 0.01;
+    private final double MAX_VELOCITY = 2500.0; // talon units per 100ms
+    private final double kP = 0.025;
     private final double kI = 0;
     private final double kD = 0;
     private final double kF = 1023 / MAX_VELOCITY;
     private final int    SLOT_ID = 0;
     private final int    TIMEOUT = 10; // ms
-    private final double ENCODER_TO_FEET = 1.0 / 400000; // ft
+    private final double ENCODER_TO_FEET = 1.5 / 18362.0; // ft
 
     // State variables
     private boolean climberInverted;
@@ -47,7 +47,7 @@ public class Climber extends Subsystem {
         rightClimberMotor.configSelectedFeedbackSensor(
                 FeedbackDevice.CTRE_MagEncoder_Relative, SLOT_ID, TIMEOUT);
         leftClimberMotor.setSensorPhase(true);
-        rightClimberMotor.setSensorPhase(true);
+        rightClimberMotor.setSensorPhase(false);
 
         // Limit Switches
         leftClimberMotor.overrideLimitSwitchesEnable(true);
@@ -74,10 +74,10 @@ public class Climber extends Subsystem {
 
     /** Prints necessary info to the dashboard. */
     private void updateShufleboard() {
-        SmartDashboard.putNumber("Climber l vel", getRawLeftVelocity());
-        SmartDashboard.putNumber("Climber l pos", getRawLeftPosition());
-        SmartDashboard.putNumber("Climber r vel", getRawRightVelocity());
-        SmartDashboard.putNumber("Climber r pos", getRawRightPosition());
+        SmartDashboard.putNumber("Climber l vel", getLeftVelocity());
+        SmartDashboard.putNumber("Climber l pos", getLeftPosition());
+        SmartDashboard.putNumber("Climber r vel", getRightVelocity());
+        SmartDashboard.putNumber("Climber r pos", getRightPosition());
     }
 
     /** Runs every loop. */
@@ -91,7 +91,7 @@ public class Climber extends Subsystem {
         resetEncoders();
         enableRampRate();
         setBrake();
-        climberInverted = true;
+        climberInverted = false;
         setInverted(false);
     }
 
@@ -166,7 +166,7 @@ public class Climber extends Subsystem {
     /** Inverts the the climber. */
     public void setInverted(boolean isInverted) {
         if(climberInverted) isInverted = !isInverted;
-        leftClimberMotor.setInverted(!isInverted);
+        leftClimberMotor.setInverted(isInverted);
         rightClimberMotor.setInverted(isInverted);
     }
 

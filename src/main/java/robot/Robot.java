@@ -4,6 +4,7 @@ import robot.OI;
 import robot.subsystems.*;
 import robot.utils.*;
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
@@ -45,8 +46,8 @@ public class Robot extends TimedRobot {
 
         // start camera stream
         UsbCamera cam = CameraServer.getInstance().startAutomaticCapture();
-        cam.setResolution(320, 240);
-        cam.setFPS(30);
+        cam.setResolution(160, 120);
+        cam.setFPS(20);
 
         // finish initialization of BadLog
         //logger.finishInit();

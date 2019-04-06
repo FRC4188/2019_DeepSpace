@@ -27,7 +27,7 @@ public class ShoulderToAngle extends Command {
 
     @Override
     protected void execute() {
-        arm.shoulderToAngle(angle, tolerance);
+        arm.shoulderToAngle(angle + 10, tolerance);
         double error = angle - arm.getPosition();
         if(Math.abs(error) < tolerance) counter++;
         else counter = 0;

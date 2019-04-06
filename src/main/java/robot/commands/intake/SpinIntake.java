@@ -22,7 +22,7 @@ public class SpinIntake extends Command {
 
     @Override
     protected void execute() {
-        intake.spinIntake(speed);
+        intake.spinIntake(-speed);
     }
 
     @Override

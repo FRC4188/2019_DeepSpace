@@ -129,11 +129,10 @@ public class OI {
         pilotB.whenPressed(new FlipLimelight());
         pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
-        pilotDpadNorth.whileHeld(new ManualClimb(0.4));
-        pilotDpadSouth.whileHeld(new ManualClimb(-0.4));
+        pilotDpadNorth.whileHeld(new ManualClimb(1.0));
+        pilotDpadSouth.whileHeld(new ManualClimb(-1.0));
 
-        pilotDpadEast.whileHeld(new ClimbWithoutSwitches(0.43));
-        pilotDpadWest.whileHeld(new ClimbWithoutSwitches(-0.43));
+        pilotDpadEast.whileHeld(new ClimbSequence());
 
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());
@@ -148,7 +147,6 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
-        copilotLb.whenPressed(new ToHeight(Height.CLIMB));
         copilotRb.whenPressed(new ZeroShoulder());
 
         rbGround.whenPressed(new ToHeight(Height.HOME));
@@ -208,13 +206,13 @@ public class OI {
     /** Returns y axis of Joystick on pilot controller. */
     public double getPilotY(Hand hand) {
         if(Math.abs(pilot.getY(hand)) < Controller.DEADBAND) return 0;
-        else return scaleJoystick(-pilot.getY(hand), JoystickSens.SQUARED);
+        else return scaleJoystick(-pilot.getY(hand), JoystickSens.CUBED);
     }
 
     /** Returns x axis of Joystick on pilot controller. */
     public double getPilotX(Hand hand) {
         if(Math.abs(pilot.getX(hand)) < Controller.DEADBAND) return 0;
-        else return scaleJoystick(pilot.getX(hand), JoystickSens.SINE);
+        else return scaleJoystick(pilot.getX(hand), JoystickSens.CUBED);
     }
 
     /** Returns trigger axis on pilot controller. */

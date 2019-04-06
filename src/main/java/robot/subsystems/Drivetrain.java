@@ -59,7 +59,7 @@ public class Drivetrain extends Subsystem {
     public final double  WHEELBASE_WIDTH = 2.67; // ft
     public final double  WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double  SRX_TICKS_PER_REV = 4096.0; // ctre mag encoder
-    public final double  RAMP_RATE = 0.75; // seconds
+    public final double  RAMP_RATE = 0.3; // seconds
     public final double  LOW_GEAR_RATIO = 15.32;
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
