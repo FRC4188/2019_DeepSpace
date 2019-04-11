@@ -14,7 +14,7 @@ public class ManualDrive extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
 
     final double kSLOW_TURN = 0.2;
-    final double kFAST_TURN = 0.4;
+    final double kFAST_TURN = 0.7;
     final double kSTICK_TURN = 0.58;
 
     public ManualDrive() {

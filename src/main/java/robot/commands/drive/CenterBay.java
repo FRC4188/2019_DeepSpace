@@ -3,6 +3,7 @@ package robot.commands.drive;
 import robot.Robot;
 import robot.subsystems.Drivetrain;
 import robot.subsystems.LimeLight;
+import robot.utils.CSPMath;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.command.Command;
 
@@ -13,7 +14,11 @@ public class CenterBay extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
     LimeLight limelight = Robot.limelight;
 
-    final double TURN_kP = 0.01;
+    final double kP = 0.02;
+    final double kD = 0.01;
+    final double DELTA_T = 0.02;
+
+    double lastError;
 
     public CenterBay() {
         requires(drivetrain);
@@ -33,7 +38,10 @@ public class CenterBay extends Command {
 
         // angle p loop
         double angleErr = limelight.getHorizontalAngle();
-        double zTurn = TURN_kP * angleErr;
+        double turnDeriv = (angleErr - lastError) * DELTA_T;
+        double zTurn = kP * angleErr + kD * turnDeriv;
+        zTurn = CSPMath.constrainKeepSign(zTurn, 0.05, 1.0);
+        lastError = angleErr;
 
         // command motor output
         drivetrain.arcade(xSpeed, zTurn);
