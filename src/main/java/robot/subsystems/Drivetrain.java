@@ -27,7 +27,7 @@ public class Drivetrain extends Subsystem {
     private CANSparkMax leftMotor = new CANSparkMax(1, MotorType.kBrushless);
     private CANSparkMax leftSlave1 = new CANSparkMax(2, MotorType.kBrushless);
     private CANSparkMax leftSlave2 = new CANSparkMax(3, MotorType.kBrushless);
-    private CANSparkMax rightMotor = new CANSparkMax(4, MotorType.kBrushless);
+    private CANSparkMax rightMotor = new CANSparkMax(7, MotorType.kBrushless);
     private CANSparkMax rightSlave1 = new CANSparkMax(5, MotorType.kBrushless);
     private CANSparkMax rightSlave2 = new CANSparkMax(6, MotorType.kBrushless);
     private CANEncoder leftNeoEncoder = leftMotor.getEncoder();
@@ -51,7 +51,7 @@ public class Drivetrain extends Subsystem {
     public final double  kP = 5e-5;
     public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kV = /* 0.1; // Phobos: */ 0.1;
+    public final double  kV = 0.1; // Phobos: */ 0.1;
     public final double  kA = 0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
@@ -59,13 +59,13 @@ public class Drivetrain extends Subsystem {
     public final double  WHEELBASE_WIDTH = 2.67; // ft
     public final double  WHEEL_DIAMETER = (6.0 / 12.0); // ft
     public final double  SRX_TICKS_PER_REV = 4096.0; // ctre mag encoder
-    public final double  RAMP_RATE = 0.3; // seconds
+    public final double  RAMP_RATE = 0.4; // seconds
     public final double  LOW_GEAR_RATIO = 15.32;
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
     public double        NEO_ENCODER_TO_FEET;
-    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET = /* 10.0 / 90.2896; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 15.32;
-    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET = /* 10.0 / 41.2614; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 7.08;
+    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET =  10.0 / 90.2896; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 15.32;
+    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET =  10.0 / 41.2614; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 7.08;
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -286,20 +286,21 @@ public class Drivetrain extends Subsystem {
 
     /** Returns gyro angle in degrees. */
     public double getGyroAngle() {
-        return gyro.getAngle();
-        //return ahrs.getYaw();
+        //return gyro.getAngle();
+        return ahrs.getYaw();
     }
 
     /** Returns gyro rate in degrees per sec. */
     public double getGyroRate() {
-        return gyro.getRate();
-        //return ahrs.getRate();
+        //return gyro.getRate();
+        return ahrs.getRate();
     }
 
     /** Resets gyro angle to 0. AVOID CALLING THIS. */
     public void resetGyro() {
         gyro.reset();
-        //ahrs.reset();
+        ahrs.reset();
+        System.out.println("*****ZEROING*****");
     }
 
     /** Calibrates the gyro to reduce drifting. Only call when robot is not moving. */

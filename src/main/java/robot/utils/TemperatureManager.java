@@ -20,20 +20,20 @@ public class TemperatureManager {
         StringBuilder sb = new StringBuilder();
         for(int i = 1; i < 7; i++){
             if(drivetrain.getMotorTemperature(i) > MAX_TEMP){
-                double tempInF = CSPMath.cToF(drivetrain.getMotorTemperature(i));
-                sb.append("D" + i + ": " + tempInF + ", ");
+                double tempInC = drivetrain.getMotorTemperature(i);
+                sb.append("D" + i + ": " + tempInC + ", ");
             }
         }
         for(int i = 11; i < 13; i++){
             if(elevator.getMotorTemperature(i) > MAX_TEMP){
-                double tempInF = CSPMath.cToF(elevator.getMotorTemperature(i));
-                sb.append("E" + i + ": " + tempInF + ", ");
+                double tempInC = elevator.getMotorTemperature(i);
+                sb.append("E" + i + ": " + tempInC + ", ");
             }
         }
         for(int i = 21; i < 23; i++){
             if(arm.getMotorTemperature(i) > MAX_TEMP){
-                double tempInF = CSPMath.cToF(arm.getMotorTemperature(i));
-                sb.append("A" + i + ": " + tempInF + ", ");
+                double tempInC = arm.getMotorTemperature(i);
+                sb.append("A" + i + ": " + tempInC + ", ");
             }
         }
         SmartDashboard.putString("Temp Warnings", sb.toString());

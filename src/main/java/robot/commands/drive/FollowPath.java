@@ -25,6 +25,7 @@ public class FollowPath extends Command {
         L_TO_L_NEAR_ROCKET_HAB2,
         L_TO_L_NEAR_SHIP_HAB1,
         L_TO_L_NEAR_SHIP_HAB2,
+        L_TO_L_FRONT_SHIP_HAB2,
         M_TO_L_FAR_ROCKET,
         M_TO_L_NEAR_SHIP,
         M_TO_R_FAR_ROCKET,
@@ -35,6 +36,7 @@ public class FollowPath extends Command {
         R_TO_R_NEAR_ROCKET_HAB2,
         R_TO_R_NEAR_SHIP_HAB1,
         R_TO_R_NEAR_SHIP_HAB2,
+        R_TO_R_FRONT_SHIP_HAB2
     }
 
     Drivetrain drivetrain = Robot.drivetrain;
@@ -158,7 +160,7 @@ public class FollowPath extends Command {
         double gyroHeading = drivetrain.getGyroAngle();
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.8 * (1.0/80.0) * angleDifference;
+        double turn = 0.4 * (1.0/80.0) * angleDifference;
 
         // use output
         drivetrain.tank(l + turn, r - turn);

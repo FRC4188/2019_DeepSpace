@@ -1,6 +1,7 @@
 package robot.utils;
 
 import robot.commands.drive.*;
+import robot.commands.groups.*;
 import robot.commands.drive.FollowPath.Path;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -31,6 +32,8 @@ public class AutoChooser {
         chooser.addOption("R2 Far Rocket", 14);
         chooser.addOption("R2 Near Rocket", 15);
         chooser.addOption("R2 Near Ship", 16);
+        chooser.addOption("L2 Front Ship", 17);
+        chooser.addOption("R2 Front Ship", 18);
 
         SmartDashboard.putData("Auto Chooser", chooser);
 
@@ -75,6 +78,10 @@ public class AutoChooser {
                 return new FollowPath(Path.R_TO_R_NEAR_ROCKET_HAB2, false);
             case 16:
                 return new FollowPath(Path.R_TO_R_NEAR_SHIP_HAB2, false);
+            case 17:
+                return new LHab2ToFrontShip();
+            case 18:
+                return new RHab2ToFrontShip();
             default:
                 return null;
         }
