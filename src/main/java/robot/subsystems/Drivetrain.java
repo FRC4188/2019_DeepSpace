@@ -49,10 +49,10 @@ public class Drivetrain extends Subsystem {
     public final double  MAX_ACCELERATION = 5; // ft/s^2
     public final double  MAX_JERK = 190; // ft/s^3
     public final double  kP = 5e-5;
-    public final double  kI = 1e-6;
+    public final double  kI = 0;
     public final double  kD = 0;
-    public final double  kV = 0.1; // Phobos: */ 0.1;
-    public final double  kA = 0;
+    public final double  kV = 0.079; // Phobos: */ 0.1;
+    public final double  kA = 0.0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
     public final double  MAX_OUT = 1.0;
@@ -257,12 +257,12 @@ public class Drivetrain extends Subsystem {
 
     /** Returns left encoder velocity in feet per second. */
     public double getLeftVelocity() {
-        return leftNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET; // native is units/sec
+        return leftNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET * (1.0/60); // native is rpm
     }
 
     /** Returns right encoder velocity in feet per second. */
     public double getRightVelocity() {
-        return rightNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET; // native is units/sec
+        return rightNeoEncoder.getVelocity() * NEO_ENCODER_TO_FEET * (1.0/60); // native is rpm
     }
 
     /** Returns average robot velocity in feet per second. */
@@ -387,14 +387,14 @@ public class Drivetrain extends Subsystem {
 
     /** Shifts drivetrain to low gear. */
     public void setLowGear() {
-        gearShift.set(Value.kReverse);
+        gearShift.set(Value.kForward);
         NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
     }
 
     /** Shifts drivetrain to high gear. */
     public void setHighGear() {
-        gearShift.set(Value.kForward);
-        NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
+        gearShift.set(Value.kReverse);
+        NEO_ENCODER_TO_FEET = NEO_HIGH_GEAR_ENCODER_TO_FEET;
     }
 
     /** Turns gear shift solenoid off. */

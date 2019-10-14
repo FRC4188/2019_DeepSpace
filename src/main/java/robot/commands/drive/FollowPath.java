@@ -46,6 +46,7 @@ public class FollowPath extends Command {
     private DistanceFollower leftFollower, rightFollower;
     private boolean isReversed, fromFile, isFinished;
     private double initialLeftDist, initialRightDist;
+    private int counter;
     private Waypoint[] points;
     private Path path;
 
@@ -80,6 +81,7 @@ public class FollowPath extends Command {
         initialLeftDist = drivetrain.getLeftPosition();
         initialRightDist = drivetrain.getRightPosition();
         isFinished = false;
+        counter = 0;
 
         // create waypoints if going to perpendicular
         if(path == Path.TO_PERPENDICULAR) {
@@ -160,15 +162,16 @@ public class FollowPath extends Command {
         double gyroHeading = drivetrain.getGyroAngle();
         double desiredHeading = Pathfinder.r2d(leftFollower.getHeading());
         double angleDifference = Pathfinder.boundHalfDegrees(desiredHeading - gyroHeading);
-        double turn = 0.4 * (1.0/80.0) * angleDifference;
+        double turn = 0.45 * (1.0/80.0) * angleDifference;
 
         // use output
         drivetrain.tank(l + turn, r - turn);
 
         // determine if finished
         if(leftFollower.isFinished() && rightFollower.isFinished() && Math.abs(angleDifference) < 3.0) {
-            isFinished = true;
+            counter++;
         }
+        if(counter > 10) isFinished = true;
 
     }
 

@@ -15,11 +15,11 @@ public class ManualArm extends Command {
 
     public ManualArm() {
         requires(arm);
+        SmartDashboard.putBoolean("Arm closed loop", true);
     }
 
     @Override
     protected void initialize() {
-        SmartDashboard.putBoolean("Arm closed loop", true);
     }
 
     @Override
