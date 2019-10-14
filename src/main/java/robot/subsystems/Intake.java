@@ -129,6 +129,7 @@ public class Intake extends Subsystem {
         wristMotor.set(ControlMode.PercentOutput, percent);
     }
 
+
     /** Sets wrist to given angle in degrees. */
     public void wristToAngle(double angleInDegrees, double toleranceInDegrees) {
         double targetPos = angleInDegrees / ENCODER_TO_DEGREES;

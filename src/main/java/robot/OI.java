@@ -49,13 +49,13 @@ public class OI {
 
     // button mappings for rocket box
     public class RocketBox {
-        public final static int GROUND = 1;
-        public final static int CARGO_LOW = 3;
-        public final static int CARGO_MID = 5;
-        public final static int CARGO_HIGH = 7;
-        public final static int HATCH_LOW = 2;
-        public final static int HATCH_MID = 4;
-        public final static int HATCH_HIGH = 6;
+        public final static int GROUND = 1;     //1
+        public final static int CARGO_LOW = 2;  //3
+        public final static int CARGO_MID = 4;  //5
+        public final static int CARGO_HIGH = 6; //7
+        public final static int HATCH_LOW = 3;  //2
+        public final static int HATCH_MID = 5;  //4
+        public final static int HATCH_HIGH = 7; //6
     }
 
     // Controller initialization
@@ -157,10 +157,10 @@ public class OI {
         rbCargoMid.whenPressed(new ToHeight(Height.CARGO_MID));
         rbCargoHigh.whenPressed(new ToHeight(Height.CARGO_HIGH));
 
-        copilotDpadNorth.whenPressed(new ToHeight(Height.CARGO_SHIP));
-        copilotDpadSouth.whenPressed(new ToHeight(Height.HATCH_FLOOR));
-        copilotDpadEast.whenPressed(new ToHeight(Height.CARGO_LOAD));
-        copilotDpadWest.whenPressed(new ToHeight(Height.CARGO_FLOOR));
+        copilotDpadNorth.whenPressed(new ToHeight(Height.CARGO_LOAD));
+        copilotDpadSouth.whenPressed(new ToHeight(Height.CARGO_FLOOR));
+        copilotDpadEast.whenPressed(new ToHeight(Height.CARGO_SHIP));
+        copilotDpadWest.whenPressed(new ToHeight(Height.HATCH_LOW));
 
     }
 

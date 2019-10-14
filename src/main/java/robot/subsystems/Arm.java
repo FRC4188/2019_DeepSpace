@@ -1,6 +1,6 @@
 package robot.subsystems;
 
-import robot.commands.arm.ManualArm;
+import robot.commands.arm.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import com.revrobotics.CANEncoder;
@@ -50,6 +50,7 @@ public class Arm extends Subsystem {
 
         // Initialize BadLog
         //initializeBadLog();
+
     }
 
     /** Defines default command that will run when object is created. */
@@ -68,6 +69,7 @@ public class Arm extends Subsystem {
         SmartDashboard.putNumber("Shoulder get", shoulderMotor.get());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
+        SmartDashboard.putData("Zero Arm", new ZeroShoulder());
     }
 
     /** Runs every loop. */

@@ -13,9 +13,10 @@ public class ManualDrive extends Command {
     OI oi = Robot.oi;
     Drivetrain drivetrain = Robot.drivetrain;
 
-    final double kSLOW_TURN = 0.2;
+    final double kSLOW_TURN = 0.4;
     final double kFAST_TURN = 0.7;
     final double kSTICK_TURN = 0.58;
+    final double THRESHOLD = 0.3;
 
     public ManualDrive() {
         requires(drivetrain);
@@ -41,6 +42,7 @@ public class ManualDrive extends Command {
         double zTurn = pilotRightX * Math.abs(xSpeed) * kSTICK_TURN;
         if(pilotLeftBumper) zTurn = pilotRightX * kSLOW_TURN;
         else if(pilotRightBumper) zTurn = pilotRightX * kFAST_TURN;
+        else if(Math.abs(xSpeed) < THRESHOLD) zTurn = pilotRightX * kSLOW_TURN;
 
         // command motor output
         drivetrain.arcade(xSpeed * brownoutVar, zTurn * brownoutVar);

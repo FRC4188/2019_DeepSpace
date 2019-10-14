@@ -64,8 +64,8 @@ public class Drivetrain extends Subsystem {
     public final double  HIGH_GEAR_RATIO = 7.08;
     public final double  SRX_ENCODER_TO_FEET = (WHEEL_DIAMETER * Math.PI) / (SRX_TICKS_PER_REV); // ft
     public double        NEO_ENCODER_TO_FEET;
-    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET =  10.0 / 90.2896; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 15.32;
-    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET =  10.0 / 41.2614; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 7.08;
+    public final double  NEO_LOW_GEAR_ENCODER_TO_FEET =  18.46 / 265.75; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 15.32;
+    public final double  NEO_HIGH_GEAR_ENCODER_TO_FEET =  18.46 / 124.25; // Phobos is */ (WHEEL_DIAMETER * Math.PI) / 7.08;
     private final double DELTA_T = 0.2;
 
     // State vars
@@ -85,7 +85,7 @@ public class Drivetrain extends Subsystem {
         controllerInit();
         reset();
         calibrateGyro();
-        setLowGear();
+        setHighGear();
 
         // Initialize BadLog
         //initializeBadLog();
@@ -102,6 +102,8 @@ public class Drivetrain extends Subsystem {
     private void updateShuffleboard() {
         SmartDashboard.putNumber("L Pos", getLeftPosition());
         SmartDashboard.putNumber("R Pos", getRightPosition());
+        SmartDashboard.putNumber("L raw", getRawLeftPosition());
+        SmartDashboard.putNumber("R raw", getRawRightPosition());
         SmartDashboard.putNumber("L Vel", getLeftVelocity());
         SmartDashboard.putNumber("R Vel", getRightVelocity());
         SmartDashboard.putNumber("Gyro", getGyroAngle());
@@ -162,7 +164,6 @@ public class Drivetrain extends Subsystem {
         BadLog.createTopic("Drivetrain/Field Pos Y", "ft", () -> getFieldPosY(), "hide", "join:Drivetrain/Field Pos");
         BadLog.createTopic("Drivetrain/Left Output", "%", () -> getLeftOutput(), "hide", "join:Drivetrain/Output");
         BadLog.createTopic("Drivetrain/Right Output", "%", () -> getRightOutput(), "hide", "join:Drivetrain/Output");
-
     }
 
     /** Drives forward a given distance in feet. */
@@ -386,13 +387,13 @@ public class Drivetrain extends Subsystem {
 
     /** Shifts drivetrain to low gear. */
     public void setLowGear() {
-        gearShift.set(Value.kForward);
+        gearShift.set(Value.kReverse);
         NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
     }
 
     /** Shifts drivetrain to high gear. */
     public void setHighGear() {
-        gearShift.set(Value.kReverse);
+        gearShift.set(Value.kForward);
         NEO_ENCODER_TO_FEET = NEO_LOW_GEAR_ENCODER_TO_FEET;
     }
 
