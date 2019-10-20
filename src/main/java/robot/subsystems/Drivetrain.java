@@ -46,12 +46,12 @@ public class Drivetrain extends Subsystem {
 
     // Constants
     public final double  MAX_VELOCITY = 9; // ft/s
-    public final double  MAX_ACCELERATION = 5; // ft/s^2
+    public final double  MAX_ACCELERATION = 4; // ft/s^2
     public final double  MAX_JERK = 190; // ft/s^3
-    public final double  kP = 5e-5;
-    public final double  kI = 0;
+    public final double  kP = 0.001;
+    public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kV = 0.079; // Phobos: */ 0.1;
+    public final double  kV = 0.08; // Phobos: */ 0.1;
     public final double  kA = 0.0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
@@ -383,6 +383,14 @@ public class Drivetrain extends Subsystem {
         leftMotor.setClosedLoopRampRate(RAMP_RATE);
         rightMotor.setOpenLoopRampRate(RAMP_RATE);
         rightMotor.setClosedLoopRampRate(RAMP_RATE);
+    }
+
+    /** Disables ramp rate. */
+    public void disableRampRate() {
+        leftMotor.setOpenLoopRampRate(0);
+        leftMotor.setClosedLoopRampRate(0);
+        rightMotor.setOpenLoopRampRate(0);
+        rightMotor.setClosedLoopRampRate(0);
     }
 
     /** Shifts drivetrain to low gear. */
