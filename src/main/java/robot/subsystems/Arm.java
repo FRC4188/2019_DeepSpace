@@ -15,8 +15,8 @@ import badlog.lib.DataInferMode;
 public class Arm extends Subsystem {
 
     // Device initialization
-    public CANSparkMax shoulderMotor = new CANSparkMax(22, MotorType.kBrushless);
-    private CANSparkMax shoulderSlave = new CANSparkMax(21, MotorType.kBrushless);
+    public CANSparkMax shoulderMotor = new CANSparkMax(21, MotorType.kBrushless);
+    private CANSparkMax shoulderSlave = new CANSparkMax(22, MotorType.kBrushless);
     public CANEncoder shoulderEncoder = new CANEncoder(shoulderMotor);
     public CANPIDController pidC = shoulderMotor.getPIDController();
 
@@ -84,7 +84,6 @@ public class Arm extends Subsystem {
     /** Resets necessary devices. */
     public void reset() {
         resetEncoders();
-        //enableRampRate();
         setBrake();
         shoulderInverted = true;
         setInverted(false);
@@ -123,7 +122,7 @@ public class Arm extends Subsystem {
         angle /= ENCODER_TO_DEGREES;
         tolerance /= ENCODER_TO_DEGREES;
         pidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
-        pidC.setReference(-angle, ControlType.kSmartMotion);
+        pidC.setReference(angle, ControlType.kSmartMotion);
     }
 
     /** Holds current arm angle using P loop to drive velocity to 0. */

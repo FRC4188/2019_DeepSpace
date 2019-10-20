@@ -388,6 +388,52 @@ public class LimeLight extends Subsystem {
     }
 
     /**
+     * Points the Limelight forward and adjusts pipelines.
+     */
+    public void lookForward() {
+        setServoAngle(90.0);
+        switch (currentPipeline) {
+        case CARGO_FLIP:
+            setPipeline(Pipeline.CARGO);
+            break;
+        case HATCH_FLIP:
+            setPipeline(Pipeline.HATCH);
+            break;
+        case BAY_CLOSE_FLIP:
+            setPipeline(Pipeline.BAY_CLOSE);
+            break;
+        case BAY_3D_FLIP:
+            setPipeline(Pipeline.BAY_3D);
+            break;
+        default:
+            break;
+        }
+    }
+
+    /**
+     * Points the Limelight backwards and adjusts pipelines.
+     */
+    public void lookBackward() {
+        setServoAngle(-90.0);
+        switch (currentPipeline) {
+        case CARGO:
+            setPipeline(Pipeline.CARGO_FLIP);
+            break;
+        case HATCH:
+            setPipeline(Pipeline.HATCH_FLIP);
+            break;
+        case BAY_CLOSE:
+            setPipeline(Pipeline.BAY_CLOSE_FLIP);
+            break;
+        case BAY_3D:
+            setPipeline(Pipeline.BAY_3D_FLIP);
+            break;
+        default:
+            break;
+        }
+    }
+
+    /**
      * Returns the pipeline the camera is running
      */
     public Pipeline getPipeline() {
@@ -449,6 +495,6 @@ public class LimeLight extends Subsystem {
     public void useAsCamera() {
         setLightMode(LedMode.OFF);
         setCameraMode(CameraMode.CAMERA);
-        //setPipeline(Pipeline.OFF);
+        setPipeline(Pipeline.OFF);
     }
 }

@@ -4,16 +4,17 @@ import robot.Robot;
 import robot.subsystems.LimeLight;
 import edu.wpi.first.wpilibj.command.Command;
 
-public class LimeLightDefault extends Command {
+/** Points the Limelight servo forward. */
+public class LimelightForward extends Command {
 
     LimeLight limelight = Robot.limelight;
 
-    public LimeLightDefault() {
-        requires(limelight);
+    public LimelightForward() {
     }
 
     @Override
     protected void initialize() {
+        limelight.lookForward();
     }
 
     @Override

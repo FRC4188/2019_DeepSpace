@@ -110,11 +110,6 @@ public class OI {
     private CommandIterator hatchIterator = new CommandIterator((Trigger) copilotLb, copilotLTrig, 160, "Hatch Iterator");
     private CommandIterator cargoIterator = new CommandIterator((Trigger) copilotRb, copilotRTrig, 160, "Cargo Iterator");
 
-    private Waypoint[] testPath = new Waypoint[] {
-        new Waypoint(0, 0, 0),
-        new Waypoint(5, 3, 0)
-    };
-
     /** Constructs new OI object and assigns commands. */
     public OI() {
 
@@ -127,12 +122,13 @@ public class OI {
 
         pilotA.whenPressed(new TrackPipeline(Pipeline.OFF));
         pilotB.whenPressed(new FlipLimelight());
-        pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
+        //pilotY.whenPressed(new FollowPath(Path.TO_PERPENDICULAR, false));
 
         pilotDpadNorth.whileHeld(new ManualClimb(1.0));
         pilotDpadSouth.whileHeld(new ManualClimb(-1.0));
 
         pilotDpadEast.whileHeld(new ClimbSequence());
+        pilotDpadWest.whenPressed(new PassThrough());
 
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());
@@ -147,7 +143,8 @@ public class OI {
         copilotX.whenPressed(new FireHatch(Value.kReverse));
         copilotX.whenReleased(new FireHatch(Value.kOff));
 
-        copilotRb.whenPressed(new ZeroShoulder());
+        copilotLb.whileHeld(new WristEndGame());
+        copilotLb.whenReleased(new SpinIntake(0));
 
         rbGround.whenPressed(new ToHeight(Height.HOME));
         rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));

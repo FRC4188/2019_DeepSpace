@@ -2,13 +2,12 @@ package robot.commands.groups;
 
 import robot.commands.arm.*;
 import robot.commands.intake.*;
+import robot.commands.vision.*;
 import robot.commands.elevator.*;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
 
 public class ToHeight extends CommandGroup {
-
-    boolean lastOnFront = true;
 
     public enum Height {
 
@@ -23,7 +22,10 @@ public class ToHeight extends CommandGroup {
         HATCH_LOW(2.25, -112.0, -39.0),
         HATCH_MID(2.25, -58.0, 0.0),
         HATCH_HIGH(2.46, 27.0, -88.0),
-        HATCH_FLOOR(0.52, -114.0, 105.0);
+        HATCH_FLOOR(0.52, -114.0, 105.0),
+        PASS_PREP(2.46, -114.0, 0),
+        THROUGH(2.46, -110, 0),
+        ENDGAME(2.46, -110, 177);
 
         double elevatorHeight, shoulderAngle, wristAngle;
         Height(double elevatorHeight, double shoulderAngle, double wristAngle) {
@@ -54,6 +56,8 @@ public class ToHeight extends CommandGroup {
         double shoulderAngle = height.getShoulderAngle();
         double wristAngle = height.getWristAngle();
 
+        if(height.equals(Height.HATCH_HIGH)) addParallel(new LimelightBackward());
+        else addParallel(new LimelightForward());
         addParallel(new ElevatorToHeight(elevatorHeight, 0.1));
         addParallel(new WristToAngle(wristAngle, 2.0));
         addSequential(new ShoulderToAngle(shoulderAngle, 2.0));
