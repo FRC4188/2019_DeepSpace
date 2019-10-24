@@ -1,6 +1,7 @@
 package robot.subsystems;
 
 import robot.commands.drive.ManualDrive;
+import robot.commands.drive.RecordTrajectory;
 import robot.utils.CSPMath;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
@@ -48,11 +49,10 @@ public class Drivetrain extends Subsystem {
     public final double  MAX_VELOCITY = 9; // ft/s
     public final double  MAX_ACCELERATION = 4; // ft/s^2
     public final double  MAX_JERK = 190; // ft/s^3
-    public final double  kP = 0.001;
+    public final double  kP = 5e-5;
     public final double  kI = 1e-6;
     public final double  kD = 0;
-    public final double  kV = 0.08; // Phobos: */ 0.1;
-    public final double  kA = 0.0;
+    public final double  kV = 0;
     public final double  kI_ZONE = 0;
     public final int     SLOT_ID = 0;
     public final double  MAX_OUT = 1.0;
@@ -110,6 +110,7 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
         SmartDashboard.putNumber("Target angle", getTargetAngle());
+        SmartDashboard.putData(new RecordTrajectory());
     }
 
     /** Runs every loop. */
@@ -175,6 +176,24 @@ public class Drivetrain extends Subsystem {
         rightPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
         leftPidC.setReference(distance, ControlType.kSmartMotion);
         rightPidC.setReference(distance, ControlType.kSmartMotion);
+    }
+
+    /** Sets left drive motors to a given velocity in feet per second. */
+    public void setLeftVelocity(double velocity, double tolerance) {
+        // convert from feet to rotations (Spark units)
+        velocity /= NEO_ENCODER_TO_FEET;
+        tolerance /= NEO_ENCODER_TO_FEET;
+        leftPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
+        leftPidC.setReference(velocity, ControlType.kVelocity);
+    }
+
+    /** Sets left drive motors to a given velocity in feet per second. */
+    public void setRightVelocity(double velocity, double tolerance) {
+        // convert from feet to rotations (Spark units)
+        velocity /= NEO_ENCODER_TO_FEET;
+        tolerance /= NEO_ENCODER_TO_FEET;
+        rightPidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
+        rightPidC.setReference(velocity, ControlType.kVelocity);
     }
 
     /** Inverts drivetrain. True inverts each side from the
@@ -275,7 +294,7 @@ public class Drivetrain extends Subsystem {
         return leftMotor.get();
     }
 
-        /** Returns the right motor output as a percentage. */
+    /** Returns the right motor output as a percentage. */
     public double getRightOutput() {
         return rightMotor.get();
     }
@@ -283,6 +302,26 @@ public class Drivetrain extends Subsystem {
     /** Returns average motor output current. */
     public double getMotorCurrent() {
         return (leftMotor.getOutputCurrent() + rightMotor.getOutputCurrent()) / 2.0;
+    }
+
+    /** Returns applied voltage to the left controller. */
+    public double getLeftInputVoltage() {
+        return leftMotor.getBusVoltage();
+    }
+
+    /** Returns input voltage to the right controller. */
+    public double getRightInputVoltage() {
+        return rightMotor.getBusVoltage();
+    }
+
+    /** Returns applied voltage to the left motors. */
+    public double getLeftAppliedVoltage() {
+        return leftMotor.getAppliedOutput() * leftMotor.getBusVoltage();
+    }
+
+    /** Returns applied voltage to the right motors. */
+    public double getRightAppliedVoltage() {
+        return rightMotor.getAppliedOutput() * rightMotor.getBusVoltage();
     }
 
     /** Returns gyro angle in degrees. */

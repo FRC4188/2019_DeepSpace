@@ -50,11 +50,11 @@ public class FollowPath extends Command {
     private Waypoint[] points;
     private Path path;
 
-    private final double kP = drivetrain.kP;
-    private final double kI = drivetrain.kI;
-    private final double kD = drivetrain.kD;
-    private final double kV = drivetrain.kV;
-    private final double kA = drivetrain.kA;
+    private final double kP = 0.001;
+    private final double kI = 0;
+    private final double kD = 0;
+    private final double kV = 0.8;
+    private final double kA = 0;
     private final double DELTA_T = 0.02; // seconds
 
   /** Follows path from given waypoints. isReversed causes the path
