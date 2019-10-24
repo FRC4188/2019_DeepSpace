@@ -19,16 +19,18 @@ public class RecordTrajectory extends Command {
     BufferedWriter bw;
 
     public RecordTrajectory() {
+        SmartDashboard.putString("Trajectory Recording Name", " ");
+        SmartDashboard.putBoolean("Stop Recording Trajectory", false);
     }
 
     @Override
     protected void initialize() {
 
         // get name of recording
-        String fileName = SmartDashboard.getString("Trajectory Recording Name", null);
+        String fileName = SmartDashboard.getString("Trajectory Recording Name", " ");
 
         // set up file and start recording if file name exists
-        if(fileName != null) {
+        if(!fileName.equals(" ")) {
             file = new File("/home/lvuser/" + fileName + ".csv");
             try {
                 fw = new FileWriter(file);
@@ -45,6 +47,8 @@ public class RecordTrajectory extends Command {
     }
 
     protected void record() {
+
+        System.out.println("******recording******");
 
         // get applied voltages from controllers
         double lVoltage = drivetrain.getLeftAppliedVoltage();

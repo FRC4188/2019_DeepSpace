@@ -75,6 +75,12 @@ public class Drivetrain extends Subsystem {
     /** Constructs new Drivetrain object and configures devices. */
     public Drivetrain() {
 
+        // Dashboard commands
+        SmartDashboard.putData(new RecordTrajectory());
+
+        // Gyro settings
+        ahrs.enableBoardlevelYawReset(true);
+
         // Slave control
         leftSlave1.follow(leftMotor);
         leftSlave2.follow(leftMotor);
@@ -110,7 +116,6 @@ public class Drivetrain extends Subsystem {
         SmartDashboard.putNumber("Field X", getFieldPosX());
         SmartDashboard.putNumber("Field Y", getFieldPosY());
         SmartDashboard.putNumber("Target angle", getTargetAngle());
-        SmartDashboard.putData(new RecordTrajectory());
     }
 
     /** Runs every loop. */

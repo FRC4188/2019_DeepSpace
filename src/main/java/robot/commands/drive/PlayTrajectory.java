@@ -14,13 +14,14 @@ public class PlayTrajectory extends Command {
     Drivetrain drivetrain = Robot.drivetrain;
     private final double DELTA_T = 0.02; // seconds
     private Notifier notif = new Notifier(() -> play());
+    String fileName;
     File file;
     FileReader fr;
     BufferedReader br;
     boolean isFinished;
 
     public PlayTrajectory(String fileName) {
-        file = new File("/home/lvuser/" + fileName + ".csv");
+        this.fileName = fileName;
     }
 
     @Override
@@ -32,6 +33,7 @@ public class PlayTrajectory extends Command {
         drivetrain.disableRampRate();
 
         // set up file and start recording if file name exists
+        file = new File("/home/lvuser/" + fileName + ".csv");
         if(file.isFile()) {
             try {
                 fr = new FileReader(file);
@@ -48,6 +50,8 @@ public class PlayTrajectory extends Command {
     }
 
     protected void play() {
+
+        System.out.println("playing");
 
         String line = null;
         try {
