@@ -60,10 +60,10 @@ public class LimeLight extends Subsystem {
 
     // pipeline enum 
     public enum Pipeline {
-        OFF(2, 0.0), CARGO(2, 13.0/12), HATCH(2, 19.0/12),                //changing all these to point to the 10_24 file (first parameter being 2)
-                BAY_CLOSE(2, 6.0/12), BAY_3D(2,6.0/12),
-                CARGO_FLIP(6, 13.0/12), HATCH_FLIP(6, 19.0/12),
-                BAY_CLOSE_FLIP(6, 6.0/12), BAY_3D_FLIP(6, 6.0 / 12);      //why do we need BAY_3D_FLIP if it passes the same parameters as BAY_3D?
+        OFF(3, 0.0), CARGO(3, 13.0/12), HATCH(3, 19.0/12),                //changing all these to point to the 10_24 file (first parameter being 3)
+                BAY_CLOSE(3, 6.0/12), BAY_3D(3,6.0/12),
+                CARGO_FLIP(7, 13.0/12), HATCH_FLIP(7, 19.0/12),
+                BAY_CLOSE_FLIP(7, 6.0/12), BAY_3D_FLIP(7, 6.0 / 12);      //why do we need BAY_3D_FLIP if it passes the same parameters as BAY_3D?
 
                 //These are the original values. Commenting these here in case we mess up the one above
                 /*OFF(0, 0.0), CARGO(1, 13.0/12), HATCH(2, 19.0/12),
