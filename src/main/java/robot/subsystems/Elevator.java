@@ -153,6 +153,11 @@ public class Elevator extends Subsystem {
         return elevatorEncoder.getPosition();
     }
 
+    /** Sets the encoder to a specific height newEncoderHeight. */
+    public void setEncoders(double newElevatorHeight) {
+        elevatorEncoder.setPosition(newElevatorHeight / ENCODER_TO_FEET);
+    }
+
     /** Returns elevator encoder velocity in feet per second. */
     public double getVelocity() {
         return elevatorEncoder.getVelocity() * ENCODER_TO_FEET / 60.0; // native is rpm

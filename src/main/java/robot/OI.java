@@ -129,7 +129,10 @@ public class OI {
         pilotDpadSouth.whileHeld(new ManualClimb(-1.0));
 
         pilotDpadEast.whileHeld(new ClimbSequence());
-        pilotDpadWest.whenPressed(new PassThrough());
+        copilotStart.whenPressed(new PassThrough());
+        pilotLb.whenPressed(new ToHeight(Height.PASS_PREP));
+        pilotRb.whenPressed(new ToHeight(Height.THROUGH));
+        pilotStart.whenPressed(new ToHeight(Height.ENDGAME));
 
         pilotBack.whenPressed(new KillAll());
         copilotBack.whenPressed(new KillAll());

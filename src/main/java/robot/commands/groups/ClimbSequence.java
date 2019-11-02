@@ -9,7 +9,7 @@ public class ClimbSequence extends CommandGroup {
     public ClimbSequence() {
 
         addParallel(new ElevatorToVelocity(-0.493));
-        addParallel(new ManualClimb(.8));
+        addParallel(new ManualClimb(.815));
 
     }
 

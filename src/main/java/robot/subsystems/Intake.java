@@ -192,6 +192,12 @@ public class Intake extends Subsystem {
         wristMotor.setSelectedSensorPosition(init, 0, 10);
     }
 
+    /** Sets encoder to degree value wristAngle. */
+    public void setEncoders(double wristAngle) {
+        double ang = wristAngle/ENCODER_TO_DEGREES;
+        wristMotor.setSelectedSensorPosition((int) ang, 0, 10);
+    }
+
     /** Returns intake wrist encoder position in degrees. */
     public double getWristPosition() {
         return wristMotor.getSelectedSensorPosition(0) * ENCODER_TO_DEGREES;

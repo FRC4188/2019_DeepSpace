@@ -1,6 +1,7 @@
 package robot.subsystems;
 
 import robot.commands.arm.*;
+import robot.commands.groups.ToHeight.Height;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import com.revrobotics.CANEncoder;
@@ -11,6 +12,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import badlog.lib.BadLog;
 import badlog.lib.DataInferMode;
+import robot.commands.arm.EncoderHatchOne;
 
 public class Arm extends Subsystem {
 
@@ -72,7 +74,8 @@ public class Arm extends Subsystem {
         SmartDashboard.putNumber("Shoulder get", shoulderMotor.get());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
-        SmartDashboard.putData("Zero Arm", new ZeroShoulder());
+        SmartDashboard.putData("EncoderHatchOne", new EncoderHatchOne());
+        SmartDashboard.putData("ZeroArm", new ZeroArm());
     }
 
     /** Runs every loop. */
@@ -148,6 +151,11 @@ public class Arm extends Subsystem {
     public void resetEncoders() {
         double init = INITIAL_ANGLE / ENCODER_TO_DEGREES;
         shoulderEncoder.setPosition(init);
+    }
+
+    /** Sets the shoulder encoders to a degree value.  */
+    public void setEncoders(double newShoulderAngle) {
+        shoulderEncoder.setPosition(newShoulderAngle / ENCODER_TO_DEGREES);
     }
 
     /** Returns left encoder position in degrees. */

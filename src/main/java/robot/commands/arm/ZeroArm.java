@@ -8,14 +8,14 @@ import robot.subsystems.Intake;
 import edu.wpi.first.wpilibj.command.Command;
 
 /** Sets shoulder encoders to 0. */
-public class ZeroShoulder extends Command {
+public class ZeroArm extends Command {
 
     Arm arm = Robot.arm;
     Intake intake = Robot.intake;
     Elevator elevator = Robot.elevator;
     Drivetrain drivetrain = Robot.drivetrain;
 
-    public ZeroShoulder() {
+    public ZeroArm() {
     }
 
     @Override
