@@ -18,8 +18,9 @@ public class AutoPlaceHatch extends CommandGroup {
         dist = limelight.getDistance(limelight.getPipeline().getHeight());
         addSequential(new DriveToDistance(dist, tolerance));
         addParallel(new FireHatch(Value.kReverse));
-        addSequential(new Wait(), 0.2);
+        addSequential(new Wait(), 0.1);
         addParallel(new FireHatch(Value.kOff));
-        addSequential(new DriveToDistance(-dist, tolerance*3));
+        addSequential(new Wait(), 0.1);
+        addSequential(new DriveToDistance(-dist, 0.5));
     }
 }
