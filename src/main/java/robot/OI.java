@@ -132,7 +132,7 @@ public class OI {
         //pilotLb.whenPressed(new ToHeight(Height.PASS_PREP));
         //pilotRb.whenPressed(new ToHeight(Height.THROUGH));
         //pilotStart.whenPressed(new ToHeight(Height.ENDGAME));
-        pilotStart.whenPressed(new Blah());
+        pilotStart.whenPressed(new AutoPlace());
 
         pilotBack.whenPressed(new KillAll());
         

@@ -38,23 +38,33 @@ public class AutoPlace extends CommandGroup {
      * Moves back from the target afterward.
      */
     public AutoPlace(){
-        gamePiece = arm.getGamePiece();
+        setGamePiece();
         if (gamePiece != 0){
             while (Math.abs(zTurn) > acceptableAng){
                 autoCenterBay();
             }
             dist = limelight.getDistance();
             addSequential(new DriveToDistance(dist - 0.5, 0.2));
-            if (gamePiece == 2){
+            if (gamePiece == -1){
                 intakeOut();
             }
             else if (gamePiece == 1){
-                hatchState = intake.getHatchState();
+                setHatchState();
                 hatchPlace();
             }
             addSequential(new DriveToDistance(-1, 0.5));
         }
     }
+
+        //Sets gamePiece to match Arm's gamePiece
+        public void setGamePiece(){
+            gamePiece = arm.getGamePiece();
+        }
+    
+        //Sets hatchState to match Intake's hatchState
+        public void setHatchState(){
+            hatchState = intake.getHatchState();
+        }
 
     //CenterBay with autonomous forward motion of constant speed
     public void autoCenterBay(){
@@ -74,16 +84,14 @@ public class AutoPlace extends CommandGroup {
         addSequential(new Wait(), 0.1);
     }
 
-    //Sequence for deploying/intaking hatches
+    //Sequence for deploying/intaking hatches (-1 = out, 1 = in)
     public void hatchPlace(){
         if (hatchState == -1){
-            addParallel(new FireHatch(Value.kReverse));
+            addSequential(new FireHatch(Value.kReverse));
         }
         if (hatchState == 1){
-            addParallel(new FireHatch(Value.kForward));
+            addSequential(new FireHatch(Value.kForward));
         }
-        addSequential(new Wait(), 0.5);
         addParallel(new FireHatch(Value.kOff));
-        addSequential(new Wait(), 0.1);
     }
 }
