@@ -29,7 +29,6 @@ public class ZeroArm extends Command {
         elevator.resetEncoders();
         drivetrain.resetEncoders();
         drivetrain.resetGyro();
-        arm.setGamePiece(0);
     }
 
     @Override

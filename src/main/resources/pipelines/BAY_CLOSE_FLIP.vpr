@@ -1,7 +1,7 @@
 area_max:100
-area_min:0.007480520100000004
+area_min:0.1027
 aspect_max:1.3530402
-aspect_min:0.14145619999999998
+aspect_min:0.2519
 black_level:5
 blue_balance:1470
 calibration_type:0

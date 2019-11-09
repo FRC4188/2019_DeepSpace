@@ -59,9 +59,9 @@ public class OI {
     }
 
     // Controller initialization
-    private XboxController pilot = new XboxController(0);
-    private XboxController copilot = new XboxController(1);
-    private Joystick rocketBox = new Joystick(2);
+    private XboxController pilot = new XboxController(0); //0
+    private XboxController copilot = new XboxController(1); //1
+    private Joystick rocketBox = new Joystick(2); //2
 
     // Button initialization
     private JoystickButton pilotA = new JoystickButton(pilot, Controller.A);
@@ -112,7 +112,6 @@ public class OI {
 
     /** Constructs new OI object and assigns commands. */
     public OI() {
-
         pilotLS.whenPressed(new ShiftGear(Gear.HIGH));
         pilotLS.whenReleased(new ShiftGear(Gear.OFF));
         pilotRS.whenPressed(new ShiftGear(Gear.LOW));
@@ -129,13 +128,14 @@ public class OI {
         pilotDpadSouth.whileHeld(new ManualClimb(-1.0));
 
         pilotDpadEast.whileHeld(new ClimbSequence());
-        copilotStart.whenPressed(new PassThrough());
+        //copilotStart.whenPressed(new PassThrough());
         //pilotLb.whenPressed(new ToHeight(Height.PASS_PREP));
         //pilotRb.whenPressed(new ToHeight(Height.THROUGH));
         //pilotStart.whenPressed(new ToHeight(Height.ENDGAME));
-        pilotStart.whenPressed(new AutoPlace());
+        pilotStart.whenPressed(new Blah());
 
         pilotBack.whenPressed(new KillAll());
+        
         copilotBack.whenPressed(new KillAll());
 
         copilotA.whileHeld(new SpinIntake(1.0));
@@ -150,6 +150,7 @@ public class OI {
 
         copilotLb.whileHeld(new WristEndGame());
         copilotLb.whenReleased(new SpinIntake(0));
+        
 
         rbGround.whenPressed(new ToHeight(Height.HOME));
         rbHatchLow.whenPressed(new ToHeight(Height.HATCH_LOW));
@@ -159,6 +160,7 @@ public class OI {
         rbCargoMid.whenPressed(new ToHeight(Height.CARGO_MID));
         rbCargoHigh.whenPressed(new ToHeight(Height.CARGO_HIGH));
 
+        
         copilotDpadNorth.whenPressed(new ToHeight(Height.CARGO_LOAD));
         copilotDpadSouth.whenPressed(new ToHeight(Height.CARGO_FLOOR));
         copilotDpadEast.whenPressed(new ToHeight(Height.CARGO_SHIP));
