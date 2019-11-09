@@ -15,7 +15,8 @@ public class ToHeight extends CommandGroup {
     public enum Height {
 
         /**
-         * Added a new int parameter called game piece, determines whether AutoPlace does cargo(2) or hatch(1). 
+         * Added a new int parameter called game piece, determines whether AutoPlace does 
+         * cargo(2), hatch(1), or nothing(0). 
          */
         HOME(0.125, 0.0, 0.0, 0),
         CLIMB(2.46, 120.0, 170.0, 0),

@@ -33,7 +33,7 @@ public class AutoPlace extends CommandGroup {
     /**
      * If there is no game piece, does nothing.
      * Moves the robot forward autonomously while guiding it with the angle PD loop from CenterBay.
-     * Drives forward for to close the distance between robot and target.
+     * Drives forward to close the distance between robot and target.
      * Checks which game piece it has before deploying/intaking hatches or deploying cargo.
      * Moves back from the target afterward.
      */
