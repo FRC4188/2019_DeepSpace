@@ -10,13 +10,15 @@ public class ShoulderToAngle extends Command {
 
     Arm arm = Robot.arm;
     double angle, tolerance, counter, trim;
+    int gamePiece;
 
-    public ShoulderToAngle(double angle, double tolerance) {
+    public ShoulderToAngle(double angle, double tolerance, int gamePiece) {
         requires(arm);
         setName("ShoulderToAngle: " + angle);
         SmartDashboard.putNumber("Arm trim", trim);
         this.angle = angle;
         this.tolerance = tolerance;
+        this.gamePiece = gamePiece;
     }
 
     @Override
@@ -28,7 +30,7 @@ public class ShoulderToAngle extends Command {
     @Override
     protected void execute() {
         trim = SmartDashboard.getNumber("Arm trim", 0);
-        arm.shoulderToAngle(angle + trim, tolerance);
+        arm.shoulderToAngle(angle + trim, tolerance, gamePiece);
         double error = angle - arm.getPosition();
         if(Math.abs(error) < tolerance) counter++;
         else counter = 0;

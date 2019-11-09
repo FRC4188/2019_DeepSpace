@@ -32,6 +32,10 @@ public class LimeLight extends Subsystem {
     // camtran data
     ArrayList<double[]> camtranBuffer;
 
+    final double CAMERA_HEIGHT = 240; // pixels
+    final double CAMERA_FOV = Math.toRadians(49.7); // rads
+    private double dist = 0;
+
     // LED mode enum
     public enum LedMode {
         DEFAULT(0), OFF(1), BLINK(2), ON(3);
@@ -93,6 +97,10 @@ public class LimeLight extends Subsystem {
         setDefaultCommand(new LimeLightDefault());
     }
 
+    public void updateShuffleboard(){
+        SmartDashboard.putNumber("Dist", dist);
+    }
+
     @Override
     public void periodic(){
         // get 3D data
@@ -104,6 +112,8 @@ public class LimeLight extends Subsystem {
                     camtranBuffer.remove(0);
             }
         }
+        updateShuffleboard();
+        setDistance(getPipeline().getHeight());
     }
 
     /**
@@ -184,30 +194,25 @@ public class LimeLight extends Subsystem {
         return limelightTable.getEntry("camtran").getDoubleArray((double[])null);
     }
 
-    /** Returns distance in feet from object of height s (feet). 
-     *  Uses s = r(theta). */
-    public double getDistance(double objectHeight) {
-        final double CAMERA_HEIGHT = 240; // pixels
-        final double CAMERA_FOV = Math.toRadians(49.7); // rads
+    public void setDistance(double objectHeight){
         double boxHeight = limelightTable.getEntry("tvert").getDouble(0.0); // pixels
-        if(boxHeight == 0) return 0;
+        if(boxHeight == 0) dist = 0;
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
-        double r = objectHeight / boxDegree; // feet
-        return r - 2.5; // from front of bot
+        dist = objectHeight / boxDegree - 2.5;
     }
 
-    /**
-     * Returns distance in feet from object of width given
-     */
-    public double getDistance(double objectHeight, double boxHeight) {
-        if(boxHeight == 0) return 0;
-        final double CAMERA_HEIGHT = 240; // pixels
-        final double CAMERA_FOV = Math.toRadians(49.7); // rads
+    public void setDistance(double objectHeight, double boxHeight){
+        if(boxHeight == 0) dist = 0;
         double percentHeight = boxHeight / CAMERA_HEIGHT;
         double boxDegree = percentHeight * CAMERA_FOV;
-        double r = objectHeight / boxDegree; // feet
-        return r - 2.5; // from front of bot
+        dist = objectHeight / boxDegree - 2.5;
+    }
+
+    /** Returns distance in feet from object of height s (feet). 
+     *  Uses s = r(theta). */
+    public double getDistance() {
+        return dist;
     }
 
     /**
@@ -299,7 +304,7 @@ public class LimeLight extends Subsystem {
         double targetAngle = Robot.drivetrain.getTargetAngle();
         double robotAngle = Robot.drivetrain.getGyroAngle() - targetAngle;
         double limelightAngle = getHorizontalAngle();
-        double distToTarget = getDistance(getPipeline().getHeight());
+        double distToTarget = getDistance();
 
         // angle between line from camera to target and perpendicular line in radians
         // found using parallel lines

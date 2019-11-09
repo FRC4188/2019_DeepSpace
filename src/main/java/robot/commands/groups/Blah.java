@@ -12,7 +12,7 @@ import robot.subsystems.Arm;
 import robot.commands.intake.FireHatch;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
-public class AutoPlace extends CommandGroup {
+public class Blah extends CommandGroup {
 
     LimeLight limelight = Robot.limelight;
     Drivetrain drivetrain = Robot.drivetrain;
@@ -33,27 +33,39 @@ public class AutoPlace extends CommandGroup {
     /**
      * If there is no game piece, does nothing.
      * Moves the robot forward autonomously while guiding it with the angle PD loop from CenterBay.
-     * Drives forward to close the distance between robot and target.
+     * Drives forward for to close the distance between robot and target.
      * Checks which game piece it has before deploying/intaking hatches or deploying cargo.
      * Moves back from the target afterward.
      */
-    public AutoPlace(){
-        gamePiece = arm.getGamePiece();
-        if (gamePiece != 0){
-            while (Math.abs(zTurn) > acceptableAng){
-                autoCenterBay();
-            }
-            dist = limelight.getDistance();
-            addSequential(new DriveToDistance(dist - 0.5, 0.2));
-            if (gamePiece == 2){
-                intakeOut();
-            }
-            else if (gamePiece == 1){
-                hatchState = intake.getHatchState();
-                hatchPlace();
-            }
-            addSequential(new DriveToDistance(-1, 0.5));
+    public Blah(){
+        setGamePiece();
+        if (gamePiece == 2){
+            System.out.println("Cargo");
+            intakeOut();
         }
+        else if (gamePiece == 1){
+            setHatchState();
+            if (hatchState == -1){
+                System.out.println("Hatch out");
+                addParallel(new FireHatch(Value.kReverse));
+            }
+            else if (hatchState == 1){
+                System.out.println("Hatch in");
+                addParallel(new FireHatch(Value.kForward));
+            }
+            addSequential(new FireHatch(Value.kOff));
+        }
+        //addSequential(new DriveToDistance(-1, 0.5));
+    }
+
+    //Sets gamePiece to match Arm's gamePiece
+    public void setGamePiece(){
+        gamePiece = arm.getGamePiece();
+    }
+
+    //Sets hatchState to match Intake's hatchState
+    public void setHatchState(){
+        hatchState = intake.getHatchState();
     }
 
     //CenterBay with autonomous forward motion of constant speed
@@ -77,13 +89,13 @@ public class AutoPlace extends CommandGroup {
     //Sequence for deploying/intaking hatches
     public void hatchPlace(){
         if (hatchState == -1){
+            System.out.println("Hatch out");
             addParallel(new FireHatch(Value.kReverse));
         }
-        if (hatchState == 1){
+        else if (hatchState == 1){
+            System.out.println("Hatch in");
             addParallel(new FireHatch(Value.kForward));
         }
-        addSequential(new Wait(), 0.5);
-        addParallel(new FireHatch(Value.kOff));
-        addSequential(new Wait(), 0.1);
+        addSequential(new FireHatch(Value.kOff));
     }
-}
+  }

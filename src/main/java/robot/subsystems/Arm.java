@@ -39,7 +39,7 @@ public class Arm extends Subsystem {
 
     // State vars
     private boolean shoulderInverted;
-    public int gamePiece;
+    private int gamePiece = 1;
 
     /** Constructs new Arm object and configures devices */
     public Arm() {
@@ -75,6 +75,7 @@ public class Arm extends Subsystem {
         SmartDashboard.putNumber("Shoulder get", shoulderMotor.get());
         SmartDashboard.putNumber("S21 temp", shoulderMotor.getMotorTemperature());
         SmartDashboard.putNumber("S22 temp", shoulderSlave.getMotorTemperature());
+        SmartDashboard.putNumber("Game Piece", getGamePiece());
         SmartDashboard.putData("EncoderHatchOne", new EncoderHatchOne());
         SmartDashboard.putData("ZeroArm", new ZeroArm());
     }
@@ -121,10 +122,11 @@ public class Arm extends Subsystem {
     }
 
     /** Drives shoulder motor to given angle in degrees (off the positive x axis). */
-    public void shoulderToAngle(double angle, double tolerance) {
+    public void shoulderToAngle(double angle, double tolerance, int piece) {
         // convert from degrees to rotations (Spark units)
         angle /= ENCODER_TO_DEGREES;
         tolerance /= ENCODER_TO_DEGREES;
+        setGamePiece(piece);
         pidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
         pidC.setReference(angle, ControlType.kSmartMotion);
     }

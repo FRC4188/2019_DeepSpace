@@ -69,12 +69,11 @@ public class ToHeight extends CommandGroup {
         double wristAngle = height.getWristAngle();
         int gamePiece = height.getGamePiece();
 
-        arm.setGamePiece(gamePiece);
         if(height.equals(Height.HATCH_HIGH)) addParallel(new LimelightBackward());
         else addParallel(new LimelightForward());
         addParallel(new ElevatorToHeight(elevatorHeight, 0.1));
         addParallel(new WristToAngle(wristAngle, 1.2));
-        addSequential(new ShoulderToAngle(shoulderAngle, 1.5));
+        addSequential(new ShoulderToAngle(shoulderAngle, 1.5, gamePiece));
     }
 
 }
