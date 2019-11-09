@@ -39,21 +39,13 @@ public class Blah extends CommandGroup {
      */
     public Blah(){
         setGamePiece();
-        if (gamePiece == 2){
+        if (gamePiece == -1){
             System.out.println("Cargo");
             intakeOut();
         }
         else if (gamePiece == 1){
             setHatchState();
-            if (hatchState == -1){
-                System.out.println("Hatch out");
-                addParallel(new FireHatch(Value.kReverse));
-            }
-            else if (hatchState == 1){
-                System.out.println("Hatch in");
-                addParallel(new FireHatch(Value.kForward));
-            }
-            addSequential(new FireHatch(Value.kOff));
+            hatchPlace();
         }
         //addSequential(new DriveToDistance(-1, 0.5));
     }
@@ -90,11 +82,11 @@ public class Blah extends CommandGroup {
     public void hatchPlace(){
         if (hatchState == -1){
             System.out.println("Hatch out");
-            addParallel(new FireHatch(Value.kReverse));
+            addSequential(new FireHatch(Value.kReverse));
         }
         else if (hatchState == 1){
             System.out.println("Hatch in");
-            addParallel(new FireHatch(Value.kForward));
+            addSequential(new FireHatch(Value.kForward));
         }
         addSequential(new FireHatch(Value.kOff));
     }

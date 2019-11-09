@@ -16,14 +16,14 @@ public class ToHeight extends CommandGroup {
 
         /**
          * Added a new int parameter called game piece, determines whether AutoPlace does 
-         * cargo(2), hatch(1), or nothing(0). 
+         * cargo(-1), hatch(1), or nothing(0). 
          */
         HOME(0.125, 0.0, 0.0, 0),
         CLIMB(2.46, 120.0, 170.0, 0),
-        CARGO_LOW(2.25, -115.0, -261.2, 2),
-        CARGO_MID(2.25, -55.1, -202.3, 2),
-        CARGO_HIGH(2.48, -8.46, -160, 2),
-        CARGO_SHIP(2.25, -50.2, -150.2, 2),
+        CARGO_LOW(2.25, -115.0, -261.2, -1),
+        CARGO_MID(2.25, -55.1, -202.3, -1),
+        CARGO_HIGH(2.48, -8.46, -160, -1),
+        CARGO_SHIP(2.25, -50.2, -150.2, -1),
         CARGO_LOAD(2.25, -112.0, 50.5, 0),
         CARGO_FLOOR(1.13, -110.6, -174.4, 0),
         HATCH_LOW(2.34, -115.9, -37.0, 1),
