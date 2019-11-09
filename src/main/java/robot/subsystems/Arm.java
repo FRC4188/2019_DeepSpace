@@ -39,6 +39,7 @@ public class Arm extends Subsystem {
 
     // State vars
     private boolean shoulderInverted;
+    public int gamePiece;
 
     /** Constructs new Arm object and configures devices */
     public Arm() {
@@ -219,6 +220,13 @@ public class Arm extends Subsystem {
         BadLog.createTopic("Arm/Current", "amps", () -> getCurrent());
         BadLog.createTopic("21 Temp", "C", () -> shoulderMotor.getMotorTemperature(), "hide", "join:Arm/Temp");
         BadLog.createTopic("22 Temp", "C", () -> shoulderSlave.getMotorTemperature(), "hide", "join:Arm/Temp");
-     }
+    }
 
+    public void setGamePiece(int piece){
+        gamePiece = piece;
+    }
+
+    public int getGamePiece(){
+        return gamePiece;
+    }
 }

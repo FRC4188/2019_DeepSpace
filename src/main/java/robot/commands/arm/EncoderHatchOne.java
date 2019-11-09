@@ -27,7 +27,7 @@ public class EncoderHatchOne extends Command {
    elevator.setEncoders(2.34);
    arm.setEncoders(-115.9);
    intake.setEncoders(-37);
-   
+   arm.setGamePiece(1);
  }
  
  // Make this return true when this Command no longer needs to run execute()

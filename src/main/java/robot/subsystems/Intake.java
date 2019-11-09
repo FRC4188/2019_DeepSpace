@@ -43,6 +43,7 @@ public class Intake extends Subsystem {
     private boolean intakeInverted, wristInverted;
     private WristState wristState;
     private IntakeState intakeState;
+    private int hatchState = 1;
 
     /** Constructs intake object and configures devices. */
     public Intake(){
@@ -140,11 +141,13 @@ public class Intake extends Subsystem {
 
     /** Fires hatch cylinders inward. */
     public void hatchCylindersIn() {
+        setHatchState(2);
         hatchSolenoid.set(Value.kReverse);
     }
 
     /** Fires hatch cylinders outward. */
     public void hatchCylindersOut() {
+        setHatchState(1);
         hatchSolenoid.set(Value.kForward);
     }
 
@@ -153,6 +156,12 @@ public class Intake extends Subsystem {
     }
 
     public void setHatchSolenoid(Value value) {
+        if (value == Value.kForward){
+            setHatchState(1);
+        }
+        if (value == Value.kReverse){
+            setHatchState(2);
+        }
         hatchSolenoid.set(value);
     }
 
@@ -266,4 +275,12 @@ public class Intake extends Subsystem {
         intakeState = state;
     }
 
+    /** Sets the hatchState int to in(1) or out(2). */
+    public void setHatchState(int state){
+        hatchState = state;
+    }
+    
+    public int getHatchState(){
+        return hatchState;
+    }
 }
