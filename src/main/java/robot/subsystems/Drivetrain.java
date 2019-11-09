@@ -108,14 +108,11 @@ public class Drivetrain extends Subsystem {
     private void updateShuffleboard() {
         SmartDashboard.putNumber("L Pos", getLeftPosition());
         SmartDashboard.putNumber("R Pos", getRightPosition());
-        SmartDashboard.putNumber("L raw", getRawLeftPosition());
-        SmartDashboard.putNumber("R raw", getRawRightPosition());
-        SmartDashboard.putNumber("L Vel", getLeftVelocity());
-        SmartDashboard.putNumber("R Vel", getRightVelocity());
+        SmartDashboard.putNumber("lv", getLeftVelocity());
+        SmartDashboard.putNumber("rv", getRightVelocity());
+        SmartDashboard.putNumber("L Voltage", getLeftAppliedVoltage());
+        SmartDashboard.putNumber("R Voltage", getRightAppliedVoltage());
         SmartDashboard.putNumber("Gyro", getGyroAngle());
-        SmartDashboard.putNumber("Field X", getFieldPosX());
-        SmartDashboard.putNumber("Field Y", getFieldPosY());
-        SmartDashboard.putNumber("Target angle", getTargetAngle());
     }
 
     /** Runs every loop. */

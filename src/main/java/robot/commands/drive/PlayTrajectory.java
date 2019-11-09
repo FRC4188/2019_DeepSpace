@@ -19,6 +19,7 @@ public class PlayTrajectory extends Command {
     FileReader fr;
     BufferedReader br;
     boolean isFinished;
+    int count;
 
     public PlayTrajectory(String fileName) {
         this.fileName = fileName;
@@ -28,12 +29,13 @@ public class PlayTrajectory extends Command {
     protected void initialize() {
 
         isFinished = false;
+        count = 0;
 
         // disable ramp rate
         drivetrain.disableRampRate();
 
         // set up file and start recording if file name exists
-        file = new File("/home/lvuser/" + fileName + ".csv");
+        file = new File("/home/lvuser/deploy/" + fileName + ".csv");
         if(file.isFile()) {
             try {
                 fr = new FileReader(file);
@@ -51,7 +53,7 @@ public class PlayTrajectory extends Command {
 
     protected void play() {
 
-        System.out.println("playing");
+        System.out.println(count + "playing ");
 
         String line = null;
         try {
@@ -64,15 +66,20 @@ public class PlayTrajectory extends Command {
                 double lVel = Double.parseDouble(data[2]);
                 double rVel = Double.parseDouble(data[3]);
 
+                System.out.println(lVoltage + " " + rVoltage);
+
+                /*
                 // normalize voltage values to [-1,1] scale
                 double l = lVoltage / drivetrain.getLeftInputVoltage();
                 double r = rVoltage / drivetrain.getRightInputVoltage();
 
                 // command motor output
                 drivetrain.tank(l, r);
+                */
 
             }
             isFinished = true;
+            notif.stop();
         } catch(IOException e) {
             e.printStackTrace();
         }
