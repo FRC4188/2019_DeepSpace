@@ -122,11 +122,10 @@ public class Arm extends Subsystem {
     }
 
     /** Drives shoulder motor to given angle in degrees (off the positive x axis). */
-    public void shoulderToAngle(double angle, double tolerance, int piece) {
+    public void shoulderToAngle(double angle, double tolerance) {
         // convert from degrees to rotations (Spark units)
         angle /= ENCODER_TO_DEGREES;
         tolerance /= ENCODER_TO_DEGREES;
-        setGamePiece(piece);
         pidC.setSmartMotionAllowedClosedLoopError(tolerance, SLOT_ID);
         pidC.setReference(angle, ControlType.kSmartMotion);
     }

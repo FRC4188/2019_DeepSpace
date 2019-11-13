@@ -12,13 +12,12 @@ public class ShoulderToAngle extends Command {
     double angle, tolerance, counter, trim;
     int gamePiece;
 
-    public ShoulderToAngle(double angle, double tolerance, int gamePiece) {
+    public ShoulderToAngle(double angle, double tolerance) {
         requires(arm);
         setName("ShoulderToAngle: " + angle);
         SmartDashboard.putNumber("Arm trim", trim);
         this.angle = angle;
         this.tolerance = tolerance;
-        this.gamePiece = gamePiece;
     }
 
     @Override
@@ -30,7 +29,7 @@ public class ShoulderToAngle extends Command {
     @Override
     protected void execute() {
         trim = SmartDashboard.getNumber("Arm trim", 0);
-        arm.shoulderToAngle(angle + trim, tolerance, gamePiece);
+        arm.shoulderToAngle(angle + trim, tolerance);
         double error = angle - arm.getPosition();
         if(Math.abs(error) < tolerance) counter++;
         else counter = 0;

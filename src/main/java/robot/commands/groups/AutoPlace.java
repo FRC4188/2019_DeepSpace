@@ -22,7 +22,7 @@ public class AutoPlace extends CommandGroup {
     final double kP = 0.02;
     final double kD = 0.01;
     final double DELTA_T = 0.02;
-    final double acceptableAng = 0.5;
+    final double acceptableAng = 0.01;
     double dist;
     int gamePiece, hatchState;
     double lastError = 0;
@@ -43,8 +43,8 @@ public class AutoPlace extends CommandGroup {
             while (Math.abs(zTurn) > acceptableAng){
                 autoCenterBay();
             }
-            dist = limelight.getDistance();
-            addSequential(new DriveToDistance(dist - 0.5, 0.2));
+            setDistance();
+            addSequential(new DriveToDistance(dist - 0.5, 0.1));
             if (gamePiece == -1){
                 intakeOut();
             }
@@ -56,15 +56,20 @@ public class AutoPlace extends CommandGroup {
         }
     }
 
-        //Sets gamePiece to match Arm's gamePiece
-        public void setGamePiece(){
-            gamePiece = arm.getGamePiece();
-        }
-    
-        //Sets hatchState to match Intake's hatchState
-        public void setHatchState(){
-            hatchState = intake.getHatchState();
-        }
+    //Sets gamePiece to match Arm's gamePiece
+    public void setGamePiece(){
+        gamePiece = arm.getGamePiece();
+    }
+
+    //Sets hatchState to match Intake's hatchState
+    public void setHatchState(){
+        hatchState = intake.getHatchState();
+    }
+
+    //Sets dist to LimeLight's distance to target
+    public void setDistance(){
+        dist = limelight.getDistance();
+    }
 
     //CenterBay with autonomous forward motion of constant speed
     public void autoCenterBay(){
