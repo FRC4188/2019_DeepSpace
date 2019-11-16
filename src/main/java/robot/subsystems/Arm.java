@@ -39,7 +39,7 @@ public class Arm extends Subsystem {
 
     // State vars
     private boolean shoulderInverted;
-    private int gamePiece = 1;
+    private int gamePiece = -1;
 
     /** Constructs new Arm object and configures devices */
     public Arm() {

@@ -74,7 +74,7 @@ public class ToHeight extends CommandGroup {
         addParallel(new SetGamePiece(gamePiece));
         addParallel(new ElevatorToHeight(elevatorHeight, 0.1));
         addParallel(new WristToAngle(wristAngle, 1.2));
-        addSequential(new ShoulderToAngle(shoulderAngle, 1.5));
+        addSequential(new ShoulderToAngle(shoulderAngle, 1.2));
     }
 
 }

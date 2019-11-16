@@ -7,11 +7,10 @@ import robot.Robot;
 public class SetGamePiece extends Command {
  
  Arm arm = Robot.arm;
- int gamePiece;
  
  public SetGamePiece(int gamePiece) {
     requires(arm);
-    this.gamePiece = gamePiece;
+    arm.setGamePiece(gamePiece);
  }
  
  // Called just before this Command runs the first time
@@ -22,7 +21,6 @@ public class SetGamePiece extends Command {
  // Called repeatedly when this Command is scheduled to run
  @Override
  protected void execute() {
-   arm.setGamePiece(gamePiece);
  }
  
  // Make this return true when this Command no longer needs to run execute()

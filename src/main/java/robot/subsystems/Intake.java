@@ -157,8 +157,11 @@ public class Intake extends Subsystem {
     }
 
     public void setHatchSolenoid(Value value) {
-        if (value != Value.kOff){
-            setHatchState(hatchState*-1);
+        if (value == Value.kReverse){
+            setHatchState(1);
+        }
+        else if (value == Value.kForward){
+            setHatchState(-1);
         }
         hatchSolenoid.set(value);
     }

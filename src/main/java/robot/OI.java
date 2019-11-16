@@ -59,8 +59,8 @@ public class OI {
     }
 
     // Controller initialization
-    private XboxController pilot = new XboxController(0); //0
-    private XboxController copilot = new XboxController(1); //1
+    private XboxController pilot = new XboxController(1); //0
+    private XboxController copilot = new XboxController(0); //1
     private Joystick rocketBox = new Joystick(2); //2
 
     // Button initialization

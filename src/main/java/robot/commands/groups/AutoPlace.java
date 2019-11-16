@@ -24,7 +24,7 @@ public class AutoPlace extends CommandGroup {
     final double DELTA_T = 0.02;
     final double acceptableAng = 0.01;
     double dist;
-    int gamePiece, hatchState;
+    int gamePiece, hatchState = -1;
     double lastError = 0;
     double angleErr = limelight.getHorizontalAngle();
     double turnDeriv = (angleErr - lastError) * DELTA_T;
@@ -40,25 +40,25 @@ public class AutoPlace extends CommandGroup {
     public AutoPlace(){
         setGamePiece();
         if (gamePiece != 0){
-            while (Math.abs(zTurn) > acceptableAng){
+            /*while (Math.abs(zTurn) > acceptableAng){
                 autoCenterBay();
-            }
+            }*/
             setDistance();
-            addSequential(new DriveToDistance(dist - 0.5, 0.1));
+            //addSequential(new DriveToDistance(dist - 0.5, 0.1));
             if (gamePiece == -1){
                 intakeOut();
             }
-            else if (gamePiece == 1){
-                setHatchState();
+            if (gamePiece == 1){
                 hatchPlace();
             }
-            addSequential(new DriveToDistance(-1, 0.5));
+            //addSequential(new DriveToDistance(-1, 0.5));
         }
     }
 
     //Sets gamePiece to match Arm's gamePiece
     public void setGamePiece(){
         gamePiece = arm.getGamePiece();
+        System.out.println(gamePiece);
     }
 
     //Sets hatchState to match Intake's hatchState
@@ -83,7 +83,7 @@ public class AutoPlace extends CommandGroup {
 
     //Sequence for deploying cargo
     public void intakeOut(){
-        addParallel(new SpinIntake(-1.0));
+        addParallel(new SpinIntake(1.0));
         addSequential(new Wait(), 0.8);
         addParallel(new SpinIntake(0));
         addSequential(new Wait(), 0.1);
@@ -91,12 +91,16 @@ public class AutoPlace extends CommandGroup {
 
     //Sequence for deploying/intaking hatches (-1 = out, 1 = in)
     public void hatchPlace(){
+        setHatchState();
         if (hatchState == -1){
-            addSequential(new FireHatch(Value.kReverse));
+            System.out.println("Hatch Out");
+            addParallel(new FireHatch(Value.kReverse));
         }
         if (hatchState == 1){
-            addSequential(new FireHatch(Value.kForward));
+            System.out.println("Hatch In");
+            addParallel(new FireHatch(Value.kForward));
         }
-        addParallel(new FireHatch(Value.kOff));
+        hatchState = 0;
+        //addParallel(new FireHatch(Value.kOff));
     }
 }
