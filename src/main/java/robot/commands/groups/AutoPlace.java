@@ -24,11 +24,7 @@ public class AutoPlace extends CommandGroup {
     final double DELTA_T = 0.02;
     final double acceptableAng = 0.01;
     double dist;
-    int gamePiece, hatchState = -1;
-    double lastError = 0;
-    double angleErr = limelight.getHorizontalAngle();
-    double turnDeriv = (angleErr - lastError) * DELTA_T;
-    double zTurn = kP * angleErr + kD * turnDeriv;
+    int gamePiece, hatchState;
 
     /**
      * If there is no game piece, does nothing.
@@ -40,9 +36,7 @@ public class AutoPlace extends CommandGroup {
     public AutoPlace(){
         setGamePiece();
         if (gamePiece != 0){
-            /*while (Math.abs(zTurn) > acceptableAng){
-                autoCenterBay();
-            }*/
+            addSequential(new AutoCenterBay(0.2));
             setDistance();
             //addSequential(new DriveToDistance(dist - 0.5, 0.1));
             if (gamePiece == -1){
@@ -71,20 +65,10 @@ public class AutoPlace extends CommandGroup {
         dist = limelight.getDistance();
     }
 
-    //CenterBay with autonomous forward motion of constant speed
-    public void autoCenterBay(){
-        angleErr = limelight.getHorizontalAngle();
-        turnDeriv = (angleErr - lastError) * DELTA_T;
-        zTurn = kP * angleErr + kD * turnDeriv;
-        zTurn = CSPMath.constrainKeepSign(zTurn, 0.05, 1.0);
-        lastError = angleErr;
-        drivetrain.arcade(0.2, zTurn);
-    }
-
     //Sequence for deploying cargo
     public void intakeOut(){
         addParallel(new SpinIntake(1.0));
-        addSequential(new Wait(), 0.8);
+        addSequential(new Wait(), 0.6);
         addParallel(new SpinIntake(0));
         addSequential(new Wait(), 0.1);
     }
